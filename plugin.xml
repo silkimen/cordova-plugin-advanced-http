@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  id="com.synconset.httpsp"
+  version="1.0.0">
+
+	<name>SSL Pinning</name>
+	 
+	<description>
+		Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning
+	</description>
+
+	<engines>
+		<engine name="cordova" version=">=3.0.0" />
+	</engines>
+	
+	<dependency id="org.apache.cordova.core.file" url="https://git-wip-us.apache.org/repos/asf/cordova-plugin-file" commit="master" />
+
+	<js-module src="www/httpsp.js" name="SSLPinningPlugin">
+		<clobbers target="plugins.httpsp" />
+	</js-module>
+
+	<!-- ios -->
+	<platform name="ios">
+		<config-file target="config.xml" parent="/*">
+			<feature name="HTTPSPinning">
+				<param name="ios-package" value="HTTPSPinning"/>
+			</feature>
+		</config-file>
+		
+		<header-file src="src/ios/HTTPSPinning.h" />
+        <source-file src="src/ios/HTTPSPinning.m" />
+        
+        <header-file src="src/ios/HTTPManager.h" />
+        <source-file src="src/ios/HTTPManager.m" />
+        
+        <header-file src="src/ios/TextResponseSerializer.h" />
+        <source-file src="src/ios/TextResponseSerializer.m" />
+
+		<header-file src="src/ios/AFNetworking/AFHTTPRequestOperation.h" />
+		<source-file src="src/ios/AFNetworking/AFHTTPRequestOperation.m" />
+		
+		<header-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.h" />
+        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.m" />
+
+        <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h" />
+        <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m" />
+        
+        <header-file src="src/ios/AFNetworking/AFNetworking.h" />
+        
+        <header-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.h" />
+        <source-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.m" />
+        
+        <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h" />
+        <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m" />
+        
+        <header-file src="src/ios/AFNetworking/AFURLConnectionOperation.h" />
+        <source-file src="src/ios/AFNetworking/AFURLConnectionOperation.m" />
+        
+        <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h" />
+        <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m" />
+        
+        <header-file src="src/ios/AFNetworking/AFURLResponseSerialization.h" />
+        <source-file src="src/ios/AFNetworking/AFURLResponseSerialization.m" />
+        
+        <header-file src="src/ios/AFNetworking/AFURLSessionManager.h" />
+        <source-file src="src/ios/AFNetworking/AFURLSessionManager.m" />
+        
+        <framework src="Security.framework" /> 
+	</platform>
+
+	<!-- android -->
+	<!--<platform name="android">-->
+	<!--	<config-file target="config.xml" parent="/*">-->
+	<!--		<feature name="ImageResizePlugin">-->
+	<!--			<param name="android-package" value="com.synconset.ImageResizePlugin"/>-->
+	<!--		</feature>-->
+	<!--	</config-file>-->
+
+	<!--	<source-file src="src/Android/com/synconset/ImageResizer/ImageResizePlugin.java" target-dir="src/com/synconset" />-->
+	<!--</platform>-->
+</plugin>
