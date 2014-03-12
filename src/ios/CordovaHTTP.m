@@ -1,9 +1,9 @@
-#import "HTTPSPinning.h"
+#import "CordovaHTTP.h"
 #import "CDVFile.h"
 #import "TextResponseSerializer.h"
 #import "HTTPManager.h"
 
-@implementation HTTPSPinning
+@implementation CordovaHTTP
 
 - (void) setAuthorizationHeaderWithUsernameAndPassword:(CDVInvokedUrlCommand*)command {
     NSString *username = [command.arguments objectAtIndex:0];
@@ -92,7 +92,7 @@
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
    
-   HTTPSPinning* __weak weakSelf = self;
+   CordovaHTTP* __weak weakSelf = self;
    
    [manager POST:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
       NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
@@ -100,14 +100,12 @@
       [dictionary setObject:responseObject forKey:@"data"];
       CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
       [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-      NSLog(@"Response: %@", responseObject);
    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
       NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
       [dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
       [dictionary setObject:[error localizedDescription] forKey:@"error"];
       CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
       [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-      NSLog(@"Error: %@", error);
    }];
 }
 
@@ -116,7 +114,7 @@
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
    
-   HTTPSPinning* __weak weakSelf = self;
+   CordovaHTTP* __weak weakSelf = self;
    
    [manager GET:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
       NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
@@ -124,14 +122,12 @@
       [dictionary setObject:responseObject forKey:@"data"];
       CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
       [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-      NSLog(@"Response: %@", responseObject);
    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
       NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
       [dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
       [dictionary setObject:[error localizedDescription] forKey:@"error"];
       CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
       [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-      NSLog(@"Error: %@", error);
    }];
 }
 
@@ -144,9 +140,7 @@
     
     NSURL *fileURL = [NSURL fileURLWithPath: filePath];
     
-    NSLog(@"%@", fileURL);
-   
-    HTTPSPinning* __weak weakSelf = self;
+    CordovaHTTP* __weak weakSelf = self;
     [manager POST:url parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         NSError *error;
         [formData appendPartWithFileURL:fileURL name:name error:&error];
@@ -169,7 +163,6 @@
         [dictionary setObject:[error localizedDescription] forKey:@"error"];
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
         [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        NSLog(@"Error: %@", error);
     }];
 }
 
@@ -180,7 +173,7 @@
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSString *filePath = [command.arguments objectAtIndex: 2];
    
-    HTTPSPinning* __weak weakSelf = self;
+    CordovaHTTP* __weak weakSelf = self;
     [manager GET:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
         /*
          *
@@ -243,7 +236,6 @@
         [dictionary setObject:[error localizedDescription] forKey:@"error"];
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
         [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        NSLog(@"Error: %@", error);
     }];
 }
 

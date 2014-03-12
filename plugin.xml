@@ -16,20 +16,20 @@
 	
 	<dependency id="org.apache.cordova.core.file" url="https://git-wip-us.apache.org/repos/asf/cordova-plugin-file" commit="master" />
 
-	<js-module src="www/httpsp.js" name="SSLPinningPlugin">
-		<clobbers target="plugins.httpsp" />
+	<js-module src="www/cordovaHTTP.js" name="CordovaHTTPPlugin">
+		<clobbers target="plugins.cordovaHTTP" />
 	</js-module>
 
 	<!-- ios -->
 	<platform name="ios">
 		<config-file target="config.xml" parent="/*">
-			<feature name="HTTPSPinning">
-				<param name="ios-package" value="HTTPSPinning"/>
+			<feature name="CordovaHTTP">
+				<param name="ios-package" value="CordovaHTTP"/>
 			</feature>
 		</config-file>
 		
-		<header-file src="src/ios/HTTPSPinning.h" />
-        <source-file src="src/ios/HTTPSPinning.m" />
+		<header-file src="src/ios/CordovaHTTP.h" />
+        <source-file src="src/ios/CordovaHTTP.m" />
         
         <header-file src="src/ios/HTTPManager.h" />
         <source-file src="src/ios/HTTPManager.m" />
