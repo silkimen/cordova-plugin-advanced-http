@@ -14,7 +14,7 @@
 		<engine name="cordova" version=">=3.0.0" />
 	</engines>
 	
-	<dependency id="org.apache.cordova.file" url="https://git-wip-us.apache.org/repos/asf/cordova-plugin-file" commit="r0.2.5" />
+	<dependency id="org.apache.cordova.file" commit="r0.2.5" />
 
 	<js-module src="www/cordovaHTTP.js" name="CordovaHTTPPlugin">
 		<clobbers target="plugins.cordovaHTTP" />
