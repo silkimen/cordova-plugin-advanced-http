@@ -14,7 +14,7 @@
 		<engine name="cordova" version=">=3.0.0" />
 	</engines>
 	
-	<dependency id="org.apache.cordova.core.file" url="https://git-wip-us.apache.org/repos/asf/cordova-plugin-file" commit="master" />
+	<dependency id="org.apache.cordova.core.file" url="https://git-wip-us.apache.org/repos/asf/cordova-plugin-file" commit="r0.2.5" />
 
 	<js-module src="www/cordovaHTTP.js" name="CordovaHTTPPlugin">
 		<clobbers target="plugins.cordovaHTTP" />
@@ -71,7 +71,7 @@
 
 	<!-- android -->
 	<!--<platform name="android">-->
-	<!--	<config-file target="config.xml" parent="/*">-->
+	<!--	<config-file target="res/xml/config.xml" parent="/*">-->
 	<!--		<feature name="ImageResizePlugin">-->
 	<!--			<param name="android-package" value="com.synconset.ImageResizePlugin"/>-->
 	<!--		</feature>-->
