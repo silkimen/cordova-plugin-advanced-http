@@ -4,31 +4,31 @@
   id="com.synconset.cordovaHTTP"
   version="1.0.0">
 
-	<name>SSL Pinning</name>
-	 
-	<description>
-		Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning
+    <name>SSL Pinning</name>
+ 
+    <description>
+        Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning
 	</description>
 
-	<engines>
-		<engine name="cordova" version=">=3.0.0" />
-	</engines>
-	
-	<dependency id="org.apache.cordova.file" commit="r0.2.5" />
+    <engines>
+        <engine name="cordova" version=">=3.0.0" />
+    </engines>
 
-	<js-module src="www/cordovaHTTP.js" name="CordovaHTTPPlugin">
-		<clobbers target="plugins.cordovaHTTP" />
-	</js-module>
+    <dependency id="org.apache.cordova.file" commit="r0.2.5" />
 
-	<!-- ios -->
-	<platform name="ios">
-		<config-file target="config.xml" parent="/*">
-			<feature name="CordovaHTTP">
-				<param name="ios-package" value="CordovaHTTP"/>
-			</feature>
-		</config-file>
-		
-		<header-file src="src/ios/CordovaHTTP.h" />
+    <js-module src="www/cordovaHTTP.js" name="CordovaHTTPPlugin">
+        <clobbers target="plugins.cordovaHTTP" />
+    </js-module>
+
+    <!-- ios -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="CordovaHTTP">
+                <param name="ios-package" value="CordovaHTTP"/>
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/CordovaHTTP.h" />
         <source-file src="src/ios/CordovaHTTP.m" />
         
         <header-file src="src/ios/HTTPManager.h" />
@@ -37,46 +37,49 @@
         <header-file src="src/ios/TextResponseSerializer.h" />
         <source-file src="src/ios/TextResponseSerializer.m" />
 
-		<header-file src="src/ios/AFNetworking/AFHTTPRequestOperation.h" />
-		<source-file src="src/ios/AFNetworking/AFHTTPRequestOperation.m" />
-		
-		<header-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.h" />
+        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperation.h" />
+        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperation.m" />
+
+        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.h" />
         <source-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.m" />
 
         <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h" />
         <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m" />
-        
+
         <header-file src="src/ios/AFNetworking/AFNetworking.h" />
-        
+
         <header-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.h" />
         <source-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.m" />
-        
+
         <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h" />
         <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m" />
-        
+
         <header-file src="src/ios/AFNetworking/AFURLConnectionOperation.h" />
         <source-file src="src/ios/AFNetworking/AFURLConnectionOperation.m" />
-        
+
         <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h" />
         <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m" />
-        
+
         <header-file src="src/ios/AFNetworking/AFURLResponseSerialization.h" />
         <source-file src="src/ios/AFNetworking/AFURLResponseSerialization.m" />
-        
+
         <header-file src="src/ios/AFNetworking/AFURLSessionManager.h" />
         <source-file src="src/ios/AFNetworking/AFURLSessionManager.m" />
-        
-        <framework src="Security.framework" /> 
-	</platform>
 
-	<!-- android -->
-	<!--<platform name="android">-->
-	<!--	<config-file target="res/xml/config.xml" parent="/*">-->
-	<!--		<feature name="ImageResizePlugin">-->
-	<!--			<param name="android-package" value="com.synconset.ImageResizePlugin"/>-->
-	<!--		</feature>-->
-	<!--	</config-file>-->
+        <framework src="Security.framework" />
+    </platform>
 
-	<!--	<source-file src="src/Android/com/synconset/ImageResizer/ImageResizePlugin.java" target-dir="src/com/synconset" />-->
-	<!--</platform>-->
+    <!--android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="CordovaHTTP">
+                <param name="android-package" value="com.synconset.CordovaHTTP"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/Android/com/synconset/CordovaHTTP/HTTP.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/HTTPGet.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/HTTPPost.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHTTP.java" target-dir="src/com/synconset" />
+    </platform>
 </plugin>

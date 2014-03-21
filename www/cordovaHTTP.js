@@ -36,8 +36,8 @@ var http = {
     setAcceptableContentTypes: function(contentTypes, success, failure) {
         return exec(success, failure, "CordovaHTTP", "setAcceptableContentTypes", contentTypes);
     },
-    post: function(url, params, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "post", [url, params]);
+    post: function(url, params, headers, success, failure) {
+        return exec(success, failure, "CordovaHTTP", "post", [url, params, headers]);
     },
     get: function(url, params, success, failure) {
         return exec(success, failure, "CordovaHTTP", "get", [url, params]);
@@ -139,8 +139,8 @@ if (angular) {
             setAcceptableContentTypes: function(contentTypes) {
                 return makePromise(http.setAcceptableContentTypes, [contentTypes]);
             },
-            post: function(url, params) {
-                return makePromise(http.post, [url, params], true);
+            post: function(url, params, headers) {
+                return makePromise(http.post, [url, params, headers], true);
             },
             get: function(url, params) {
                 return makePromise(http.get, [url, params], true);
