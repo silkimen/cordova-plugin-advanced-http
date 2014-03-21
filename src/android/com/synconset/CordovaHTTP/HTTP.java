@@ -67,6 +67,7 @@ public class HTTP {
     protected void addHeaders(URLConnection conn) throws JSONException {
         Iterator<?> i = this.headers.keys();
         
+        Log.d(TAG, this.headers.toString(3));
         while (i.hasNext()) {
             String key = (String)i.next();
             conn.setRequestProperty(key, this.headers.getString(key));

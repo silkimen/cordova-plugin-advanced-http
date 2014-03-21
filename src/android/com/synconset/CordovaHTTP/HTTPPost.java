@@ -51,12 +51,21 @@ public class HTTPPost extends HTTP implements Runnable {
             conn.connect();
             int status = conn.getResponseCode();
             Log.d(TAG, "The response is: " + status);
-            is = conn.getInputStream();
-            String responseData = this.readInputStream(is);
-            JSONObject response = new JSONObject();
-            response.put("status", status);
-            response.put("data", responseData);
-            callbackContext.success(response);
+            if (status >= 200 && status < 300) {
+                is = conn.getInputStream();
+                String responseData = this.readInputStream(is);
+                JSONObject response = new JSONObject();
+                response.put("status", status);
+                response.put("data", responseData);
+                callbackContext.success(response);
+            } else {
+                is = conn.getErrorStream();
+                String responseData = this.readInputStream(is);
+                JSONObject response = new JSONObject();
+                response.put("status", status);
+                response.put("error", responseData);
+                callbackContext.error(response);
+            }
         } catch (MalformedURLException e) {
             this.respondWithError(callbackContext, "There is an error with the url");
         } catch (JSONException e) {

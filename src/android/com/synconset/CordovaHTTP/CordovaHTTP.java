@@ -57,7 +57,7 @@ public class CordovaHTTP extends CordovaPlugin {
 
     private void setAuthorizationHeaderWithUsernameAndPassword(String username, String password) throws JSONException {
         String loginInfo = username + ":" + password;
-        loginInfo = "Basic " + Base64.encodeToString(loginInfo.getBytes(), Base64.DEFAULT);
+        loginInfo = "Basic " + Base64.encodeToString(loginInfo.getBytes(), Base64.NO_WRAP);
         globalHeaders.put("Authorization", loginInfo);
     }
 
