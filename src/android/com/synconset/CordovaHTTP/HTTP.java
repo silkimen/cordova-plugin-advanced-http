@@ -15,6 +15,8 @@ import java.io.BufferedReader;
 
 import java.net.URLConnection;
 
+import javax.net.ssl.SSLContext;
+
 import java.util.Iterator;
 
 import android.util.Log;
@@ -27,12 +29,14 @@ public class HTTP {
     private String urlString;
     private JSONObject params;
     private JSONObject headers;
+    private SSLContext sslContext;
     private CallbackContext callbackContext;
     
-    public HTTP(String urlString, JSONObject params, JSONObject headers, CallbackContext callbackContext) {
+    public HTTP(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.headers = headers;
+        this.sslContext = sslContext;
         this.callbackContext = callbackContext;
     }
     
@@ -58,6 +62,10 @@ public class HTTP {
     
     protected void setHeaders(JSONObject headers) {
         this.headers = headers;
+    }
+    
+    protected SSLContext getSSLContext() {
+        return this.sslContext;
     }
     
     protected CallbackContext getCallbackContext() {

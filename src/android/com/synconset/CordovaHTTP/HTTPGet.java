@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
@@ -17,8 +18,8 @@ import org.json.JSONObject;
 import android.util.Log;
  
 public class HTTPGet extends HTTP implements Runnable {
-    public HTTPGet(String urlString, JSONObject params, JSONObject headers, CallbackContext callbackContext) {
-        super(urlString, params, headers, callbackContext);
+    public HTTPGet(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, CallbackContext callbackContext) {
+        super(urlString, params, headers, sslContext, callbackContext);
     }
     
     @Override
@@ -26,15 +27,14 @@ public class HTTPGet extends HTTP implements Runnable {
         JSONObject params = this.getParams();
         String urlString = this.getUrlString();
         CallbackContext callbackContext = this.getCallbackContext();
-        JSONObject response = new JSONObject();
         
         InputStream is = null;
         HttpsURLConnection conn = null;
         try {
-        	if (params.length() > 0) {
+            if (params.length() > 0) {
                 urlString = urlString + "?" + this.getQueryString();
             }
-        	URL url = new URL(urlString);
+            URL url = new URL(urlString);
             conn = (HttpsURLConnection)url.openConnection();
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
@@ -42,14 +42,23 @@ public class HTTPGet extends HTTP implements Runnable {
             this.addHeaders(conn);
             conn.connect();
             int status = conn.getResponseCode();
-            Log.d(TAG, "The response is: " + status);
-            is = conn.getInputStream();
-            String responseData = this.readInputStream(is);
-            response.put("status", status);
-            response.put("data", responseData);
-            callbackContext.success(response);
+            if (status >= 200 && status < 300) {
+                is = conn.getInputStream();
+                String responseData = this.readInputStream(is);
+                JSONObject response = new JSONObject();
+                response.put("status", status);
+                response.put("data", responseData);
+                callbackContext.success(response);
+            } else {
+                is = conn.getErrorStream();
+                String responseData = this.readInputStream(is);
+                JSONObject response = new JSONObject();
+                response.put("status", status);
+                response.put("error", responseData);
+                callbackContext.error(response);
+            }
         } catch (MalformedURLException e) {
-        	this.respondWithError(callbackContext, "There is an error with the url");
+            this.respondWithError(callbackContext, "There is an error with the url");
         } catch (JSONException e) {
             this.respondWithError(callbackContext, "There was an error with the params, headers or generating the response");
         } catch (IOException e) {

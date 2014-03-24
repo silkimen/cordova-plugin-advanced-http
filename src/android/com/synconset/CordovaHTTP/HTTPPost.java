@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
@@ -20,8 +21,8 @@ import org.json.JSONObject;
 import android.util.Log;
  
 public class HTTPPost extends HTTP implements Runnable {
-    public HTTPPost(String urlString, JSONObject params, JSONObject headers, CallbackContext callbackContext) {
-        super(urlString, params, headers, callbackContext);
+    public HTTPPost(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, CallbackContext callbackContext) {
+        super(urlString, params, headers, sslContext, callbackContext);
     }
     
     @Override
@@ -34,6 +35,7 @@ public class HTTPPost extends HTTP implements Runnable {
         try {
             URL url = new URL(urlString);
             conn = (HttpsURLConnection)url.openConnection();
+            conn.setSSLSocketFactory(this.getSSLContext().getSocketFactory());
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
             conn.setDoOutput(true);
@@ -50,7 +52,6 @@ public class HTTPPost extends HTTP implements Runnable {
 
             conn.connect();
             int status = conn.getResponseCode();
-            Log.d(TAG, "The response is: " + status);
             if (status >= 200 && status < 300) {
                 is = conn.getInputStream();
                 String responseData = this.readInputStream(is);
@@ -71,6 +72,7 @@ public class HTTPPost extends HTTP implements Runnable {
         } catch (JSONException e) {
             this.respondWithError(callbackContext, "There was an error with the params, headers or generating the response");
         } catch (IOException e) {
+            Log.d(TAG, e.getMessage());
             this.respondWithError(callbackContext, "There was an error with the request");
         } finally {
             if (is != null) {
