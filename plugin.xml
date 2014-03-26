@@ -81,5 +81,7 @@
         <source-file src="src/Android/com/synconset/CordovaHTTP/HTTPGet.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/HTTPPost.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHTTP.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/VeryTrustingTrustManager.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/VeryTrustingHostnameVerifier.java" target-dir="src/com/synconset" />
     </platform>
 </plugin>

@@ -7,19 +7,14 @@
 var exec = require('cordova/exec');
 
 var http = {
-    SSLPinningMode: {
-        None: 0,
-        Certificate: 1,
-        PublicKey: 2
-    },
     setAuthorizationHeaderWithUsernameAndPassword: function(username, password, success, failure) {
         return exec(success, failure, "CordovaHTTP", "setAuthorizationHeaderWithUsernameAndPassword", [username, password]);
     },
     setHeader: function(header, value, success, failure) {
         return exec(success, failure, "CordovaHTTP", "setHeader", [header, value]);
     },
-    setSSLPinningMode: function(mode, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "setSSLPinningMode", [mode]);
+    enableSSLPinning: function(success, failure) {
+        return exec(success, failure, "CordovaHTTP", "enableSSLPinning", []);
     },
     validateEntireCertificateChain: function(validateChain, success, failure) {
         return exec(success, failure, "CordovaHTTP", "validateEntireCertificateChain", [validateChain]);
@@ -114,15 +109,14 @@ if (angular) {
         }
         
         var cordovaHTTP = {
-            SSLPinningMode: http.SSLPinningMode,
             setAuthorizationHeaderWithUsernameAndPassword: function(username, password) {
                 return makePromise(http.setAuthorizationHeaderWithUsernameAndPassword, [username, password]);
             },
             setHeader: function(header, value) {
                 return makePromise(http.setHeader, [header, value]);
             },
-            setSSLPinningMode: function(mode) {
-                return makePromise(http.setSSLPinningMode, [mode]);
+            enableSSLPinning: function() {
+                return makePromise(http.enableSSLPinning, []);
             },
             validateEntireCertificateChain: function(validateChain) {
                 return makePromise(http.validateEntireCertificateChain, [validateChain]);

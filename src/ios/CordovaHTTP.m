@@ -5,7 +5,7 @@
 
 @implementation CordovaHTTP
 
-- (void) setAuthorizationHeaderWithUsernameAndPassword:(CDVInvokedUrlCommand*)command {
+- (void)setAuthorizationHeaderWithUsernameAndPassword:(CDVInvokedUrlCommand*)command {
     NSString *username = [command.arguments objectAtIndex:0];
     NSString *password = [command.arguments objectAtIndex:1];
     
@@ -15,7 +15,7 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) setHeader:(CDVInvokedUrlCommand*)command {
+- (void)setHeader:(CDVInvokedUrlCommand*)command {
     NSString *header = [command.arguments objectAtIndex:0];
     NSString *value = [command.arguments objectAtIndex:1];
     
@@ -25,24 +25,10 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) setSSLPinningMode:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = nil;
-    int pinningMode = [[command.arguments objectAtIndex:0] integerValue];
+- (void)enableSSLPinning:(CDVInvokedUrlCommand*)command {
+    [HTTPManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
     
-    if (pinningMode == 0) {
-        [HTTPManager sharedClient].securityPolicy.SSLPinningMode = AFSSLPinningModeNone;
-    } else if (pinningMode == 1) {
-        [HTTPManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
-    } else if (pinningMode == 2) {
-        [HTTPManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModePublicKey];
-    } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Requested SSL Pinning Mode is Unknown"];
-    }
-    
-    if (pluginResult == nil) {
-      pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    }
-    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

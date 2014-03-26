@@ -10,6 +10,7 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.HostnameVerifier;
 
 import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
@@ -18,8 +19,8 @@ import org.json.JSONObject;
 import android.util.Log;
  
 public class HTTPGet extends HTTP implements Runnable {
-    public HTTPGet(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, CallbackContext callbackContext) {
-        super(urlString, params, headers, sslContext, callbackContext);
+    public HTTPGet(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, HostnameVerifier hostnameVerifier, CallbackContext callbackContext) {
+        super(urlString, params, headers, sslContext, hostnameVerifier, callbackContext);
     }
     
     @Override

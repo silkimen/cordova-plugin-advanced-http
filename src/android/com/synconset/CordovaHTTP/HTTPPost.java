@@ -13,6 +13,7 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.HostnameVerifier;
 
 import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
@@ -21,8 +22,8 @@ import org.json.JSONObject;
 import android.util.Log;
  
 public class HTTPPost extends HTTP implements Runnable {
-    public HTTPPost(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, CallbackContext callbackContext) {
-        super(urlString, params, headers, sslContext, callbackContext);
+    public HTTPPost(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, HostnameVerifier hostnameVerifier, CallbackContext callbackContext) {
+        super(urlString, params, headers, sslContext, hostnameVerifier, callbackContext);
     }
     
     @Override
@@ -35,7 +36,14 @@ public class HTTPPost extends HTTP implements Runnable {
         try {
             URL url = new URL(urlString);
             conn = (HttpsURLConnection)url.openConnection();
-            conn.setSSLSocketFactory(this.getSSLContext().getSocketFactory());
+            HostnameVerifier hostnameVerifier = this.getHostnameVerifier();
+            if (hostnameVerifier != null) {
+                conn.setHostnameVerifier(hostnameVerifier);
+            }
+            SSLContext context = this.getSSLContext();
+            if (context != null) {
+                conn.setSSLSocketFactory(this.getSSLContext().getSocketFactory());
+            }
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
             conn.setDoOutput(true);

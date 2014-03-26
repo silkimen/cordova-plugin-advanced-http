@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.net.URLConnection;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.HostnameVerifier;
 
 import java.util.Iterator;
 
@@ -30,14 +31,16 @@ public class HTTP {
     private JSONObject params;
     private JSONObject headers;
     private SSLContext sslContext;
+    private HostnameVerifier hostnameVerifier;
     private CallbackContext callbackContext;
     
-    public HTTP(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, CallbackContext callbackContext) {
+    public HTTP(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, HostnameVerifier hostnameVerifier, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.headers = headers;
         this.sslContext = sslContext;
         this.callbackContext = callbackContext;
+        this.hostnameVerifier = hostnameVerifier;
     }
     
     protected String getUrlString() {
@@ -66,6 +69,10 @@ public class HTTP {
     
     protected SSLContext getSSLContext() {
         return this.sslContext;
+    }
+    
+    protected HostnameVerifier getHostnameVerifier() {
+        return this.hostnameVerifier;
     }
     
     protected CallbackContext getCallbackContext() {
