@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 // Modified by Andrew Stephan
-#import "HTTPManager.h"
+#import "HttpManager.h"
 
-@implementation HTTPManager
+@implementation HttpManager
 
 + (instancetype)sharedClient {
     static HTTPManager *_sharedClient = nil;

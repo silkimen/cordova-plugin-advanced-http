@@ -34,7 +34,7 @@ import android.content.res.AssetManager;
 import android.util.Base64;
 import android.util.Log;
  
-public class CordovaHTTP extends CordovaPlugin {
+public class CordovaHttpPlugin extends CordovaPlugin {
     private static final String TAG = "CordovaHTTP";
     
     private SSLContext sslContext;

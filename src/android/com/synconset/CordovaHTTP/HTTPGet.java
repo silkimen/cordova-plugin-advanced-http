@@ -35,8 +35,7 @@ public class HTTPGet extends HTTP implements Runnable {
             if (params.length() > 0) {
                 urlString = urlString + "?" + this.getQueryString();
             }
-            URL url = new URL(urlString);
-            conn = (HttpsURLConnection)url.openConnection();
+            conn = this.openConnection(urlString);
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
             conn.setRequestProperty("Accept-Charset", charset);

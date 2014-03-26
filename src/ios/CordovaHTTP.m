@@ -1,15 +1,15 @@
-#import "CordovaHTTP.h"
+#import "CordovaHttpPlugin.h"
 #import "CDVFile.h"
 #import "TextResponseSerializer.h"
-#import "HTTPManager.h"
+#import "HttpManager.h"
 
-@implementation CordovaHTTP
+@implementation CordovaHttpPlugin
 
 - (void)setAuthorizationHeaderWithUsernameAndPassword:(CDVInvokedUrlCommand*)command {
     NSString *username = [command.arguments objectAtIndex:0];
     NSString *password = [command.arguments objectAtIndex:1];
     
-    [[HTTPManager sharedClient].requestSerializer setAuthorizationHeaderFieldWithUsername:username password:password];
+    [[HttpManager sharedClient].requestSerializer setAuthorizationHeaderFieldWithUsername:username password:password];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -19,14 +19,14 @@
     NSString *header = [command.arguments objectAtIndex:0];
     NSString *value = [command.arguments objectAtIndex:1];
     
-    [[HTTPManager sharedClient].requestSerializer setValue:value forHTTPHeaderField: header];
+    [[HttpManager sharedClient].requestSerializer setValue:value forHTTPHeaderField: header];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)enableSSLPinning:(CDVInvokedUrlCommand*)command {
-    [HTTPManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+    [HttpManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -36,7 +36,7 @@
     CDVPluginResult* pluginResult = nil;
     bool validate = [[command.arguments objectAtIndex:0] boolValue];
     
-    [HTTPManager sharedClient].securityPolicy.validatesCertificateChain = validate;
+    [HttpManager sharedClient].securityPolicy.validatesCertificateChain = validate;
     
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -46,35 +46,35 @@
     CDVPluginResult* pluginResult = nil;
     bool allow = [[command.arguments objectAtIndex:0] boolValue];
     
-    [HTTPManager sharedClient].securityPolicy.allowInvalidCertificates = allow;
+    [HttpManager sharedClient].securityPolicy.allowInvalidCertificates = allow;
     
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)acceptText:(CDVInvokedUrlCommand*)command {
-    [HTTPManager sharedClient].responseSerializer = [TextResponseSerializer serializer];
+    [HttpManager sharedClient].responseSerializer = [TextResponseSerializer serializer];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)acceptData:(CDVInvokedUrlCommand*)command {
-    [HTTPManager sharedClient].responseSerializer = [AFHTTPResponseSerializer serializer];
+    [HttpManager sharedClient].responseSerializer = [AFHTTPResponseSerializer serializer];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)setAcceptableContentTypes:(CDVInvokedUrlCommand*)command {
-    [HTTPManager sharedClient].responseSerializer.acceptableContentTypes = [NSSet setWithArray: command.arguments];
+    [HttpManager sharedClient].responseSerializer.acceptableContentTypes = [NSSet setWithArray: command.arguments];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)post:(CDVInvokedUrlCommand*)command {
-   HTTPManager *manager = [HTTPManager sharedClient];
+   HttpManager *manager = [HttpManager sharedClient];
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
    
@@ -96,7 +96,7 @@
 }
 
 - (void)get:(CDVInvokedUrlCommand*)command {
-   HTTPManager *manager = [HTTPManager sharedClient];
+   HttpManager *manager = [HttpManager sharedClient];
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
    
@@ -118,7 +118,7 @@
 }
 
 - (void)uploadFile:(CDVInvokedUrlCommand*)command {
-    HTTPManager *manager = [HTTPManager sharedClient];
+    HttpManager *manager = [HttpManager sharedClient];
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSString *filePath = [command.arguments objectAtIndex: 2];
@@ -154,7 +154,7 @@
 
 
 - (void)downloadFile:(CDVInvokedUrlCommand*)command {
-    HTTPManager *manager = [HTTPManager sharedClient];
+    HttpManager *manager = [HttpManager sharedClient];
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSString *filePath = [command.arguments objectAtIndex: 2];

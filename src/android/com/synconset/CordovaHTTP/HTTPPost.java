@@ -34,16 +34,7 @@ public class HTTPPost extends HTTP implements Runnable {
         InputStream is = null;
         HttpsURLConnection conn = null;
         try {
-            URL url = new URL(urlString);
-            conn = (HttpsURLConnection)url.openConnection();
-            HostnameVerifier hostnameVerifier = this.getHostnameVerifier();
-            if (hostnameVerifier != null) {
-                conn.setHostnameVerifier(hostnameVerifier);
-            }
-            SSLContext context = this.getSSLContext();
-            if (context != null) {
-                conn.setSSLSocketFactory(this.getSSLContext().getSocketFactory());
-            }
+            conn = this.openConnection(urlString);
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
             conn.setDoOutput(true);

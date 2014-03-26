@@ -28,8 +28,8 @@
             </feature>
         </config-file>
 
-        <header-file src="src/ios/CordovaHTTP.h" />
-        <source-file src="src/ios/CordovaHTTP.m" />
+        <header-file src="src/ios/CordovaHttpPlugin.h" />
+        <source-file src="src/ios/CordovaHttpPlugin.m" />
         
         <header-file src="src/ios/HTTPManager.h" />
         <source-file src="src/ios/HTTPManager.m" />
@@ -80,7 +80,7 @@
         <source-file src="src/Android/com/synconset/CordovaHTTP/HTTP.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/HTTPGet.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/HTTPPost.java" target-dir="src/com/synconset" />
-        <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHTTP.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHttpPlugin.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/VeryTrustingTrustManager.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/VeryTrustingHostnameVerifier.java" target-dir="src/com/synconset" />
     </platform>

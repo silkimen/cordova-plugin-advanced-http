@@ -13,8 +13,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLConnection;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.HostnameVerifier;
 
@@ -67,16 +70,20 @@ public class HTTP {
         this.headers = headers;
     }
     
-    protected SSLContext getSSLContext() {
-        return this.sslContext;
-    }
-    
-    protected HostnameVerifier getHostnameVerifier() {
-        return this.hostnameVerifier;
-    }
-    
     protected CallbackContext getCallbackContext() {
         return this.callbackContext;
+    }
+    
+    protected HttpsURLConnection openConnection(String urlString) throws MalformedURLException, IOException {
+        URL url = new URL(urlString);
+        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
+        if (this.hostnameVerifier != null) {
+            conn.setHostnameVerifier(this.hostnameVerifier);
+        }
+        if (this.sslContext != null) {
+            conn.setSSLSocketFactory(this.sslContext.getSocketFactory());
+        }
+        return conn;
     }
     
     protected void addHeaders(URLConnection conn) throws JSONException {

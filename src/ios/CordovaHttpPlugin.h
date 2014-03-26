@@ -3,7 +3,7 @@
 #import <Cordova/CDVPlugin.h>
 #import <Cordova/CDVJSON.h>
 
-@interface CordovaHTTP : CDVPlugin
+@interface CordovaHttpPlugin : CDVPlugin
 
 - (void)setAuthorizationHeaderWithUsernameAndPassword:(CDVInvokedUrlCommand*)command;
 - (void)setHeader:(CDVInvokedUrlCommand*)command;
