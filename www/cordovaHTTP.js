@@ -8,37 +8,37 @@ var exec = require('cordova/exec');
 
 var http = {
     setAuthorizationHeaderWithUsernameAndPassword: function(username, password, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "setAuthorizationHeaderWithUsernameAndPassword", [username, password]);
+        return exec(success, failure, "CordovaHttpPlugin", "setAuthorizationHeaderWithUsernameAndPassword", [username, password]);
     },
     setHeader: function(header, value, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "setHeader", [header, value]);
+        return exec(success, failure, "CordovaHttpPlugin", "setHeader", [header, value]);
     },
     enableSSLPinning: function(success, failure) {
-        return exec(success, failure, "CordovaHTTP", "enableSSLPinning", []);
+        return exec(success, failure, "CordovaHttpPlugin", "enableSSLPinning", []);
     },
     validateEntireCertificateChain: function(validateChain, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "validateEntireCertificateChain", [validateChain]);
+        return exec(success, failure, "CordovaHttpPlugin", "validateEntireCertificateChain", [validateChain]);
     },
     allowInvalidCertificates: function(allow, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "allowInvalidCertificates", [allow]);
+        return exec(success, failure, "CordovaHttpPlugin", "allowInvalidCertificates", [allow]);
     },
     acceptText: function(success, failure) {
-        return exec(success, failure, "CordovaHTTP", "acceptText", []);
+        return exec(success, failure, "CordovaHttpPlugin", "acceptText", []);
     },
     acceptData: function(success, failure) {
-        return exec(success, failure, "CordovaHTTP", "acceptData", []);
+        return exec(success, failure, "CordovaHttpPlugin", "acceptData", []);
     },
     setAcceptableContentTypes: function(contentTypes, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "setAcceptableContentTypes", contentTypes);
+        return exec(success, failure, "CordovaHttpPlugin", "setAcceptableContentTypes", contentTypes);
     },
     post: function(url, params, headers, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "post", [url, params, headers]);
+        return exec(success, failure, "CordovaHttpPlugin", "post", [url, params, headers]);
     },
     get: function(url, params, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "get", [url, params]);
+        return exec(success, failure, "CordovaHttpPlugin", "get", [url, params]);
     },
     uploadFile: function(url, params, filePath, name, success, failure) {
-        return exec(success, failure, "CordovaHTTP", "uploadFile", [url, params, filePath, name]);
+        return exec(success, failure, "CordovaHttpPlugin", "uploadFile", [url, params, filePath, name]);
     },
     downloadFile: function(url, params, filePath, success, failure) {
         /*
@@ -71,7 +71,7 @@ var http = {
             entry.fullPath = result.file.fullPath;
             success(entry);
         };
-        return exec(win, failure, "CordovaHTTP", "downloadFile", [url, params, filePath]);
+        return exec(win, failure, "CordovaHttpPlugin", "downloadFile", [url, params, filePath]);
     }
 };
 

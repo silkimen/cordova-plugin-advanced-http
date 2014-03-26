@@ -56,14 +56,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
             this.addToJSONObject(headers, this.globalHeaders);
-            HTTPGet get = new HTTPGet(urlString, params, headers, this.sslContext, this.hostnameVerifier, callbackContext);
+            CordovaHttpGet get = new CordovaHttpGet(urlString, params, headers, this.sslContext, this.hostnameVerifier, callbackContext);
             cordova.getThreadPool().execute(get);
         } else if (action.equals("post")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
             this.addToJSONObject(headers, this.globalHeaders);
-            HTTPPost post = new HTTPPost(urlString, params, headers, this.sslContext, this.hostnameVerifier, callbackContext);
+            CordovaHttpPost post = new CordovaHttpPost(urlString, params, headers, this.sslContext, this.hostnameVerifier, callbackContext);
             cordova.getThreadPool().execute(post);
         } else if (action.equals("setAuthorizationHeaderWithUsernameAndPassword")) {
             String username = args.getString(0);

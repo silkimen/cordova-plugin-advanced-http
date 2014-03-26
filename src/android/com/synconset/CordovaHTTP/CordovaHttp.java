@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 import android.util.Log;
  
-public class HTTP {
+public class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
     
     protected String charset = "UTF-8";
@@ -37,7 +37,7 @@ public class HTTP {
     private HostnameVerifier hostnameVerifier;
     private CallbackContext callbackContext;
     
-    public HTTP(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, HostnameVerifier hostnameVerifier, CallbackContext callbackContext) {
+    public CordovaHttp(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, HostnameVerifier hostnameVerifier, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.headers = headers;

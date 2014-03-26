@@ -78,7 +78,7 @@
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
    
-   CordovaHTTP* __weak weakSelf = self;
+   CordovaHttpPlugin* __weak weakSelf = self;
    
    [manager POST:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
       NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
@@ -100,7 +100,7 @@
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
    
-   CordovaHTTP* __weak weakSelf = self;
+   CordovaHttpPlugin* __weak weakSelf = self;
    
    [manager GET:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
       NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
@@ -126,7 +126,7 @@
     
     NSURL *fileURL = [NSURL fileURLWithPath: filePath];
     
-    CordovaHTTP* __weak weakSelf = self;
+    CordovaHttpPlugin* __weak weakSelf = self;
     [manager POST:url parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         NSError *error;
         [formData appendPartWithFileURL:fileURL name:name error:&error];
@@ -159,7 +159,7 @@
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSString *filePath = [command.arguments objectAtIndex: 2];
    
-    CordovaHTTP* __weak weakSelf = self;
+    CordovaHttpPlugin* __weak weakSelf = self;
     [manager GET:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
         /*
          *

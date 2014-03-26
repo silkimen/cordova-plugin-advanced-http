@@ -5,7 +5,10 @@ package com.synconset;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -18,28 +21,34 @@ import org.json.JSONObject;
 
 import android.util.Log;
  
-public class HTTPGet extends HTTP implements Runnable {
-    public HTTPGet(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, HostnameVerifier hostnameVerifier, CallbackContext callbackContext) {
+public class CordovaHttpPost extends CordovaHttp implements Runnable {
+    public CordovaHttpPost(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, HostnameVerifier hostnameVerifier, CallbackContext callbackContext) {
         super(urlString, params, headers, sslContext, hostnameVerifier, callbackContext);
     }
     
     @Override
     public void run() {
-        JSONObject params = this.getParams();
         String urlString = this.getUrlString();
         CallbackContext callbackContext = this.getCallbackContext();
-        
+
         InputStream is = null;
         HttpsURLConnection conn = null;
         try {
-            if (params.length() > 0) {
-                urlString = urlString + "?" + this.getQueryString();
-            }
             conn = this.openConnection(urlString);
-            conn.setRequestMethod("GET");
+            conn.setRequestMethod("POST");
             conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setChunkedStreamingMode(0);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.setRequestProperty("Accept-Charset", charset);
             this.addHeaders(conn);
+
+            OutputStream out = conn.getOutputStream();
+            OutputStreamWriter writer = new OutputStreamWriter(out, charset);
+            writer.write(this.getQueryString());
+            writer.close();
+            out.close();
+
             conn.connect();
             int status = conn.getResponseCode();
             if (status >= 200 && status < 300) {
@@ -62,6 +71,7 @@ public class HTTPGet extends HTTP implements Runnable {
         } catch (JSONException e) {
             this.respondWithError(callbackContext, "There was an error with the params, headers or generating the response");
         } catch (IOException e) {
+            Log.d(TAG, e.getMessage());
             this.respondWithError(callbackContext, "There was an error with the request");
         } finally {
             if (is != null) {
