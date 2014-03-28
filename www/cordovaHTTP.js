@@ -7,40 +7,28 @@
 var exec = require('cordova/exec');
 
 var http = {
-    setAuthorizationHeaderWithUsernameAndPassword: function(username, password, success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "setAuthorizationHeaderWithUsernameAndPassword", [username, password]);
+    useBasicAuth: function(username, password, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "useBasicAuth", [username, password]);
     },
     setHeader: function(header, value, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "setHeader", [header, value]);
     },
-    enableSSLPinning: function(success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "enableSSLPinning", []);
+    enableSSLPinning: function(enable, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "enableSSLPinning", [enable]);
     },
-    validateEntireCertificateChain: function(validateChain, success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "validateEntireCertificateChain", [validateChain]);
-    },
-    allowInvalidCertificates: function(allow, success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "allowInvalidCertificates", [allow]);
-    },
-    acceptText: function(success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "acceptText", []);
-    },
-    acceptData: function(success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "acceptData", []);
-    },
-    setAcceptableContentTypes: function(contentTypes, success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "setAcceptableContentTypes", contentTypes);
+    acceptAllCerts: function(allow, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "acceptAllCerts", [allow]);
     },
     post: function(url, params, headers, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "post", [url, params, headers]);
     },
-    get: function(url, params, success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "get", [url, params]);
+    get: function(url, params, headers, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "get", [url, params, headers]);
     },
-    uploadFile: function(url, params, filePath, name, success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "uploadFile", [url, params, filePath, name]);
+    uploadFile: function(url, params, headers, filePath, name, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "uploadFile", [url, params, headers, filePath, name]);
     },
-    downloadFile: function(url, params, filePath, success, failure) {
+    downloadFile: function(url, params, headers, filePath, success, failure) {
         /*
          *
          * Licensed to the Apache Software Foundation (ASF) under one
@@ -71,7 +59,7 @@ var http = {
             entry.fullPath = result.file.fullPath;
             success(entry);
         };
-        return exec(win, failure, "CordovaHttpPlugin", "downloadFile", [url, params, filePath]);
+        return exec(win, failure, "CordovaHttpPlugin", "downloadFile", [url, params, headers, filePath]);
     }
 };
 
@@ -109,41 +97,29 @@ if (angular) {
         }
         
         var cordovaHTTP = {
-            setAuthorizationHeaderWithUsernameAndPassword: function(username, password) {
-                return makePromise(http.setAuthorizationHeaderWithUsernameAndPassword, [username, password]);
+            useBasicAuth: function(username, password) {
+                return makePromise(http.useBasicAuth, [username, password]);
             },
             setHeader: function(header, value) {
                 return makePromise(http.setHeader, [header, value]);
             },
-            enableSSLPinning: function() {
-                return makePromise(http.enableSSLPinning, []);
+            enableSSLPinning: function(enable) {
+                return makePromise(http.enableSSLPinning, [enable]);
             },
-            validateEntireCertificateChain: function(validateChain) {
-                return makePromise(http.validateEntireCertificateChain, [validateChain]);
-            },
-            allowInvalidCertificates: function(allow) {
-                return makePromise(http.allowInvalidCertificates, [allow]);
-            },
-            acceptText: function() {
-                return makePromise(http.acceptText, []);
-            },
-            acceptData: function() {
-                return makePromise(http.acceptData, []);
-            },
-            setAcceptableContentTypes: function(contentTypes) {
-                return makePromise(http.setAcceptableContentTypes, [contentTypes]);
+            acceptAllCerts: function(allow) {
+                return makePromise(http.acceptAllCerts, [allow]);
             },
             post: function(url, params, headers) {
                 return makePromise(http.post, [url, params, headers], true);
             },
-            get: function(url, params) {
-                return makePromise(http.get, [url, params], true);
+            get: function(url, params, headers) {
+                return makePromise(http.get, [url, params, headers], true);
             },
-            uploadFile: function(url, params, filePath, name) {
-                return makePromise(http.uploadFile, [url, params, filePath, name], true);
+            uploadFile: function(url, params, headers, filePath, name) {
+                return makePromise(http.uploadFile, [url, params, headers, filePath, name], true);
             },
-            downloadFile: function(url, params, filePath) {
-                return makePromise(http.downloadFile, [url, params, filePath], true);
+            downloadFile: function(url, params, headers, filePath) {
+                return makePromise(http.downloadFile, [url, params, headers, filePath], true);
             }
         };
         return cordovaHTTP;

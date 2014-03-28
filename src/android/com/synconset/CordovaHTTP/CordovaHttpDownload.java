@@ -3,59 +3,63 @@
  */
 package com.synconset;
 
-import java.util.Map;
-
-import org.apache.cordova.CallbackContext;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.util.Log;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
- 
-public class CordovaHttpPost extends CordovaHttp implements Runnable {
-    public CordovaHttpPost(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
+
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.file.FileUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class CordovaHttpDownload extends CordovaHttp implements Runnable {
+    private String filePath;
+    
+    public CordovaHttpDownload(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext, String filePath) {
         super(urlString, params, headers, callbackContext);
+        this.filePath = filePath;
     }
     
     @Override
     public void run() {
         try {
-            Log.d(TAG, this.getParams().toString());
-            HttpRequest request = HttpRequest.post(this.getUrlString());
+            HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParams(), true);
             if (this.acceptAllCerts()) {
                 request.trustAllCerts();
                 request.trustAllHosts();
             }
             if (this.sslPinning()) {
-                Log.d(TAG, "ssl pinning");
                 request.pinToCerts();
             }
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
-            
-            request.form(this.getParams());
-            
             int code = request.code();
-            String body = request.body(CHARSET);
-            
-            Log.d(TAG, Integer.toString(code));
-            Log.d(TAG, body);
             
             JSONObject response = new JSONObject();
             response.put("status", code);
             if (code >= 200 && code < 300) {
-                response.put("data", body);
+                URI uri = new URI(filePath);
+                File file = new File(uri);
+                request.receive(file);
+                JSONObject fileEntry = FileUtils.getEntry(file);
+                response.put("file", fileEntry);
                 this.getCallbackContext().success(response);
             } else {
-                response.put("error", body);
+                response.put("error", "There was an error downloading the file");
                 this.getCallbackContext().error(response);
             }
+        } catch(URISyntaxException e) {
+            this.respondWithError("There was an error with the given filePath");
         } catch (JSONException e) {
-            Log.d(TAG, e.getMessage());
             this.respondWithError("There was an error generating the response");
-        }  catch (HttpRequestException e) {
+        } catch (HttpRequestException e) {
             Log.d(TAG, e.getMessage());
             this.respondWithError("There was an error with the request");
         }

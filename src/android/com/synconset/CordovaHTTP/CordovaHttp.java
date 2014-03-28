@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.util.Map;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,25 +26,39 @@ import java.util.Iterator;
 
 import android.util.Log;
  
-public class CordovaHttp {
+public abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
+    protected static final String CHARSET = "UTF-8";
     
-    protected String charset = "UTF-8";
+    private static boolean sslPinning;
+    private static boolean acceptAllCerts;
     
     private String urlString;
-    private JSONObject params;
-    private JSONObject headers;
-    private SSLContext sslContext;
-    private HostnameVerifier hostnameVerifier;
+    private Map<?, ?> params;
+    private Map<String, String> headers;
     private CallbackContext callbackContext;
     
-    public CordovaHttp(String urlString, JSONObject params, JSONObject headers, SSLContext sslContext, HostnameVerifier hostnameVerifier, CallbackContext callbackContext) {
+    public CordovaHttp(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.headers = headers;
-        this.sslContext = sslContext;
+        this.sslPinning = sslPinning;
+        this.acceptAllCerts = acceptAllCerts;
         this.callbackContext = callbackContext;
-        this.hostnameVerifier = hostnameVerifier;
+    }
+    
+    public static void enableSSLPinning(boolean enable) {
+        sslPinning = enable;
+        if (sslPinning) {
+            acceptAllCerts = false;
+        }
+    }
+    
+    public static void acceptAllCerts(boolean accept) {
+        acceptAllCerts = accept;
+        if (acceptAllCerts) {
+            sslPinning = false;
+        }
     }
     
     protected String getUrlString() {
@@ -54,19 +69,19 @@ public class CordovaHttp {
         this.urlString = urlString;
     }
     
-    protected JSONObject getParams() {
+    protected Map<?, ?> getParams() {
         return this.params;
     }
     
-    protected void setParams(JSONObject params) {
+    protected void setParams(Map<?, ?> params) {
         this.params = params;
     }
     
-    protected JSONObject getHeaders() {
+    protected Map<String, String> getHeaders() {
         return this.headers;
     }
     
-    protected void setHeaders(JSONObject headers) {
+    protected void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
     
@@ -74,74 +89,22 @@ public class CordovaHttp {
         return this.callbackContext;
     }
     
-    protected HttpsURLConnection openConnection(String urlString) throws MalformedURLException, IOException {
-        URL url = new URL(urlString);
-        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
-        if (this.hostnameVerifier != null) {
-            conn.setHostnameVerifier(this.hostnameVerifier);
-        }
-        if (this.sslContext != null) {
-            conn.setSSLSocketFactory(this.sslContext.getSocketFactory());
-        }
-        return conn;
+    protected boolean sslPinning() {
+        return sslPinning;
     }
     
-    protected void addHeaders(URLConnection conn) throws JSONException {
-        Iterator<?> i = this.headers.keys();
-        
-        Log.d(TAG, this.headers.toString(3));
-        while (i.hasNext()) {
-            String key = (String)i.next();
-            conn.setRequestProperty(key, this.headers.getString(key));
-        }
+    protected boolean acceptAllCerts() {
+        return acceptAllCerts;
     }
     
-    protected String getQueryString() throws JSONException {
-        Iterator<?> i = this.params.keys();
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        
-        while (i.hasNext()) {
-            String key = (String)i.next();
-            
-            if (!first) {
-                sb.append("&");
-            } else {
-                first = false;
-            }
-            sb.append(key);
-            sb.append("=");
-            sb.append(this.params.getString(key));
-        }
-        
-        return sb.toString();
-    }
-    
-    protected String readInputStream(InputStream is) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-        
-        try {
-            String line = reader.readLine();
-            while (line != null) {
-                sb.append(line);
-                line = reader.readLine();
-            }
-            
-            return sb.toString();
-        } finally {
-            reader.close();
-        }
-    }
-    
-    protected void respondWithError(CallbackContext callbackContext, String msg) {
+    protected void respondWithError(String msg) {
         try {
             JSONObject response = new JSONObject();
             response.put("status", 500);
             response.put("error", msg);
-            callbackContext.error(response);
+            this.callbackContext.error(response);
         } catch (JSONException e) {
-            callbackContext.error(msg);
+            this.callbackContext.error(msg);
         }
     }
 }

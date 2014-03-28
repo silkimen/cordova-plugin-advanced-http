@@ -80,8 +80,9 @@
         <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHttp.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHttpGet.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHttpPost.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHttpUpload.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHttpDownload.java" target-dir="src/com/synconset" />
         <source-file src="src/Android/com/synconset/CordovaHTTP/CordovaHttpPlugin.java" target-dir="src/com/synconset" />
-        <source-file src="src/Android/com/synconset/CordovaHTTP/VeryTrustingTrustManager.java" target-dir="src/com/synconset" />
-        <source-file src="src/Android/com/synconset/CordovaHTTP/VeryTrustingHostnameVerifier.java" target-dir="src/com/synconset" />
+        <source-file src="src/Android/com/synconset/CordovaHTTP/HttpRequest.java" target-dir="src/com/github/kevinsawicki/http" />
     </platform>
 </plugin>

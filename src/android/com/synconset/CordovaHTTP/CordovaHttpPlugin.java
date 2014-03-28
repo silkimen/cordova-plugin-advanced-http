@@ -6,17 +6,18 @@ package com.synconset;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyManagementException;
+import java.net.HttpURLConnection;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.TrustManager;
@@ -33,20 +34,18 @@ import org.json.JSONObject;
 import android.content.res.AssetManager;
 import android.util.Base64;
 import android.util.Log;
- 
+
+import com.github.kevinsawicki.http.HttpRequest;
+
 public class CordovaHttpPlugin extends CordovaPlugin {
     private static final String TAG = "CordovaHTTP";
     
-    private SSLContext sslContext;
-    private HostnameVerifier hostnameVerifier;
-    private JSONObject globalHeaders;
+    private HashMap<String, String> globalHeaders;
     
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
-        this.globalHeaders = new JSONObject();
-        this.sslContext = null;
-        this.hostnameVerifier = null;
+        this.globalHeaders = new HashMap<String, String>();
     }
 
     @Override
@@ -55,113 +54,121 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
-            this.addToJSONObject(headers, this.globalHeaders);
-            CordovaHttpGet get = new CordovaHttpGet(urlString, params, headers, this.sslContext, this.hostnameVerifier, callbackContext);
+            HashMap<?, ?> paramsMap = this.getMapFromJSONObject(params);
+            HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
+            CordovaHttpGet get = new CordovaHttpGet(urlString, paramsMap, headersMap, callbackContext);
             cordova.getThreadPool().execute(get);
         } else if (action.equals("post")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
-            this.addToJSONObject(headers, this.globalHeaders);
-            CordovaHttpPost post = new CordovaHttpPost(urlString, params, headers, this.sslContext, this.hostnameVerifier, callbackContext);
+            HashMap<?, ?> paramsMap = this.getMapFromJSONObject(params);
+            HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
+            CordovaHttpPost post = new CordovaHttpPost(urlString, paramsMap, headersMap, callbackContext);
             cordova.getThreadPool().execute(post);
-        } else if (action.equals("setAuthorizationHeaderWithUsernameAndPassword")) {
+        } else if (action.equals("useBasicAuth")) {
             String username = args.getString(0);
             String password = args.getString(1);
-            this.setAuthorizationHeaderWithUsernameAndPassword(username, password);
+            this.useBasicAuth(username, password);
             callbackContext.success();
         } else if (action.equals("enableSSLPinning")) {
             try {
-                this.enableSSLPinning();
+                boolean enable = args.getBoolean(0);
+                this.enableSSLPinning(enable);
                 callbackContext.success();
             } catch(Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, e.getMessage());
                 callbackContext.error("There was an error setting up ssl pinning");
             }
-        } else if (action.equals("allowInvalidCertificates")) {
-            try {
-                boolean allow = args.getBoolean(0);
-                this.allowInvalidCertificates(allow);
-            } catch(Exception e) {
-                callbackContext.error("There was an error allowing or disallowing invalide certificates");
-            }
+        } else if (action.equals("acceptAllCerts")) {
+            boolean accept = args.getBoolean(0);
+            CordovaHttp.acceptAllCerts(accept);
+        } else if (action.equals("setHeader")) {
+            String header = args.getString(0);
+            String value = args.getString(1);
+            this.setHeader(header, value);
+            callbackContext.success();
+        } else if (action.equals("uploadFile")) {
+            String urlString = args.getString(0);
+            JSONObject params = args.getJSONObject(1);
+            JSONObject headers = args.getJSONObject(2);
+            HashMap<?, ?> paramsMap = this.getMapFromJSONObject(params);
+            HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
+            String filePath = args.getString(3);
+            String name = args.getString(4);
+            CordovaHttpUpload upload = new CordovaHttpUpload(urlString, paramsMap, headersMap, callbackContext, filePath, name);
+            cordova.getThreadPool().execute(upload);
+        } else if (action.equals("downloadFile")) {
+            String urlString = args.getString(0);
+            JSONObject params = args.getJSONObject(1);
+            JSONObject headers = args.getJSONObject(2);
+            HashMap<?, ?> paramsMap = this.getMapFromJSONObject(params);
+            HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
+            String filePath = args.getString(3);
+            CordovaHttpDownload download = new CordovaHttpDownload(urlString, paramsMap, headersMap, callbackContext, filePath);
+            cordova.getThreadPool().execute(download);
         } else {
             return false;
         }
         return true;
     }
 
-    private void setAuthorizationHeaderWithUsernameAndPassword(String username, String password) throws JSONException {
+    private void useBasicAuth(String username, String password) {
         String loginInfo = username + ":" + password;
         loginInfo = "Basic " + Base64.encodeToString(loginInfo.getBytes(), Base64.NO_WRAP);
-        globalHeaders.put("Authorization", loginInfo);
+        this.globalHeaders.put("Authorization", loginInfo);
     }
     
-    private void enableSSLPinning() throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
-        // Create a KeyStore containing our trusted CAs
-        String keyStoreType = KeyStore.getDefaultType();
-        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-        keyStore.load(null, null);
-        
-        
-        AssetManager assetManager = cordova.getActivity().getAssets();
-        String[] files = assetManager.list("");
-        int index;
-        ArrayList<String> cerFiles = new ArrayList<String>();
-        for (int i = 0; i < files.length; i++) {
-            index = files[i].lastIndexOf('.');
-            if (index != -1) {
-                if (files[i].substring(index).equals(".cer")) {
-                    cerFiles.add(files[i]);
+    private void setHeader(String header, String value) {
+        this.globalHeaders.put(header, value);
+    }
+    
+    private void enableSSLPinning(boolean enable) throws GeneralSecurityException, IOException {
+        if (enable) {
+            AssetManager assetManager = cordova.getActivity().getAssets();
+            String[] files = assetManager.list("");
+            int index;
+            ArrayList<String> cerFiles = new ArrayList<String>();
+            for (int i = 0; i < files.length; i++) {
+                index = files[i].lastIndexOf('.');
+                if (index != -1) {
+                    if (files[i].substring(index).equals(".cer")) {
+                        cerFiles.add(files[i]);
+                    }
                 }
             }
-        }
-        
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        for (int i = 0; i < cerFiles.size(); i++) {
-            InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
-            InputStream caInput = new BufferedInputStream(in);
-            Certificate ca;
-            try {
-                ca = cf.generateCertificate(caInput);
-                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
-            } finally {
-                caInput.close();
-            }
             
-            keyStore.setCertificateEntry(cerFiles.get(i), ca);
+            for (int i = 0; i < cerFiles.size(); i++) {
+                InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
+                InputStream caInput = new BufferedInputStream(in);
+                HttpRequest.addCert(caInput);
+            }
+            CordovaHttp.enableSSLPinning(true);
+        } else {
+            CordovaHttp.enableSSLPinning(false);
         }
-        
-        // Create a TrustManager that trusts the CAs in our KeyStore
-        String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-        tmf.init(keyStore);
-        
-        // Create an SSLContext that uses our TrustManager
-        sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, tmf.getTrustManagers(), null);
-        hostnameVerifier = null;
     }
     
-    private void allowInvalidCertificates(boolean allow) throws NoSuchAlgorithmException, KeyManagementException {
-        if (allow) {
-            VeryTrustingTrustManager vttm = new VeryTrustingTrustManager();
-            sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[]{vttm}, null);
-            hostnameVerifier = new VeryTrustingHostnameVerifier();
-        } else {
-            sslContext = null;
-            hostnameVerifier = null;
-        }
-    }
-
-    private void addToJSONObject(JSONObject object, JSONObject objectToAdd) throws JSONException {
-        Iterator<?> i = objectToAdd.keys();
+    private HashMap<String, String> addToMap(HashMap<String, String> map, JSONObject object) throws JSONException {
+        HashMap<String, String> newMap = (HashMap<String, String>)map.clone();
+        Iterator<?> i = object.keys();
         
         while (i.hasNext()) {
             String key = (String)i.next();
-            if (!object.has(key)) {
-                object.put(key, objectToAdd.getString(key));
-            }
+            newMap.put(key, object.getString(key));
         }
+        return newMap;
+    }
+    
+    private HashMap<String, Object> getMapFromJSONObject(JSONObject object) throws JSONException {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Iterator<?> i = object.keys();
+        
+        while(i.hasNext()) {
+            String key = (String)i.next();
+            map.put(key, object.get(key));
+        }
+        return map;
     }
 }
