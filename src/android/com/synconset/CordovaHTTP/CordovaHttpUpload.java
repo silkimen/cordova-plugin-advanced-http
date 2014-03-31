@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
@@ -34,21 +35,17 @@ public class CordovaHttpUpload extends CordovaHttp implements Runnable {
     public void run() {
         try {
             HttpRequest request = HttpRequest.post(this.getUrlString());
-            if (this.acceptAllCerts()) {
-                request.trustAllCerts();
-                request.trustAllHosts();
-            }
-            if (this.sslPinning()) {
-                request.pinToCerts();
-            }
+            this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
             URI uri = new URI(filePath);
-            Log.d(TAG, uri.toString());
-            Log.d(TAG, name);
             int index = filePath.lastIndexOf('/');
-            String filename = filePath.substring(index);
-            request.part(this.name, filename, "image/jpeg", new File(uri));
+            String filename = filePath.substring(index + 1);
+            index = filePath.lastIndexOf('.');
+            String ext = filePath.substring(index + 1);
+            MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+            String mimeType = mimeTypeMap.getMimeTypeFromExtension(ext);
+            request.part(this.name, filename, mimeType, new File(uri));
             
             Set<?> set = (Set<?>)this.getParams().entrySet();
             Iterator<?> i = set.iterator();

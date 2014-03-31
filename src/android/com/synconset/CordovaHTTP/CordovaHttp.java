@@ -25,6 +25,8 @@ import javax.net.ssl.HostnameVerifier;
 import java.util.Iterator;
 
 import android.util.Log;
+
+import com.github.kevinsawicki.http.HttpRequest;
  
 public abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
@@ -89,12 +91,15 @@ public abstract class CordovaHttp {
         return this.callbackContext;
     }
     
-    protected boolean sslPinning() {
-        return sslPinning;
-    }
-    
-    protected boolean acceptAllCerts() {
-        return acceptAllCerts;
+    protected HttpRequest setupSecurity(HttpRequest request) {
+        if (acceptAllCerts) {
+            request.trustAllCerts();
+            request.trustAllHosts();
+        }
+        if (sslPinning) {
+            request.pinToCerts();
+        }
+        return request;
     }
     
     protected void respondWithError(String msg) {

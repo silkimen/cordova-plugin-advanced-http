@@ -31,13 +31,7 @@ public class CordovaHttpDownload extends CordovaHttp implements Runnable {
     public void run() {
         try {
             HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParams(), true);
-            if (this.acceptAllCerts()) {
-                request.trustAllCerts();
-                request.trustAllHosts();
-            }
-            if (this.sslPinning()) {
-                request.pinToCerts();
-            }
+            this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
             int code = request.code();

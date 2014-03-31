@@ -22,27 +22,13 @@ public class CordovaHttpPost extends CordovaHttp implements Runnable {
     @Override
     public void run() {
         try {
-            Log.d(TAG, this.getParams().toString());
             HttpRequest request = HttpRequest.post(this.getUrlString());
-            if (this.acceptAllCerts()) {
-                request.trustAllCerts();
-                request.trustAllHosts();
-            }
-            if (this.sslPinning()) {
-                Log.d(TAG, "ssl pinning");
-                request.pinToCerts();
-            }
+            this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
-            
             request.form(this.getParams());
-            
             int code = request.code();
             String body = request.body(CHARSET);
-            
-            Log.d(TAG, Integer.toString(code));
-            Log.d(TAG, body);
-            
             JSONObject response = new JSONObject();
             response.put("status", code);
             if (code >= 200 && code < 300) {

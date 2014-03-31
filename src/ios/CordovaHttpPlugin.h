@@ -5,14 +5,10 @@
 
 @interface CordovaHttpPlugin : CDVPlugin
 
-- (void)setAuthorizationHeaderWithUsernameAndPassword:(CDVInvokedUrlCommand*)command;
+- (void)useBasicAuth:(CDVInvokedUrlCommand*)command;
 - (void)setHeader:(CDVInvokedUrlCommand*)command;
-- (void)setSSLPinningMode:(CDVInvokedUrlCommand*)command;
-- (void)validateEntireCertificateChain:(CDVInvokedUrlCommand*)command;
-- (void)allowInvalidCertificates:(CDVInvokedUrlCommand*)command;
-- (void)acceptText:(CDVInvokedUrlCommand*)command;
-- (void)acceptData:(CDVInvokedUrlCommand*)command;
-- (void)setAcceptableContentTypes:(CDVInvokedUrlCommand*)command;
+- (void)enableSSLPinning:(CDVInvokedUrlCommand*)command;
+- (void)acceptAllCerts:(CDVInvokedUrlCommand*)command;
 - (void)post:(CDVInvokedUrlCommand*)command;
 - (void)get:(CDVInvokedUrlCommand*)command;
 - (void)uploadFile:(CDVInvokedUrlCommand*)command;

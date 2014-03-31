@@ -31,21 +31,11 @@ public class CordovaHttpGet extends CordovaHttp implements Runnable {
     public void run() {
         try {
             HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParams(), true);
-            if (this.acceptAllCerts()) {
-                request.trustAllCerts();
-                request.trustAllHosts();
-            }
-            if (this.sslPinning()) {
-                request.pinToCerts();
-            }
+            this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
             int code = request.code();
             String body = request.body(CHARSET);
-            
-            Log.d(TAG, Integer.toString(code));
-            Log.d(TAG, body);
-            
             JSONObject response = new JSONObject();
             response.put("status", code);
             if (code >= 200 && code < 300) {
