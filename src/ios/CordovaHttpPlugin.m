@@ -1,99 +1,85 @@
-#import "CordovaHTTP.h"
+#import "CordovaHttpPlugin.h"
 #import "CDVFile.h"
 #import "TextResponseSerializer.h"
-#import "HTTPManager.h"
+#import "HttpManager.h"
 
-@implementation CordovaHTTP
+@interface CordovaHttpPlugin()
 
-- (void) setAuthorizationHeaderWithUsernameAndPassword:(CDVInvokedUrlCommand*)command {
+- (void)setRequestHeaders:(NSDictionary*)headers;
+
+@end
+
+
+@implementation CordovaHttpPlugin {
+    AFHTTPRequestSerializer *requestSerializer;
+}
+
+- (void)pluginInitialize {
+    requestSerializer = [AFHTTPRequestSerializer serializer];
+}
+
+- (void)setRequestHeaders:(NSDictionary*)headers {
+    [HttpManager sharedClient].requestSerializer = [AFHTTPRequestSerializer serializer];
+    [requestSerializer.HTTPRequestHeaders enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        [[HttpManager sharedClient].requestSerializer setValue:obj forHTTPHeaderField:key];
+    }];
+    [headers enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        [[HttpManager sharedClient].requestSerializer setValue:obj forHTTPHeaderField:key];
+    }];
+}
+
+- (void)useBasicAuth:(CDVInvokedUrlCommand*)command {
     NSString *username = [command.arguments objectAtIndex:0];
     NSString *password = [command.arguments objectAtIndex:1];
     
-    [[HTTPManager sharedClient].requestSerializer setAuthorizationHeaderFieldWithUsername:username password:password];
+    [requestSerializer setAuthorizationHeaderFieldWithUsername:username password:password];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) setHeader:(CDVInvokedUrlCommand*)command {
+- (void)setHeader:(CDVInvokedUrlCommand*)command {
     NSString *header = [command.arguments objectAtIndex:0];
     NSString *value = [command.arguments objectAtIndex:1];
     
-    [[HTTPManager sharedClient].requestSerializer setValue:value forHTTPHeaderField: header];
+    [requestSerializer setValue:value forHTTPHeaderField: header];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) setSSLPinningMode:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = nil;
-    int pinningMode = [[command.arguments objectAtIndex:0] integerValue];
-    
-    if (pinningMode == 0) {
-        [HTTPManager sharedClient].securityPolicy.SSLPinningMode = AFSSLPinningModeNone;
-    } else if (pinningMode == 1) {
-        [HTTPManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
-    } else if (pinningMode == 2) {
-        [HTTPManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModePublicKey];
+- (void)enableSSLPinning:(CDVInvokedUrlCommand*)command {
+    bool enable = [[command.arguments objectAtIndex:0] boolValue];
+    if (enable) {
+        [HttpManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+        [HttpManager sharedClient].securityPolicy.validatesCertificateChain = NO;
     } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Requested SSL Pinning Mode is Unknown"];
+        [HttpManager sharedClient].securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     }
     
-    if (pluginResult == nil) {
-      pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    }
-    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void)validateEntireCertificateChain:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = nil;
-    bool validate = [[command.arguments objectAtIndex:0] boolValue];
-    
-    [HTTPManager sharedClient].securityPolicy.validatesCertificateChain = validate;
-    
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)allowInvalidCertificates:(CDVInvokedUrlCommand*)command {
+- (void)acceptAllCerts:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = nil;
     bool allow = [[command.arguments objectAtIndex:0] boolValue];
     
-    [HTTPManager sharedClient].securityPolicy.allowInvalidCertificates = allow;
+    [HttpManager sharedClient].securityPolicy.allowInvalidCertificates = allow;
     
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)acceptText:(CDVInvokedUrlCommand*)command {
-    [HTTPManager sharedClient].responseSerializer = [TextResponseSerializer serializer];
-    
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)acceptData:(CDVInvokedUrlCommand*)command {
-    [HTTPManager sharedClient].responseSerializer = [AFHTTPResponseSerializer serializer];
-    
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)setAcceptableContentTypes:(CDVInvokedUrlCommand*)command {
-    [HTTPManager sharedClient].responseSerializer.acceptableContentTypes = [NSSet setWithArray: command.arguments];
-    
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)post:(CDVInvokedUrlCommand*)command {
-   HTTPManager *manager = [HTTPManager sharedClient];
+   HttpManager *manager = [HttpManager sharedClient];
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
+   NSDictionary *headers = [command.arguments objectAtIndex:2];
+   [self setRequestHeaders: headers];
    
-   CordovaHTTP* __weak weakSelf = self;
-   
+   CordovaHttpPlugin* __weak weakSelf = self;
+   manager.responseSerializer = [TextResponseSerializer serializer];
    [manager POST:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
       NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
       [dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
@@ -110,12 +96,15 @@
 }
 
 - (void)get:(CDVInvokedUrlCommand*)command {
-   HTTPManager *manager = [HTTPManager sharedClient];
+   HttpManager *manager = [HttpManager sharedClient];
    NSString *url = [command.arguments objectAtIndex:0];
    NSDictionary *parameters = [command.arguments objectAtIndex:1];
+   NSDictionary *headers = [command.arguments objectAtIndex:2];
+   [self setRequestHeaders: headers];
    
-   CordovaHTTP* __weak weakSelf = self;
+   CordovaHttpPlugin* __weak weakSelf = self;
    
+   manager.responseSerializer = [TextResponseSerializer serializer];
    [manager GET:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
       NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
       [dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
@@ -132,15 +121,19 @@
 }
 
 - (void)uploadFile:(CDVInvokedUrlCommand*)command {
-    HTTPManager *manager = [HTTPManager sharedClient];
+    HttpManager *manager = [HttpManager sharedClient];
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
-    NSString *filePath = [command.arguments objectAtIndex: 2];
-    NSString *name = [command.arguments objectAtIndex: 3];
+    NSDictionary *headers = [command.arguments objectAtIndex:2];
+    NSString *filePath = [command.arguments objectAtIndex: 3];
+    NSString *name = [command.arguments objectAtIndex: 4];
     
     NSURL *fileURL = [NSURL fileURLWithPath: filePath];
     
-    CordovaHTTP* __weak weakSelf = self;
+    [self setRequestHeaders: headers];
+    
+    CordovaHttpPlugin* __weak weakSelf = self;
+    manager.responseSerializer = [TextResponseSerializer serializer];
     [manager POST:url parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         NSError *error;
         [formData appendPartWithFileURL:fileURL name:name error:&error];
@@ -168,12 +161,16 @@
 
 
 - (void)downloadFile:(CDVInvokedUrlCommand*)command {
-    HTTPManager *manager = [HTTPManager sharedClient];
+    HttpManager *manager = [HttpManager sharedClient];
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
-    NSString *filePath = [command.arguments objectAtIndex: 2];
+    NSDictionary *headers = [command.arguments objectAtIndex:2];
+    NSString *filePath = [command.arguments objectAtIndex: 3];
    
-    CordovaHTTP* __weak weakSelf = self;
+    [self setRequestHeaders: headers];
+    
+    CordovaHttpPlugin* __weak weakSelf = self;
+    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
     [manager GET:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
         /*
          *

@@ -18,15 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 // Modified by Andrew Stephan
-#import "HTTPManager.h"
+#import "HttpManager.h"
 
-@implementation HTTPManager
+@implementation HttpManager
 
 + (instancetype)sharedClient {
-    static HTTPManager *_sharedClient = nil;
+    static HttpManager *_sharedClient = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _sharedClient = [HTTPManager manager];
+        _sharedClient = [HttpManager manager];
     });
     
     return _sharedClient;
