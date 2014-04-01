@@ -1,4 +1,4 @@
-cordova-sslPinning
+cordovaHTTP
 ==================
 
 Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and Android.
