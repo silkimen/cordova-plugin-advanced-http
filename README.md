@@ -150,7 +150,7 @@ Downloads a file and saves it to the device.  Takes a URL, parameters, headers, 
 
 ## Libraries
 
-This plugin utilizes some awesome open source networking licenses.  These are both MIT licensed:
+This plugin utilizes some awesome open source networking libraries.  These are both MIT licensed:
 
  - iOS - [AFNetworking](https://github.com/AFNetworking/AFNetworking)
  - Android - [http-request](https://github.com/kevinsawicki/http-request)
