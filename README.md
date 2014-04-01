@@ -47,7 +47,7 @@ Set a header for all future requests.  Takes a header and a value.
     });
 
 ### enableSSLPinning
-Enable or disable ssl pinning.  To use ssl pinning you must include at least one .cer ssl certificate in your app project.  For ios include your certificate in the root level of your bundle(Just add the .cer file to your project/target at the root level).  For android include your certificate in your projects assets folder.  In both cases all .cer files found will be loaded automatically.  If you only have .pem certificate see this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729).  You want to convert it to a DER encoded certificate with a .cer extension.
+Enable or disable SSL pinning.  To use SSL pinning you must include at least one .cer SSL certificate in your app project.  For ios include your certificate in the root level of your bundle (just add the .cer file to your project/target at the root level).  For android include your certificate in your project's platforms/android/assets folder.  In both cases all .cer files found will be loaded automatically.  If you only have a .pem certificate see this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729).  You want to convert it to a DER encoded certificate with a .cer extension.
 
     cordovaHttp.enableSSLPinning(true, function() {
         console.log('success!');
@@ -56,7 +56,7 @@ Enable or disable ssl pinning.  To use ssl pinning you must include at least one
     });
     
 ### acceptAllCerts
-Accept all ssl certificates.  Or disable accepting all certificates.
+Accept all SSL certificates.  Or disable accepting all certificates.
 
     cordovaHttp.acceptAllCerts(true, function() {
         console.log('success!');
@@ -64,11 +64,11 @@ Accept all ssl certificates.  Or disable accepting all certificates.
         console.log('error :(');
     });
     
-### post
-Execute a post request.  Takes a url, parameters, and headers.
+### post<a name="post></a>
+Execute a POST request.  Takes a URL, parameters, and headers.
 
 #### success
-The success function receives a response object with 2 properties: status and data.  Status is the http response code and data is the response from the server as a string. Here's a quick example:
+The success function receives a response object with 2 properties: status and data.  Status is the HTTP response code and data is the response from the server as a string. Here's a quick example:
 
     {
         status: 200,
@@ -100,7 +100,7 @@ Most apis will return JSON meaning you'll want to parse the data like in the exa
     
     
 #### failure
-The error function receives a response object with 2 properties: status and error.  Status is the http response code.  Error is the error response from the server as a string.  Here's a quick example:
+The error function receives a response object with 2 properties: status and error.  Status is the HTTP response code.  Error is the error response from the server as a string.  Here's a quick example:
 
     {
         status: 403,
@@ -108,7 +108,7 @@ The error function receives a response object with 2 properties: status and erro
     }
     
 ### get
-Execute a get request.  Takes a url, parameters, and headers.  See the post documentation for details on what is returned on success and failure.
+Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
     cordovaHttp.get("https://google.com/, {
         id: 12,
@@ -120,7 +120,7 @@ Execute a get request.  Takes a url, parameters, and headers.  See the post docu
     });
     
 ### uploadFile
-Uploads a file saved on the device.  Takes a url, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the post documentation for details on what is returned on success and failure.
+Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
 
     cordovaHttp.uploadFile("https://google.com/, {
         id: 12,
@@ -132,7 +132,7 @@ Uploads a file saved on the device.  Takes a url, parameters, headers, filePath,
     });
     
 ### downloadFile
-Downloads a file and saves it to the device.  Takes a url, parameters, headers, and a filePath.  See post documentation for details on what is returned on failure.  On success this function returns a cordova [FileEntry object](http://cordova.apache.org/docs/en/3.3.0/cordova_file_file.md.html#FileEntry).
+Downloads a file and saves it to the device.  Takes a URL, parameters, headers, and a filePath.  See [post](#post) documentation for details on what is returned on failure.  On success this function returns a cordova [FileEntry object](http://cordova.apache.org/docs/en/3.3.0/cordova_file_file.md.html#FileEntry).
 
     cordovaHttp.uploadFile("https://google.com/, {
         id: 12,
