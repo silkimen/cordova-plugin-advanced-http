@@ -8,6 +8,14 @@ Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and
  - Background threading - all requests are done in a background thread.
  - SSL Pinning - read more at [LumberBlog](http://blog.lumberlabs.com/2012/04/why-app-developers-should-care-about.html).
 
+## Installation
+
+The plugin conforms to the Cordova plugin specification, it can be installed
+using the Cordova / Phonegap command line interface.
+
+    phonegap plugin add https://github.com/wymsee/cordova-HTTP.git
+
+    cordova plugin add https://github.com/wymsee/cordova-HTTP.git
 
 ## Usage
 
