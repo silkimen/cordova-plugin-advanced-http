@@ -417,7 +417,7 @@ public class HttpRequest {
       keyStore.load(null, null);
       
       for (int i = 0; i < PINNED_CERTS.size(); i++) {
-          keyStore.setCertificateEntry("CA" + i, ca);
+          keyStore.setCertificateEntry("CA" + i, PINNED_CERTS.get(i));
       }
       
       // Create a TrustManager that trusts the CAs in our KeyStore
