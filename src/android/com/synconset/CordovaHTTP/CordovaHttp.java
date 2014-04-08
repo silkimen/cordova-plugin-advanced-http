@@ -89,14 +89,18 @@ public abstract class CordovaHttp {
         return request;
     }
     
-    protected void respondWithError(String msg) {
+    protected void respondWithError(int status, String msg) {
         try {
             JSONObject response = new JSONObject();
-            response.put("status", 500);
+            response.put("status", status);
             response.put("error", msg);
             this.callbackContext.error(response);
         } catch (JSONException e) {
             this.callbackContext.error(msg);
         }
+    }
+    
+    protected void respondWithError(String msg) {
+        this.respondWithError(500, msg);
     }
 }

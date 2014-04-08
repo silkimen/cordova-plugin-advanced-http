@@ -78,7 +78,6 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                 callbackContext.success();
             } catch(Exception e) {
                 e.printStackTrace();
-                Log.d(TAG, e.getMessage());
                 callbackContext.error("There was an error setting up ssl pinning");
             }
         } else if (action.equals("acceptAllCerts")) {

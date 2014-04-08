@@ -3,6 +3,7 @@
  */
 package com.synconset;
 
+import java.net.UnknownHostException;
 import java.util.Map;
 
 import org.apache.cordova.CallbackContext;
@@ -39,11 +40,13 @@ public class CordovaHttpPost extends CordovaHttp implements Runnable {
                 this.getCallbackContext().error(response);
             }
         } catch (JSONException e) {
-            Log.d(TAG, e.getMessage());
             this.respondWithError("There was an error generating the response");
         }  catch (HttpRequestException e) {
-            Log.d(TAG, e.getMessage());
-            this.respondWithError("There was an error with the request");
+            if (e.getCause() instanceof UnknownHostException) {
+                this.respondWithError(0, "The host could not be resolved");
+            } else {
+                this.respondWithError("There was an error with the request");
+            }
         }
     }
 }

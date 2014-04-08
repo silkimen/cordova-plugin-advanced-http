@@ -48,8 +48,11 @@ public class CordovaHttpGet extends CordovaHttp implements Runnable {
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
         } catch (HttpRequestException e) {
-            Log.d(TAG, e.getMessage());
-            this.respondWithError("There was an error with the request");
+            if (e.getCause() instanceof UnknownHostException) {
+                this.respondWithError(0, "The host could not be resolved");
+            } else {
+                this.respondWithError("There was an error with the request");
+            }
         }
     }
 }
