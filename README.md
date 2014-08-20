@@ -39,7 +39,7 @@ All available functions are documented below.  Every function takes a success an
 ### useBasicAuth
 This sets up all future requests to use Basic HTTP authentication with the given username and password.
 
-    cordovaHttp.useBasicAuth("user", "password", function() {
+    cordovaHTTP.useBasicAuth("user", "password", function() {
         console.log('success!');
     }, function() {
         console.log('error :(');
@@ -48,7 +48,7 @@ This sets up all future requests to use Basic HTTP authentication with the given
 ### setHeader
 Set a header for all future requests.  Takes a header and a value.
 
-    cordovaHttp.setHeader("Header", "Value", function() {
+    cordovaHTTP.setHeader("Header", "Value", function() {
         console.log('success!');
     }, function() {
         console.log('error :(');
@@ -57,7 +57,7 @@ Set a header for all future requests.  Takes a header and a value.
 ### enableSSLPinning
 Enable or disable SSL pinning.  To use SSL pinning you must include at least one .cer SSL certificate in your app project.  For ios include your certificate in the root level of your bundle (just add the .cer file to your project/target at the root level).  For android include your certificate in your project's platforms/android/assets folder.  In both cases all .cer files found will be loaded automatically.  If you only have a .pem certificate see this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729).  You want to convert it to a DER encoded certificate with a .cer extension.
 
-    cordovaHttp.enableSSLPinning(true, function() {
+    cordovaHTTP.enableSSLPinning(true, function() {
         console.log('success!');
     }, function() {
         console.log('error :(');
@@ -66,7 +66,7 @@ Enable or disable SSL pinning.  To use SSL pinning you must include at least one
 ### acceptAllCerts
 Accept all SSL certificates.  Or disable accepting all certificates.
 
-    cordovaHttp.acceptAllCerts(true, function() {
+    cordovaHTTP.acceptAllCerts(true, function() {
         console.log('success!');
     }, function() {
         console.log('error :(');
@@ -85,7 +85,7 @@ The success function receives a response object with 2 properties: status and da
     
 Most apis will return JSON meaning you'll want to parse the data like in the example below:
 
-    cordovaHttp.post("https://google.com/, {
+    cordovaHTTP.post("https://google.com/, {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, function(response) {
@@ -118,7 +118,7 @@ The error function receives a response object with 2 properties: status and erro
 ### get
 Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-    cordovaHttp.get("https://google.com/, {
+    cordovaHTTP.get("https://google.com/, {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, function(response) {
@@ -130,7 +130,7 @@ Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#p
 ### uploadFile
 Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-    cordovaHttp.uploadFile("https://google.com/, {
+    cordovaHTTP.uploadFile("https://google.com/, {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, "file:///somepicture.jpg", "picture", function(response) {
@@ -142,7 +142,7 @@ Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath,
 ### downloadFile
 Downloads a file and saves it to the device.  Takes a URL, parameters, headers, and a filePath.  See [post](#post) documentation for details on what is returned on failure.  On success this function returns a cordova [FileEntry object](http://cordova.apache.org/docs/en/3.3.0/cordova_file_file.md.html#FileEntry).
 
-    cordovaHttp.downloadFile("https://google.com/, {
+    cordovaHTTP.downloadFile("https://google.com/, {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, "file:///somepicture.jpg", function(entry) {
