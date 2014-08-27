@@ -31,8 +31,8 @@
         <header-file src="src/ios/CordovaHttpPlugin.h" />
         <source-file src="src/ios/CordovaHttpPlugin.m" />
         
-        <header-file src="src/ios/HttpManager.h" />
-        <source-file src="src/ios/HttpManager.m" />
+        <header-file src="src/ios/HTTPManager.h" />
+        <source-file src="src/ios/HTTPManager.m" />
         
         <header-file src="src/ios/TextResponseSerializer.h" />
         <source-file src="src/ios/TextResponseSerializer.m" />
