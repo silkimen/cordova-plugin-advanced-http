@@ -16,6 +16,8 @@ import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.net.ssl.SSLHandshakeException;
+
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 

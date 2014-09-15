@@ -14,6 +14,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import javax.net.ssl.SSLHandshakeException;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.file.FileUtils;
 

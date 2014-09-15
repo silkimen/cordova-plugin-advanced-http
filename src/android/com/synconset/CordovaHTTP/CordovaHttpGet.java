@@ -14,6 +14,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.HostnameVerifier;
 
+import javax.net.ssl.SSLHandshakeException;
+
 import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
 import org.json.JSONObject;
