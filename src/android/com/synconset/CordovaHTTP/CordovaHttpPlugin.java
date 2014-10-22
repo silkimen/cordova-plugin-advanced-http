@@ -39,9 +39,9 @@ import com.github.kevinsawicki.http.HttpRequest;
 
 public class CordovaHttpPlugin extends CordovaPlugin {
     private static final String TAG = "CordovaHTTP";
-    
+
     private HashMap<String, String> globalHeaders;
-    
+
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
@@ -118,11 +118,11 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         loginInfo = "Basic " + Base64.encodeToString(loginInfo.getBytes(), Base64.NO_WRAP);
         this.globalHeaders.put("Authorization", loginInfo);
     }
-    
+
     private void setHeader(String header, String value) {
         this.globalHeaders.put(header, value);
     }
-    
+
     private void enableSSLPinning(boolean enable) throws GeneralSecurityException, IOException {
         if (enable) {
             AssetManager assetManager = cordova.getActivity().getAssets();
@@ -137,7 +137,18 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                     }
                 }
             }
-            
+
+            // scan the www/certificates folder for .cer files as well
+            files = assetManager.list("www/certificates");
+            for (int i = 0; i < files.length; i++) {
+              index = files[i].lastIndexOf('.');
+              if (index != -1) {
+                if (files[i].substring(index).equals(".cer")) {
+                  cerFiles.add("www/certificates/" + files[i]);
+                }
+              }
+            }
+
             for (int i = 0; i < cerFiles.size(); i++) {
                 InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
                 InputStream caInput = new BufferedInputStream(in);
@@ -148,22 +159,22 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             CordovaHttp.enableSSLPinning(false);
         }
     }
-    
+
     private HashMap<String, String> addToMap(HashMap<String, String> map, JSONObject object) throws JSONException {
         HashMap<String, String> newMap = (HashMap<String, String>)map.clone();
         Iterator<?> i = object.keys();
-        
+
         while (i.hasNext()) {
             String key = (String)i.next();
             newMap.put(key, object.getString(key));
         }
         return newMap;
     }
-    
+
     private HashMap<String, Object> getMapFromJSONObject(JSONObject object) throws JSONException {
         HashMap<String, Object> map = new HashMap<String, Object>();
         Iterator<?> i = object.keys();
-        
+
         while(i.hasNext()) {
             String key = (String)i.next();
             map.put(key, object.get(key));
