@@ -55,7 +55,7 @@ Set a header for all future requests.  Takes a header and a value.
     });
 
 ### enableSSLPinning
-Enable or disable SSL pinning.  To use SSL pinning you must include at least one .cer SSL certificate in your app project.  For ios include your certificate in the root level of your bundle (just add the .cer file to your project/target at the root level).  For android include your certificate in your project's platforms/android/assets folder.  In both cases all .cer files found will be loaded automatically.  If you only have a .pem certificate see this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729).  You want to convert it to a DER encoded certificate with a .cer extension.
+Enable or disable SSL pinning.  To use SSL pinning you must include at least one .cer SSL certificate in your app project.  You can pin to your server certificate or to one of the issuing CA certificate. For ios include your certificate in the root level of your bundle (just add the .cer file to your project/target at the root level).  For android include your certificate in your project's platforms/android/assets folder.  In both cases all .cer files found will be loaded automatically.  If you only have a .pem certificate see this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729).  You want to convert it to a DER encoded certificate with a .cer extension.
 
 As an alternative, you can store your .cer files in the www/certificates folder.
 
@@ -166,6 +166,17 @@ This plugin utilizes some awesome open source networking libraries.  These are b
  - Android - [http-request](https://github.com/kevinsawicki/http-request)
 
 We made a few modifications to http-request.  They can be found in a separate repo here: https://github.com/wymsee/http-request
+
+## Limitations
+
+This plugin isn't equivalent to using XMLHttpRequest or Ajax calls in Javascript.
+For instance, the following features are currently not supported:
+
+- cookies support (a cookie set by a request isn't sent in subsequent requests)
+- read content of error responses (only the HTTP status code and message are returned)
+- read returned HTTP headers (e.g. in case security tokens are returned as headers)
+
+Take this into account when using this plugin into your application.
 
 ## License
 
