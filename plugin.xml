@@ -67,6 +67,7 @@
         <source-file src="src/ios/AFNetworking/AFURLSessionManager.m" />
 
         <framework src="Security.framework" />
+        <framework src="SystemConfiguration.framework" />
     </platform>
 
     <!--android -->
