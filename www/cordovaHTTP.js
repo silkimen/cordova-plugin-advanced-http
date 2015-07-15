@@ -19,6 +19,9 @@ var http = {
     acceptAllCerts: function(allow, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "acceptAllCerts", [allow]);
     },
+    acceptAllHosts: function(allow, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "acceptAllHosts", [allow]);
+    },
     post: function(url, params, headers, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "post", [url, params, headers]);
     },

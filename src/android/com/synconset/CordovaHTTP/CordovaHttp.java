@@ -35,7 +35,8 @@ public abstract class CordovaHttp {
     
     private static AtomicBoolean sslPinning = new AtomicBoolean(false);
     private static AtomicBoolean acceptAllCerts = new AtomicBoolean(false);
-    
+    private static AtomicBoolean acceptAllHosts = new AtomicBoolean(false);
+
     private String urlString;
     private Map<?, ?> params;
     private Map<String, String> headers;
@@ -61,7 +62,11 @@ public abstract class CordovaHttp {
             sslPinning.set(false);
         }
     }
-    
+
+    public static void acceptAllHosts(boolean accept) {
+        acceptAllHosts.set(accept);
+    }
+
     protected String getUrlString() {
         return this.urlString;
     }
@@ -81,10 +86,11 @@ public abstract class CordovaHttp {
     protected HttpRequest setupSecurity(HttpRequest request) {
         if (acceptAllCerts.get()) {
             request.trustAllCerts();
-            request.trustAllHosts();
+            request.trustAllHosts(true);
         }
         if (sslPinning.get()) {
             request.pinToCerts();
+            request.trustAllHosts(acceptAllHosts.get());
         }
         return request;
     }
