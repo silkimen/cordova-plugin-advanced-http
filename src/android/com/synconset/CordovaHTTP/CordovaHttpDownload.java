@@ -45,7 +45,7 @@ public class CordovaHttpDownload extends CordovaHttp implements Runnable {
                 URI uri = new URI(filePath);
                 File file = new File(uri);
                 request.receive(file);
-                JSONObject fileEntry = FileUtils.getEntry(file);
+                JSONObject fileEntry = FileUtils.getFilePlugin().getEntryForFile(file);
                 response.put("file", fileEntry);
                 this.getCallbackContext().success(response);
             } else {
