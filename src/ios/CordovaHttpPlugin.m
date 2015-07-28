@@ -71,6 +71,14 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)acceptAllHosts:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = nil;
+    bool allow = [[command.arguments objectAtIndex:0] boolValue];
+    [HttpManager sharedClient].securityPolicy.validatesDomainName = !allow;
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)post:(CDVInvokedUrlCommand*)command {
    HttpManager *manager = [HttpManager sharedClient];
    NSString *url = [command.arguments objectAtIndex:0];
