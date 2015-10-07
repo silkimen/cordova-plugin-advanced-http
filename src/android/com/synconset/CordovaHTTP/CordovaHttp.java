@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -108,5 +110,18 @@ public abstract class CordovaHttp {
     
     protected void respondWithError(String msg) {
         this.respondWithError(500, msg);
+    }
+
+    protected void addResponseHeaders(HttpRequest request, JSONObject response) throws JSONException {
+        Map<String, List<String>> headers = request.headers();
+        Map<String, String> parsed_headers = new HashMap<String, String>();
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            String key = entry.getKey();
+            List<String> value = entry.getValue();
+            if ((key != null) && (!value.isEmpty())) {
+                parsed_headers.put(key, value.get(0));
+            }
+        }
+        response.put("headers", new JSONObject(parsed_headers));
     }
 }

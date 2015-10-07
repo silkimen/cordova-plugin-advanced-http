@@ -40,6 +40,7 @@ public class CordovaHttpDownload extends CordovaHttp implements Runnable {
             int code = request.code();
             
             JSONObject response = new JSONObject();
+            this.addResponseHeaders(request, response);
             response.put("status", code);
             if (code >= 200 && code < 300) {
                 URI uri = new URI(filePath);
