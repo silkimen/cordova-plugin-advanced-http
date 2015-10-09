@@ -87,7 +87,7 @@ The success function receives a response object with 2 properties: status and da
     
 Most apis will return JSON meaning you'll want to parse the data like in the example below:
 
-    cordovaHTTP.post("https://google.com/, {
+    cordovaHTTP.post("https://google.com/", {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, function(response) {
@@ -120,7 +120,7 @@ The error function receives a response object with 2 properties: status and erro
 ### get
 Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-    cordovaHTTP.get("https://google.com/, {
+    cordovaHTTP.get("https://google.com/", {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, function(response) {
@@ -132,7 +132,7 @@ Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#p
 ### uploadFile
 Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-    cordovaHTTP.uploadFile("https://google.com/, {
+    cordovaHTTP.uploadFile("https://google.com/", {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, "file:///somepicture.jpg", "picture", function(response) {
@@ -144,7 +144,7 @@ Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath,
 ### downloadFile
 Downloads a file and saves it to the device.  Takes a URL, parameters, headers, and a filePath.  See [post](#post) documentation for details on what is returned on failure.  On success this function returns a cordova [FileEntry object](http://cordova.apache.org/docs/en/3.3.0/cordova_file_file.md.html#FileEntry).
 
-    cordovaHTTP.downloadFile("https://google.com/, {
+    cordovaHTTP.downloadFile("https://google.com/", {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, "file:///somepicture.jpg", function(entry) {
