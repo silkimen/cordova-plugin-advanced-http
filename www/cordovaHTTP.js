@@ -19,11 +19,17 @@ var http = {
     acceptAllCerts: function(allow, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "acceptAllCerts", [allow]);
     },
+    acceptAllHosts: function(allow, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "acceptAllHosts", [allow]);
+    },
     post: function(url, params, headers, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "post", [url, params, headers]);
     },
     get: function(url, params, headers, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "get", [url, params, headers]);
+    },
+    head: function(url, params, headers, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "head", [url, params, headers]);
     },
     uploadFile: function(url, params, headers, filePath, name, success, failure) {
         return exec(success, failure, "CordovaHttpPlugin", "uploadFile", [url, params, headers, filePath, name]);
@@ -52,11 +58,13 @@ var http = {
          *
         */
         var win = function(result) {
-            var entry = new (require('org.apache.cordova.file.FileEntry'))();
+            var entry = new (require('cordova-plugin-file.FileEntry'))();
             entry.isDirectory = false;
             entry.isFile = true;
             entry.name = result.file.name;
             entry.fullPath = result.file.fullPath;
+            entry.filesystem = new FileSystem(result.file.filesystemName || (result.file.filesystem == window.PERSISTENT ? 'persistent' : 'temporary'));
+            entry.nativeURL = result.file.nativeURL;
             success(entry);
         };
         return exec(win, failure, "CordovaHttpPlugin", "downloadFile", [url, params, headers, filePath]);
@@ -116,6 +124,9 @@ if (typeof angular !== "undefined") {
             },
             get: function(url, params, headers) {
                 return makePromise(http.get, [url, params, headers], true);
+            },
+            head: function(url, params, headers) {
+                return makePromise(http.head, [url, params, headers], true);
             },
             uploadFile: function(url, params, headers, filePath, name) {
                 return makePromise(http.uploadFile, [url, params, headers, filePath, name], true);

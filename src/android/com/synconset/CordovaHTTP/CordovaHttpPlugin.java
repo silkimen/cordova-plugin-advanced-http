@@ -58,6 +58,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
             CordovaHttpGet get = new CordovaHttpGet(urlString, paramsMap, headersMap, callbackContext);
             cordova.getThreadPool().execute(get);
+        } else if (action.equals("head")) {
+            String urlString = args.getString(0);
+            JSONObject params = args.getJSONObject(1);
+            JSONObject headers = args.getJSONObject(2);
+            HashMap<?, ?> paramsMap = this.getMapFromJSONObject(params);
+            HashMap<String, String> headersMap = this.addToMap(this.globalHeaders, headers);
+            CordovaHttpHead head = new CordovaHttpHead(urlString, paramsMap, headersMap, callbackContext);
+            cordova.getThreadPool().execute(head);
         } else if (action.equals("post")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
@@ -83,6 +91,11 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         } else if (action.equals("acceptAllCerts")) {
             boolean accept = args.getBoolean(0);
             CordovaHttp.acceptAllCerts(accept);
+            callbackContext.success();
+        } else if (action.equals("acceptAllHosts")) {
+            boolean accept = args.getBoolean(0);
+            CordovaHttp.acceptAllHosts(accept);
+            callbackContext.success();
         } else if (action.equals("setHeader")) {
             String header = args.getString(0);
             String value = args.getString(1);
