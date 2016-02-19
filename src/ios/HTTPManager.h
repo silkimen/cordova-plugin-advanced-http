@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 // Modified by Andrew Stephan
 #import <Foundation/Foundation.h>
-#import "AFHTTPRequestOperationManager.h"
+#import "AFHTTPSessionManager.h"
 
-@interface HttpManager : AFHTTPRequestOperationManager 
+@interface HttpManager : AFHTTPSessionManager 
 
 + (instancetype)sharedClient;
 

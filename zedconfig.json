@@ -1,0 +1,33 @@
+{
+    "preferences": {
+        "tabSize": 4,
+        "wordWrap": true,
+        "useSoftTabs": true,
+        "gotoExclude": []
+    },
+    "packages": [
+        "gh:wymsee/zed-tools/mobile"
+    ],
+    "modes": {
+        "javascript": {
+             "commands": {
+                 "Tools:Check": {
+                     "options": {
+                         "globals": {
+                            "angular": true,
+                            "$": true,
+                            "device": true,
+                            "persistence": true,
+                            "moment": true,
+                            "sos": true,
+                            "LocalFileSystem": true,
+                            "Hammer": true,
+                            "AnimationFrame": true,
+                            "Bloodhound": true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

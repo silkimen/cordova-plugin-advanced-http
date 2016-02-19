@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
-  id="com.synconset.cordovaHTTP"
-  version="0.1.4">
+  id="cordova-plugin-http"
+  version="0.2.0">
 
     <name>SSL Pinning</name>
  
@@ -17,7 +17,7 @@
     <dependency id="cordova-plugin-file" version=">=2.0.0" />
 
     <js-module src="www/cordovaHTTP.js" name="CordovaHttpPlugin">
-        <clobbers target="plugins.CordovaHttpPlugin" />
+        <clobbers target="CordovaHttpPlugin" />
     </js-module>
 
     <!-- ios -->
@@ -37,12 +37,6 @@
         <header-file src="src/ios/TextResponseSerializer.h" />
         <source-file src="src/ios/TextResponseSerializer.m" />
 
-        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperation.h" />
-        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperation.m" />
-
-        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.h" />
-        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.m" />
-
         <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h" />
         <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m" />
 
@@ -53,9 +47,6 @@
 
         <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h" />
         <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m" />
-
-        <header-file src="src/ios/AFNetworking/AFURLConnectionOperation.h" />
-        <source-file src="src/ios/AFNetworking/AFURLConnectionOperation.m" />
 
         <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h" />
         <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m" />

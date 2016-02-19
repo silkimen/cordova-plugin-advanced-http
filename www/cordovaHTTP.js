@@ -119,6 +119,9 @@ if (typeof angular !== "undefined") {
             acceptAllCerts: function(allow) {
                 return makePromise(http.acceptAllCerts, [allow]);
             },
+            acceptAllHosts: function(allow) {
+                return makePromise(http.acceptAllHosts, [allow]);
+            },
             post: function(url, params, headers) {
                 return makePromise(http.post, [url, params, headers], true);
             },
