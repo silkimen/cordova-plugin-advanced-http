@@ -71,6 +71,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -348,6 +349,32 @@ public class HttpRequest {
       result.append('?');
     else if (queryStart < lastChar && baseUrl.charAt(lastChar) != '&')
       result.append('&');
+    return result;
+  }
+
+  private static StringBuilder addParam(final Object key, Object value,
+      final StringBuilder result) {
+    if (value != null && value.getClass().isArray())
+      value = arrayToList(value);
+
+    if (value instanceof Iterable<?>) {
+      Iterator<?> iterator = ((Iterable<?>) value).iterator();
+      while (iterator.hasNext()) {
+        result.append(key);
+        result.append("[]=");
+        Object element = iterator.next();
+        if (element != null)
+          result.append(element);
+        if (iterator.hasNext())
+          result.append("&");
+      }
+    } else {
+      result.append(key);
+      result.append("=");
+      if (value != null)
+        result.append(value);
+    }
+
     return result;
   }
 
@@ -871,6 +898,36 @@ public class HttpRequest {
   }
 
   /**
+   * Represents array of any type as list of objects so we can easily iterate over it
+   * @param array of elements
+   * @return list with the same elements
+   */
+  private static List<Object> arrayToList(final Object array) {
+    if (array instanceof Object[])
+      return Arrays.asList((Object[]) array);
+
+    List<Object> result = new ArrayList<Object>();
+    // Arrays of the primitive types can't be cast to array of Object, so this:
+    if (array instanceof int[])
+      for (int value : (int[]) array) result.add(value);
+    else if (array instanceof boolean[])
+      for (boolean value : (boolean[]) array) result.add(value);
+    else if (array instanceof long[])
+      for (long value : (long[]) array) result.add(value);
+    else if (array instanceof float[])
+      for (float value : (float[]) array) result.add(value);
+    else if (array instanceof double[])
+      for (double value : (double[]) array) result.add(value);
+    else if (array instanceof short[])
+      for (short value : (short[]) array) result.add(value);
+    else if (array instanceof byte[])
+      for (byte value : (byte[]) array) result.add(value);
+    else if (array instanceof char[])
+      for (char value : (char[]) array) result.add(value);
+    return result;
+  }
+
+  /**
    * Encode the given URL as an ASCII {@link String}
    * <p>
    * This method ensures the path and query segments of the URL are properly
@@ -933,23 +990,14 @@ public class HttpRequest {
     addParamPrefix(baseUrl, result);
 
     Entry<?, ?> entry;
-    Object value;
     Iterator<?> iterator = params.entrySet().iterator();
     entry = (Entry<?, ?>) iterator.next();
-    result.append(entry.getKey().toString());
-    result.append('=');
-    value = entry.getValue();
-    if (value != null)
-      result.append(value);
+    addParam(entry.getKey().toString(), entry.getValue(), result);
 
     while (iterator.hasNext()) {
       result.append('&');
       entry = (Entry<?, ?>) iterator.next();
-      result.append(entry.getKey().toString());
-      result.append('=');
-      value = entry.getValue();
-      if (value != null)
-        result.append(value);
+      addParam(entry.getKey().toString(), entry.getValue(), result);
     }
 
     return result.toString();
@@ -980,20 +1028,11 @@ public class HttpRequest {
     addPathSeparator(baseUrl, result);
     addParamPrefix(baseUrl, result);
 
-    Object value;
-    result.append(params[0]);
-    result.append('=');
-    value = params[1];
-    if (value != null)
-      result.append(value);
+    addParam(params[0], params[1], result);
 
     for (int i = 2; i < params.length; i += 2) {
       result.append('&');
-      result.append(params[i]);
-      result.append('=');
-      value = params[i + 1];
-      if (value != null)
-        result.append(value);
+      addParam(params[i], params[i + 1], result);
     }
 
     return result.toString();
@@ -1052,7 +1091,7 @@ public class HttpRequest {
    *          the name/value query parameter pairs to include as part of the
    *          baseUrl
    *
-   * @see #append(CharSequence, String...)
+   * @see #append(CharSequence, Object...)
    * @see #encode(CharSequence)
    *
    * @return request
@@ -1116,7 +1155,7 @@ public class HttpRequest {
    *          the name/value query parameter pairs to include as part of the
    *          baseUrl
    *
-   * @see #append(CharSequence, String...)
+   * @see #append(CharSequence, Object...)
    * @see #encode(CharSequence)
    *
    * @return request
@@ -1180,7 +1219,7 @@ public class HttpRequest {
    *          the name/value query parameter pairs to include as part of the
    *          baseUrl
    *
-   * @see #append(CharSequence, String...)
+   * @see #append(CharSequence, Object...)
    * @see #encode(CharSequence)
    *
    * @return request
@@ -1244,7 +1283,7 @@ public class HttpRequest {
    *          the name/value query parameter pairs to include as part of the
    *          baseUrl
    *
-   * @see #append(CharSequence, String...)
+   * @see #append(CharSequence, Object...)
    * @see #encode(CharSequence)
    *
    * @return request
@@ -1308,7 +1347,7 @@ public class HttpRequest {
    *          the name/value query parameter pairs to include as part of the
    *          baseUrl
    *
-   * @see #append(CharSequence, String...)
+   * @see #append(CharSequence, Object...)
    * @see #encode(CharSequence)
    *
    * @return request
@@ -1388,7 +1427,7 @@ public class HttpRequest {
   }
 
   /**
-   * Set the 'http.proxyHost' & 'https.proxyHost' properties to the given host
+   * Set the 'http.proxyHost' and 'https.proxyHost' properties to the given host
    * value.
    * <p>
    * This setting will apply to all requests.
@@ -1401,7 +1440,7 @@ public class HttpRequest {
   }
 
   /**
-   * Set the 'http.proxyPort' & 'https.proxyPort' properties to the given port
+   * Set the 'http.proxyPort' and 'https.proxyPort' properties to the given port
    * number.
    * <p>
    * This setting will apply to all requests.
@@ -3252,17 +3291,11 @@ public class HttpRequest {
    *
    * @return this request
    */
-  public HttpRequest trustAllHosts(boolean enable) {
+  public HttpRequest trustAllHosts() {
     final HttpURLConnection connection = getConnection();
-    if (connection instanceof HttpsURLConnection) {
-      if (enable) {
-        ((HttpsURLConnection) connection)
-            .setHostnameVerifier(getTrustedVerifier());
-      } else {
-        ((HttpsURLConnection) connection)
-                .setHostnameVerifier(HttpsURLConnection.getDefaultHostnameVerifier());
-      }
-    }
+    if (connection instanceof HttpsURLConnection)
+      ((HttpsURLConnection) connection)
+          .setHostnameVerifier(getTrustedVerifier());
     return this;
   }
 

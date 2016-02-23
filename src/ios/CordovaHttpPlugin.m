@@ -152,7 +152,7 @@
     NSString *filePath = [command.arguments objectAtIndex: 3];
     NSString *name = [command.arguments objectAtIndex: 4];
     
-    NSURL *fileURL = [NSURL fileURLWithPath: filePath];
+    NSURL *fileURL = [NSURL URLWithString: filePath];
     
     [self setRequestHeaders: headers forManager: manager];
     
