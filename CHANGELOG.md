@@ -14,6 +14,7 @@
 - Update cordova file plugin dependency (Thanks to denisbabineau)
 - useBasicAuthHeader and setHeader are now synchronous functions
 - updated AFNetworking to 3.0.4 - only iOS 7+ is now supported
+- updated http-request to 6.0
 
 ## v0.1.4
 
