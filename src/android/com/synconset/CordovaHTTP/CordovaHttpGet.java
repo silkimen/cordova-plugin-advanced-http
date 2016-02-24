@@ -40,6 +40,7 @@ public class CordovaHttpGet extends CordovaHttp implements Runnable {
             int code = request.code();
             String body = request.body(CHARSET);
             JSONObject response = new JSONObject();
+            this.addResponseHeaders(request, response);
             response.put("status", code);
             if (code >= 200 && code < 300) {
                 response.put("data", body);

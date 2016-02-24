@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
-  id="com.synconset.cordovaHTTP"
-  version="0.1.4">
+  id="cordova-plugin-http"
+  version="0.2.0">
 
     <name>SSL Pinning</name>
  
@@ -14,10 +14,10 @@
         <engine name="cordova" version=">=3.0.0" />
     </engines>
 
-    <dependency id="org.apache.cordova.file" url="https://github.com/apache/cordova-plugin-file" commit="r0.2.5" />
+    <dependency id="cordova-plugin-file" version=">=2.0.0" />
 
     <js-module src="www/cordovaHTTP.js" name="CordovaHttpPlugin">
-        <clobbers target="plugins.CordovaHttpPlugin" />
+        <clobbers target="CordovaHttpPlugin" />
     </js-module>
 
     <!-- ios -->
@@ -31,17 +31,8 @@
         <header-file src="src/ios/CordovaHttpPlugin.h" />
         <source-file src="src/ios/CordovaHttpPlugin.m" />
         
-        <header-file src="src/ios/HTTPManager.h" />
-        <source-file src="src/ios/HTTPManager.m" />
-        
         <header-file src="src/ios/TextResponseSerializer.h" />
         <source-file src="src/ios/TextResponseSerializer.m" />
-
-        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperation.h" />
-        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperation.m" />
-
-        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.h" />
-        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.m" />
 
         <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h" />
         <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m" />
@@ -53,9 +44,6 @@
 
         <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h" />
         <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m" />
-
-        <header-file src="src/ios/AFNetworking/AFURLConnectionOperation.h" />
-        <source-file src="src/ios/AFNetworking/AFURLConnectionOperation.m" />
 
         <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h" />
         <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m" />
@@ -78,9 +66,14 @@
             </feature>
         </config-file>
 
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET" />
+        </config-file>
+        
         <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttp.java" target-dir="src/com/synconset" />
         <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpGet.java" target-dir="src/com/synconset" />
         <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpPost.java" target-dir="src/com/synconset" />
+        <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpHead.java" target-dir="src/com/synconset" />
         <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpUpload.java" target-dir="src/com/synconset" />
         <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpDownload.java" target-dir="src/com/synconset" />
         <source-file src="src/android/com/synconset/CordovaHTTP/CordovaHttpPlugin.java" target-dir="src/com/synconset" />
