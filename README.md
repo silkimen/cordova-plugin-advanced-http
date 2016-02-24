@@ -17,9 +17,9 @@ Please check [CHANGELOG.md](CHANGELOG.md) for details about updating to a new ve
 The plugin conforms to the Cordova plugin specification, it can be installed
 using the Cordova / Phonegap command line interface.
 
-    phonegap plugin add https://github.com/wymsee/cordova-HTTP.git
+    phonegap plugin add cordova-plugin-http
 
-    cordova plugin add https://github.com/wymsee/cordova-HTTP.git
+    cordova plugin add cordova-plugin-http
 
 ## Usage
 
