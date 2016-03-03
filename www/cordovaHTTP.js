@@ -137,8 +137,12 @@ if (typeof angular !== "undefined") {
         
         var cordovaHTTP = {
             getBasicAuthHeader: http.getBasicAuthHeader,
-            useBasicAuth: http.useBasicAuth,
-            setHeader: http.setHeader,
+            useBasicAuth: function(username, password) {
+                return http.useBasicAuth(username, password);
+            },
+            setHeader: function(header, value) {
+                return http.setHeader(header, value);
+            },
             enableSSLPinning: function(enable) {
                 return makePromise(http.enableSSLPinning, [enable]);
             },
