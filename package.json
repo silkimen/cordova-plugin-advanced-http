@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-http",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning",
   "cordova": {
     "id": "cordova-plugin-http",
