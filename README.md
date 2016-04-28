@@ -92,11 +92,14 @@ Whether or not to validate the domain name in the certificate.  This defaults to
 Execute a POST request.  Takes a URL, parameters, and headers.
 
 #### success
-The success function receives a response object with 2 properties: status and data.  Status is the HTTP response code and data is the response from the server as a string. Here's a quick example:
+The success function receives a response object with 3 properties: status, data, and headers.  Status is the HTTP response code. Data is the response from the server as a string. Headers is an object with the headers.  Here's a quick example:
 
     {
         status: 200,
-        data: "{'id': 12, 'message': 'test'}"
+        data: "{'id': 12, 'message': 'test'}",
+        headers: {
+            "Content-Length": "247"
+        }
     }
     
 Most apis will return JSON meaning you'll want to parse the data like in the example below:
@@ -124,11 +127,14 @@ Most apis will return JSON meaning you'll want to parse the data like in the exa
     
     
 #### failure
-The error function receives a response object with 2 properties: status and error.  Status is the HTTP response code.  Error is the error response from the server as a string.  Here's a quick example:
+The error function receives a response object with 3 properties: status, error and headers.  Status is the HTTP response code.  Error is the error response from the server as a string.  Headers is an object with the headers.  Here's a quick example:
 
     {
         status: 403,
-        error: "Permission denied"
+        error: "Permission denied",
+        headers: {
+            "Content-Length": "247"
+        }
     }
     
 ### get
@@ -188,7 +194,6 @@ For instance, the following features are currently not supported:
 
 - cookies support (a cookie set by a request isn't sent in subsequent requests)
 - read content of error responses (only the HTTP status code and message are returned)
-- read returned HTTP headers (e.g. in case security tokens are returned as headers)
 
 Take this into account when using this plugin into your application.
 
