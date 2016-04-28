@@ -33,7 +33,7 @@ public class CordovaHttpGet extends CordovaHttp implements Runnable {
     @Override
     public void run() {
         try {
-            HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParams(), true);
+            HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParams(), false);
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeaders());
