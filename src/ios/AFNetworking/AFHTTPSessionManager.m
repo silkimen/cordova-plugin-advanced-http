@@ -1,5 +1,5 @@
 // AFHTTPSessionManager.m
-// Copyright (c) 2011–2016 Alamofire Software Foundation (http://alamofire.org/)
+// Copyright (c) 2011–2016 Alamofire Software Foundation ( http://alamofire.org/ )
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -186,12 +186,9 @@
     NSMutableURLRequest *request = [self.requestSerializer multipartFormRequestWithMethod:@"POST" URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString] parameters:parameters constructingBodyWithBlock:block error:&serializationError];
     if (serializationError) {
         if (failure) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wgnu"
             dispatch_async(self.completionQueue ?: dispatch_get_main_queue(), ^{
                 failure(nil, serializationError);
             });
-#pragma clang diagnostic pop
         }
 
         return nil;
@@ -262,12 +259,9 @@
     NSMutableURLRequest *request = [self.requestSerializer requestWithMethod:method URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString] parameters:parameters error:&serializationError];
     if (serializationError) {
         if (failure) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wgnu"
             dispatch_async(self.completionQueue ?: dispatch_get_main_queue(), ^{
                 failure(nil, serializationError);
             });
-#pragma clang diagnostic pop
         }
 
         return nil;

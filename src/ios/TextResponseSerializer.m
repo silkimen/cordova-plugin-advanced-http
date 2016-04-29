@@ -1,10 +1,10 @@
 #import "TextResponseSerializer.h"
 
-static BOOL AFErrorOrUnderlyingErrorHasCode(NSError *error, NSInteger code) {
-    if (error.code == code) {
+static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger code, NSString *domain) {
+    if ([error.domain isEqualToString:domain] && error.code == code) {
         return YES;
     } else if (error.userInfo[NSUnderlyingErrorKey]) {
-        return AFErrorOrUnderlyingErrorHasCode(error.userInfo[NSUnderlyingErrorKey], code);
+        return AFErrorOrUnderlyingErrorHasCodeInDomain(error.userInfo[NSUnderlyingErrorKey], code, domain);
     }
 
     return NO;
@@ -35,7 +35,7 @@ static BOOL AFErrorOrUnderlyingErrorHasCode(NSError *error, NSInteger code) {
                           error:(NSError *__autoreleasing *)error
 {
     if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
-        if (AFErrorOrUnderlyingErrorHasCode(*error, NSURLErrorCannotDecodeContentData)) {
+        if (!error || AFErrorOrUnderlyingErrorHasCodeInDomain(*error, NSURLErrorCannotDecodeContentData, AFURLResponseSerializationErrorDomain)) {
             return nil;
         }
     }
