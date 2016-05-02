@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.1.0
+
+- Fixed the body of errors not being returned in iOS
+- Updated AFNetworking to 3.1.0
+
+### Potentially Breaking Changes
+
+- Disable encoding get() URLS in android (Thanks to devgeeks)
+
+## v1.0.3
+
+- Fixed version number in plugin.xml
+
+## v1.0.2
+
+- Fixed bug using useBasicAuth and setHeader from angular
+
+## v1.0.1
+
+- updated README
+
 ## v1.0.0
 
 - Added getBasicAuthHeader function

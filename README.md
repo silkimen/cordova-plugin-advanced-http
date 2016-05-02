@@ -187,15 +187,11 @@ This plugin utilizes some awesome open source networking libraries.  These are b
 
 We made a few modifications to http-request.  They can be found in a separate repo here: https://github.com/wymsee/http-request
 
-## Current Limitations
+## Cookies
 
-This plugin isn't equivalent to using XMLHttpRequest or Ajax calls in Javascript.
-For instance, the following features are currently not supported:
+- a cookie set by a request isn't sent in subsequent requests
 
-- cookies support (a cookie set by a request isn't sent in subsequent requests)
-- read content of error responses (only the HTTP status code and message are returned)
-
-Take this into account when using this plugin into your application.
+Take this into account when using this plugin in your application.
 
 ## License
 
