@@ -305,7 +305,7 @@ public class HttpRequest {
       try {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, trustAllCerts, new SecureRandom());
-        TRUSTED_FACTORY = context.getSocketFactory();
+        TRUSTED_FACTORY = new TLSSocketFactory(context);
       } catch (GeneralSecurityException e) {
         IOException ioException = new IOException(
             "Security exception configuring SSL context");
@@ -455,7 +455,7 @@ public class HttpRequest {
       // Create an SSLContext that uses our TrustManager
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, tmf.getTrustManagers(), null);
-      PINNED_FACTORY = sslContext.getSocketFactory();
+      PINNED_FACTORY = new TLSSocketFactory(context);
   }
   
   /**
