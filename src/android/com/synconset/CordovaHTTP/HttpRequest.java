@@ -455,7 +455,7 @@ public class HttpRequest {
       // Create an SSLContext that uses our TrustManager
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, tmf.getTrustManagers(), null);
-      PINNED_FACTORY = new TLSSocketFactory(context);
+      PINNED_FACTORY = new TLSSocketFactory(sslContext);
   }
   
   /**
