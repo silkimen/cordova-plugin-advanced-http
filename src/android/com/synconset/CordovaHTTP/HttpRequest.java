@@ -305,7 +305,12 @@ public class HttpRequest {
       try {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, trustAllCerts, new SecureRandom());
-        TRUSTED_FACTORY = context.getSocketFactory();
+        
+        if (android.os.Build.VERSION.SDK_INT < 20) {
+          TRUSTED_FACTORY = new TLSSocketFactory(context);
+        } else {
+          TRUSTED_FACTORY = context.getSocketFactory();
+        }
       } catch (GeneralSecurityException e) {
         IOException ioException = new IOException(
             "Security exception configuring SSL context");
@@ -436,7 +441,7 @@ public class HttpRequest {
   */
   public static void addCert(Certificate ca) throws GeneralSecurityException, IOException  {
       if (PINNED_CERTS == null) {
-          PINNED_CERTS = new ArrayList<Certificate>();
+        PINNED_CERTS = new ArrayList<Certificate>();
       }
       PINNED_CERTS.add(ca);
       String keyStoreType = KeyStore.getDefaultType();
@@ -444,7 +449,7 @@ public class HttpRequest {
       keyStore.load(null, null);
       
       for (int i = 0; i < PINNED_CERTS.size(); i++) {
-          keyStore.setCertificateEntry("CA" + i, PINNED_CERTS.get(i));
+        keyStore.setCertificateEntry("CA" + i, PINNED_CERTS.get(i));
       }
       
       // Create a TrustManager that trusts the CAs in our KeyStore
@@ -455,7 +460,12 @@ public class HttpRequest {
       // Create an SSLContext that uses our TrustManager
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, tmf.getTrustManagers(), null);
-      PINNED_FACTORY = sslContext.getSocketFactory();
+      
+      if (android.os.Build.VERSION.SDK_INT < 20) {
+        PINNED_FACTORY = new TLSSocketFactory(sslContext);
+      } else {
+        PINNED_FACTORY = sslContext.getSocketFactory();
+      }
   }
   
   /**

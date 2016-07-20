@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.0
+
+- Added support for TLSv1.1 and TLSv1.2 for android versions 4.1-4.4 (API levels 16-19)
+
+### Potentially Breaking Changes that really shouldn't matter because you shouldn't be using SSLv3
+
+- Dropped SSLv3 support for all API Levels < 20.  It will now only work on API Levels 20-22.
+
 ## v1.1.0
 
 - Fixed the body of errors not being returned in iOS
