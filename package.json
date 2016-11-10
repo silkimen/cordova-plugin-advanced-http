@@ -1,9 +1,9 @@
 {
-  "name": "cordova-plugin-http",
-  "version": "1.2.0",
+  "name": "cordova-plugin-advanced-http",
+  "version": "1.3.0",
   "description": "Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning",
   "cordova": {
-    "id": "cordova-plugin-http",
+    "id": "cordova-plugin-advanced-http",
     "platforms": [
       "ios",
       "android"
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wymsee/cordova-HTTP.git"
+    "url": "git+https://github.com/silkimen/cordova-plugin-advanced-http.git"
   },
   "keywords": [
     "cordova",
