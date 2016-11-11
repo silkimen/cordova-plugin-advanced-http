@@ -19,8 +19,15 @@
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
 }
 
-- (void)setRequestHeaders:(NSDictionary*)headers forManager:(AFHTTPSessionManager*)manager {
+- (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
+  if ([serializerName isEqualToString:@"json"]) {
+    manager.requestSerializer = [AFJSONRequestSerializer serializer];
+  } else {
     manager.requestSerializer = [AFHTTPRequestSerializer serializer];
+  }
+}
+
+- (void)setRequestHeaders:(NSDictionary*)headers forManager:(AFHTTPSessionManager*)manager {
     [headers enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         [manager.requestSerializer setValue:obj forHTTPHeaderField:key];
     }];
@@ -41,7 +48,7 @@
     } else {
         securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     }
-    
+
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -49,9 +56,9 @@
 - (void)acceptAllCerts:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = nil;
     bool allow = [[command.arguments objectAtIndex:0] boolValue];
-    
+
     securityPolicy.allowInvalidCertificates = allow;
-    
+
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -59,9 +66,9 @@
 - (void)validateDomainName:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = nil;
     bool validate = [[command.arguments objectAtIndex:0] boolValue];
-    
+
     securityPolicy.validatesDomainName = validate;
-    
+
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -71,9 +78,11 @@
     manager.securityPolicy = securityPolicy;
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
-    NSDictionary *headers = [command.arguments objectAtIndex:2];
+    NSString *serializerName = [command.arguments objectAtIndex:2];
+    NSDictionary *headers = [command.arguments objectAtIndex:3];
+    [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
-   
+
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
     [manager POST:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
@@ -98,10 +107,11 @@
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
+    [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
-   
+
     CordovaHttpPlugin* __weak weakSelf = self;
-   
+
     manager.responseSerializer = [TextResponseSerializer serializer];
     [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
@@ -126,9 +136,9 @@
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
     [self setRequestHeaders: headers forManager: manager];
-    
+
     CordovaHttpPlugin* __weak weakSelf = self;
-    
+
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
     [manager HEAD:url parameters:parameters success:^(NSURLSessionTask *task) {
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
@@ -154,11 +164,11 @@
     NSDictionary *headers = [command.arguments objectAtIndex:2];
     NSString *filePath = [command.arguments objectAtIndex: 3];
     NSString *name = [command.arguments objectAtIndex: 4];
-    
+
     NSURL *fileURL = [NSURL URLWithString: filePath];
-    
+
     [self setRequestHeaders: headers forManager: manager];
-    
+
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
     [manager POST:url parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
@@ -195,13 +205,13 @@
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
     NSString *filePath = [command.arguments objectAtIndex: 3];
-   
+
     [self setRequestHeaders: headers forManager: manager];
-    
+
     if ([filePath hasPrefix:@"file://"]) {
         filePath = [filePath substringFromIndex:7];
     }
-    
+
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
     [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
@@ -229,7 +239,7 @@
         */
         // Download response is okay; begin streaming output to file
         NSString* parentPath = [filePath stringByDeletingLastPathComponent];
-        
+
         // create parent directories if needed
         NSError *error;
         if ([[NSFileManager defaultManager] createDirectoryAtPath:parentPath withIntermediateDirectories:YES attributes:nil error:&error] == NO) {
@@ -253,7 +263,7 @@
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             return;
         }
-   
+
         id filePlugin = [self.commandDelegate getCommandInstance:@"File"];
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
         [self setResults: dictionary withTask: task];
