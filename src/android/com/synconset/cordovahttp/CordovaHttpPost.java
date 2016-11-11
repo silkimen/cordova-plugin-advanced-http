@@ -1,10 +1,9 @@
 /**
  * A HTTP plugin for Cordova / Phonegap
  */
-package com.synconset;
+package com.synconset.cordovahttp;
 
 import java.net.UnknownHostException;
-import java.util.Map;
 
 import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
@@ -12,29 +11,37 @@ import org.json.JSONObject;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import android.util.Log;
-
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
- 
-public class CordovaHttpPost extends CordovaHttp implements Runnable {
-    public CordovaHttpPost(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
-        super(urlString, params, headers, callbackContext);
+
+class CordovaHttpPost extends CordovaHttp implements Runnable {
+    public CordovaHttpPost(String urlString, JSONObject params, String serializerName, JSONObject headers, CallbackContext callbackContext) {
+        super(urlString, params, serializerName, headers, callbackContext);
     }
-    
+
     @Override
     public void run() {
         try {
             HttpRequest request = HttpRequest.post(this.getUrlString());
+
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
-            request.headers(this.getHeaders());
-            request.form(this.getParams());
+            request.headers(this.getHeadersMap());
+
+            if (new String("json").equals(this.getSerializerName())) {
+                request.contentType(request.CONTENT_TYPE_JSON, request.CHARSET_UTF8);
+                request.send(this.getParamsObject().toString());
+            } else {
+                request.form(this.getParamsMap());
+            }
+
             int code = request.code();
             String body = request.body(CHARSET);
             JSONObject response = new JSONObject();
+
             this.addResponseHeaders(request, response);
             response.put("status", code);
+
             if (code >= 200 && code < 300) {
                 response.put("data", body);
                 this.getCallbackContext().success(response);

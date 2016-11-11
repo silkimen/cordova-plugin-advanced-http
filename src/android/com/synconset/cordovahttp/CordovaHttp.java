@@ -1,63 +1,58 @@
 /**
  * A HTTP plugin for Cordova / Phonegap
  */
-package com.synconset;
+package com.synconset.cordovahttp;
 
 import org.apache.cordova.CallbackContext;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.HostnameVerifier;
-
 import java.util.Iterator;
 
-import android.util.Log;
-
 import com.github.kevinsawicki.http.HttpRequest;
- 
-public abstract class CordovaHttp {
+
+abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
     protected static final String CHARSET = "UTF-8";
-    
+
     private static AtomicBoolean sslPinning = new AtomicBoolean(false);
     private static AtomicBoolean acceptAllCerts = new AtomicBoolean(false);
     private static AtomicBoolean validateDomainName = new AtomicBoolean(true);
 
     private String urlString;
-    private Map<?, ?> params;
-    private Map<String, String> headers;
+    private JSONObject params;
+    private String serializerName;
+    private JSONObject headers;
     private CallbackContext callbackContext;
-    
-    public CordovaHttp(String urlString, Map<?, ?> params, Map<String, String> headers, CallbackContext callbackContext) {
+
+    public CordovaHttp(String urlString, JSONObject params, JSONObject headers, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
+        this.serializerName = "default";
         this.headers = headers;
         this.callbackContext = callbackContext;
     }
-    
+
+    public CordovaHttp(String urlString, JSONObject params, String serializerName, JSONObject headers, CallbackContext callbackContext) {
+        this.urlString = urlString;
+        this.params = params;
+        this.serializerName = serializerName;
+        this.headers = headers;
+        this.callbackContext = callbackContext;
+    }
+
     public static void enableSSLPinning(boolean enable) {
         sslPinning.set(enable);
         if (enable) {
             acceptAllCerts.set(false);
         }
     }
-    
+
     public static void acceptAllCerts(boolean accept) {
         acceptAllCerts.set(accept);
         if (accept) {
@@ -72,19 +67,31 @@ public abstract class CordovaHttp {
     protected String getUrlString() {
         return this.urlString;
     }
-    
-    protected Map<?, ?> getParams() {
+
+    protected JSONObject getParamsObject() {
         return this.params;
     }
-    
-    protected Map<String, String> getHeaders() {
+
+    protected String getSerializerName() {
+        return this.serializerName;
+    }
+
+    protected HashMap<String, Object> getParamsMap() throws JSONException {
+        return this.getMapFromJSONObject(this.params);
+    }
+
+    protected JSONObject getHeadersObject() {
         return this.headers;
     }
-    
+
+    protected HashMap<String, String> getHeadersMap() throws JSONException {
+        return this.getStringMapFromJSONObject(this.headers);
+    }
+
     protected CallbackContext getCallbackContext() {
         return this.callbackContext;
     }
-    
+
     protected HttpRequest setupSecurity(HttpRequest request) {
         if (acceptAllCerts.get()) {
             request.trustAllCerts();
@@ -97,7 +104,7 @@ public abstract class CordovaHttp {
         }
         return request;
     }
-    
+
     protected void respondWithError(int status, String msg) {
         try {
             JSONObject response = new JSONObject();
@@ -108,7 +115,7 @@ public abstract class CordovaHttp {
             this.callbackContext.error(msg);
         }
     }
-    
+
     protected void respondWithError(String msg) {
         this.respondWithError(500, msg);
     }
@@ -124,5 +131,27 @@ public abstract class CordovaHttp {
             }
         }
         response.put("headers", new JSONObject(parsed_headers));
+    }
+
+    protected HashMap<String, String> getStringMapFromJSONObject(JSONObject object) throws JSONException {
+        HashMap<String, String> map = new HashMap<String, String>();
+        Iterator<?> i = object.keys();
+
+        while (i.hasNext()) {
+            String key = (String)i.next();
+            map.put(key, object.getString(key));
+        }
+        return map;
+    }
+
+    protected HashMap<String, Object> getMapFromJSONObject(JSONObject object) throws JSONException {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Iterator<?> i = object.keys();
+
+        while(i.hasNext()) {
+            String key = (String)i.next();
+            map.put(key, object.get(key));
+        }
+        return map;
     }
 }

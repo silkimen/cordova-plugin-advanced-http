@@ -259,11 +259,11 @@ public class HttpRequest {
   private static final String CRLF = "\r\n";
 
   private static final String[] EMPTY_STRINGS = new String[0];
-  
+
   private static SSLSocketFactory PINNED_FACTORY;
 
   private static SSLSocketFactory TRUSTED_FACTORY;
-  
+
   private static ArrayList<Certificate> PINNED_CERTS;
 
   private static HostnameVerifier TRUSTED_VERIFIER;
@@ -274,7 +274,7 @@ public class HttpRequest {
     else
       return CHARSET_UTF8;
   }
-  
+
   private static SSLSocketFactory getPinnedFactory()
       throws HttpRequestException {
     if (PINNED_FACTORY != null) {
@@ -305,7 +305,7 @@ public class HttpRequest {
       try {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, trustAllCerts, new SecureRandom());
-        
+
         if (android.os.Build.VERSION.SDK_INT < 20) {
           TRUSTED_FACTORY = new TLSSocketFactory(context);
         } else {
@@ -429,8 +429,8 @@ public class HttpRequest {
     else
       CONNECTION_FACTORY = connectionFactory;
   }
-  
-  
+
+
   /**
   * Add a certificate to test against when using ssl pinning.
   *
@@ -447,27 +447,27 @@ public class HttpRequest {
       String keyStoreType = KeyStore.getDefaultType();
       KeyStore keyStore = KeyStore.getInstance(keyStoreType);
       keyStore.load(null, null);
-      
+
       for (int i = 0; i < PINNED_CERTS.size(); i++) {
         keyStore.setCertificateEntry("CA" + i, PINNED_CERTS.get(i));
       }
-      
+
       // Create a TrustManager that trusts the CAs in our KeyStore
       String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
       TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
       tmf.init(keyStore);
-      
+
       // Create an SSLContext that uses our TrustManager
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, tmf.getTrustManagers(), null);
-      
+
       if (android.os.Build.VERSION.SDK_INT < 20) {
         PINNED_FACTORY = new TLSSocketFactory(sslContext);
       } else {
         PINNED_FACTORY = sslContext.getSocketFactory();
       }
   }
-  
+
   /**
   * Add a certificate to test against when using ssl pinning.
   *
@@ -3256,7 +3256,7 @@ public class HttpRequest {
         form(entry, charset);
     return this;
   }
-  
+
   /**
    * Configure HTTPS connection to trust only certain certificates
    * <p>
@@ -3275,7 +3275,7 @@ public class HttpRequest {
     }
     return this;
   }
-  
+
   /**
    * Configure HTTPS connection to trust all certificates
    * <p>
