@@ -18,7 +18,9 @@
     "device",
     "ecosystem:cordova",
     "cordova-ios",
-    "cordova-android"
+    "cordova-android",
+    "ssl",
+    "tls"
   ],
   "engines": [
     {
@@ -27,9 +29,20 @@
     }
   ],
   "author": "Wymsee",
+  "contributors": [
+    "devgeeks",
+    "EddyVerbruggen",
+    "mbektchiev",
+    "denisbabineau",
+    "andrey-tsaplin",
+    "pvsaikrishna",
+    "cvillerm",
+    "hideov",
+    "Mobisys"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wymsee/cordova-HTTP/issues"
+    "url": "https://github.com/silkimen/cordova-plugin-advanced-http/issues"
   },
-  "homepage": "https://github.com/wymsee/cordova-HTTP#readme"
+  "homepage": "https://github.com/silkimen/cordova-plugin-advanced-http#readme"
 }

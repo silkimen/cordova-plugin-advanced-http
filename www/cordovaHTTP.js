@@ -91,7 +91,7 @@ var http = {
         params = params || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
-        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, params, this.serializer, headers]);
+        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, params, this.paramSerializer, headers]);
     },
     get: function (url, params, headers, success, failure) {
         params = params || {};
