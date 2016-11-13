@@ -87,17 +87,29 @@ var http = {
     validateDomainName: function (validate, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'validateDomainName', [validate]);
     },
-    post: function (url, params, headers, success, failure) {
-        params = params || {};
+    post: function (url, data, headers, success, failure) {
+        data = data || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
-        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, params, this.paramSerializer, headers]);
+        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, data, this.paramSerializer, headers]);
     },
     get: function (url, params, headers, success, failure) {
         params = params || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
         return exec(success, failure, 'CordovaHttpPlugin', 'get', [url, params, headers]);
+    },
+    put: function (url, data, headers, success, failure) {
+        data = data || {};
+        headers = headers || {};
+        headers = mergeHeaders(this.headers, headers);
+        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, data, this.paramSerializer, headers]);
+    },
+    delete: function (url, params, headers, success, failure) {
+        params = params || {};
+        headers = headers || {};
+        headers = mergeHeaders(this.headers, headers);
+        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, params, this.paramSerializer, headers]);
     },
     head: function (url, params, headers, success, failure) {
         headers = mergeHeaders(this.headers, headers);
@@ -178,11 +190,17 @@ if (typeof angular !== 'undefined') {
             validateDomainName: function (validate) {
                 return makePromise(http.validateDomainName, [validate]);
             },
-            post: function (url, params, headers) {
-                return makePromise(http.post, [url, params, headers], true);
+            post: function (url, data, headers) {
+                return makePromise(http.post, [url, data, headers], true);
             },
             get: function (url, params, headers) {
                 return makePromise(http.get, [url, params, headers], true);
+            },
+            put: function (url, data, headers) {
+                return makePromise(http.put, [url, data, headers], true);
+            },
+            delete: function (url, params, headers) {
+                return makePromise(http.delete, [url, params, headers], true);
             },
             head: function (url, params, headers) {
                 return makePromise(http.head, [url, params, headers], true);
