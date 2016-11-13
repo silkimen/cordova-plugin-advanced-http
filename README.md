@@ -53,14 +53,14 @@ Set a header for all future requests.  Takes a header and a value.
 
     cordovaHTTP.setHeader("Header", "Value");
 
-### setParamSerializer
-Set the parameter serializer which will be used for all future POST and PUT requests. Takes a string representing the name of the serializer.
+### setDataSerializer
+Set the data serializer which will be used for all future POST and PUT requests. Takes a string representing the name of the serializer.
 
-    cordovaHTTP.setParamSerializer("urlencoded");
+    cordovaHTTP.setDataSerializer("urlencoded");
 
 You can choose one of these two:
-* `urlencoded`: send parameters as url encoded content in body (content type "application/x-www-form-urlencoded")
-* `json`: send parameters as JSON encoded content in body (content type "application/json")
+* `urlencoded`: send data as url encoded content in body (content type "application/x-www-form-urlencoded")
+* `json`: send data as JSON encoded content in body (content type "application/json")
 
 ## Async Functions
 These functions all take success and error callbacks as their last 2 arguments.
@@ -97,7 +97,7 @@ Whether or not to validate the domain name in the certificate.  This defaults to
     });
 
 ### post<a name="post"></a>
-Execute a POST request.  Takes a URL, parameters, and headers.
+Execute a POST request.  Takes a URL, data, and headers.
 
 #### success
 The success function receives a response object with 3 properties: status, data, and headers.  Status is the HTTP response code. Data is the response from the server as a string. Headers is an object with the headers.  Here's a quick example:

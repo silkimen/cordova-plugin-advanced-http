@@ -64,7 +64,7 @@ function checkSerializer(serializer) {
 
 var http = {
     headers: {},
-    paramSerializer: 'urlencoded',
+    dataSerializer: 'urlencoded',
     sslPinning: false,
     getBasicAuthHeader: function (username, password) {
         return {'Authorization': 'Basic ' + b64EncodeUnicode(username + ':' + password)};
@@ -75,8 +75,8 @@ var http = {
     setHeader: function (header, value) {
         this.headers[header] = value;
     },
-    setParamSerializer: function (serializer) {
-      this.paramSerializer = checkSerializer(serializer);
+    setDataSerializer: function (serializer) {
+      this.dataSerializer = checkSerializer(serializer);
     },
     enableSSLPinning: function (enable, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'enableSSLPinning', [enable]);
@@ -91,7 +91,7 @@ var http = {
         data = data || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
-        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, data, this.paramSerializer, headers]);
+        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, data, this.dataSerializer, headers]);
     },
     get: function (url, params, headers, success, failure) {
         params = params || {};
@@ -103,13 +103,13 @@ var http = {
         data = data || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
-        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, data, this.paramSerializer, headers]);
+        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, data, this.dataSerializer, headers]);
     },
     delete: function (url, params, headers, success, failure) {
         params = params || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
-        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, params, this.paramSerializer, headers]);
+        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, params, this.dataSerializer, headers]);
     },
     head: function (url, params, headers, success, failure) {
         headers = mergeHeaders(this.headers, headers);
@@ -178,7 +178,7 @@ if (typeof angular !== 'undefined') {
             setHeader: function (header, value) {
                 return http.setHeader(header, value);
             },
-            setParamSerializer: function (serializer) {
+            setDataSerializer: function (serializer) {
                 return http.setParamSerializer(serializer);
             },
             enableSSLPinning: function (enable) {
