@@ -4,20 +4,20 @@
   id="cordova-plugin-advanced-http"
   version="1.3.0">
 
-    <name>SSL Pinning</name>
+    <name>Advanced HTTP plugin</name>
 
     <description>
         Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning
 	 </description>
 
     <engines>
-        <engine name="cordova" version=">=3.0.0" />
+        <engine name="cordova" version=">=3.5.0" />
     </engines>
 
     <dependency id="cordova-plugin-file" version=">=2.0.0" />
 
-    <js-module src="www/cordovaHTTP.js" name="CordovaHttpPlugin">
-        <clobbers target="CordovaHttpPlugin" />
+    <js-module src="www/cordovaHttp.js" name="http">
+        <clobbers target="cordova.plugin.http" />
     </js-module>
 
     <!-- ios -->

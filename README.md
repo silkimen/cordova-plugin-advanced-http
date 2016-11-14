@@ -26,7 +26,7 @@ using the Cordova / Phonegap command line interface.
 
 ### Without AngularJS
 
-This plugin registers a `cordovaHTTP` global on window
+This plugin registers a global object located at `cordova.plugin.http`.
 
 ### With AngularJS
 
