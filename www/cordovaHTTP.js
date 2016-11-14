@@ -103,13 +103,13 @@ var http = {
         data = data || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
-        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, data, this.dataSerializer, headers]);
+        return exec(success, failure, 'CordovaHttpPlugin', 'put', [url, data, this.dataSerializer, headers]);
     },
     delete: function (url, params, headers, success, failure) {
         params = params || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
-        return exec(success, failure, 'CordovaHttpPlugin', 'post', [url, params, this.dataSerializer, headers]);
+        return exec(success, failure, 'CordovaHttpPlugin', 'delete', [url, params, headers]);
     },
     head: function (url, params, headers, success, failure) {
         headers = mergeHeaders(this.headers, headers);
