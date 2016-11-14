@@ -1,7 +1,8 @@
-cordovaHTTP
-==================
+Cordova Advanced HTTP
+=====================
 
 Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and Android.
+This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordova-HTTP).
 
 ## Advantages over Javascript requests
 
