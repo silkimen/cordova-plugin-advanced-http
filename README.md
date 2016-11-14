@@ -6,6 +6,7 @@ Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and
 ## Advantages over Javascript requests
 
  - Background threading - all requests are done in a background thread.
+ - Handling of HTTP code 401 - read more at [Issue CB-2415](https://issues.apache.org/jira/browse/CB-2415).
  - SSL Pinning - read more at [LumberBlog](http://blog.lumberlabs.com/2012/04/why-app-developers-should-care-about.html).
 
 ## Updates
@@ -23,7 +24,11 @@ using the Cordova / Phonegap command line interface.
 
 ## Usage
 
-### AngularJS
+### Without AngularJS
+
+This plugin registers a `cordovaHTTP` global on window
+
+### With AngularJS
 
 This plugin creates a cordovaHTTP service inside of a cordovaHTTP module.  You must load the module when you create your app's module.
 
@@ -31,12 +36,8 @@ This plugin creates a cordovaHTTP service inside of a cordovaHTTP module.  You m
 
 You can then inject the cordovaHTTP service into your controllers.  The functions can then be used identically to the examples shown below except that instead of accepting success and failure callback functions, each function returns a promise.  For more information on promises in AngularJS read the [AngularJS docs](http://docs.angularjs.org/api/ng/service/$q).  For more info on promises in general check out this article on [html5rocks](http://www.html5rocks.com/en/tutorials/es6/promises/).  Make sure that you load cordova.js or phonegap.js after AngularJS is loaded.
 
-### Not AngularJS
 
-This plugin registers a `cordovaHTTP` global on window
-
-
-## Sync Functions
+## Synchronous Functions
 
 ### getBasicAuthHeader
 This returns an object representing a basic HTTP Authorization header of the form `{'Authorization': 'Basic base64encodedusernameandpassword'}`
@@ -62,7 +63,10 @@ You can choose one of these two:
 * `urlencoded`: send data as url encoded content in body (content type "application/x-www-form-urlencoded")
 * `json`: send data as JSON encoded content in body (content type "application/json")
 
-## Async Functions
+Caution: `urlencoded` does not support serializing deep structures whereas `json` does.
+
+
+## Asynchronous Functions
 These functions all take success and error callbacks as their last 2 arguments.
 
 ### enableSSLPinning
@@ -156,6 +160,12 @@ Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#p
     }, function(response) {
         console.error(response.error);
     });
+
+### put
+Execute a PUT request.  Takes a URL, data, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
+
+### delete
+Execute a DELETE request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ### uploadFile
 Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
