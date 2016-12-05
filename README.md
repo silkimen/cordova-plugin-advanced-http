@@ -208,8 +208,7 @@ We made a few modifications to http-request.  They can be found in a separate re
 
 ## Cookies
 
-- a cookie set by a request isn't sent in subsequent requests
-
+Cookies are not persisted, they are hold in memory. They are gone when you close the app or even if you do a `window.location` change.
 Take this into account when using this plugin in your application.
 
 ## License
