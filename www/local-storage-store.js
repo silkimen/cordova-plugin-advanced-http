@@ -34,13 +34,10 @@ var pluginId = module.id.slice(0, module.id.indexOf('.'));
 var ToughCookie = require(pluginId + '.tough-cookie');
 var _ = require(pluginId + '.lodash');
 
-var Cookie = ToughCookie.Cookie;
-
-var STORE_KEY = '__cookieStore__';
-
-function WebStorageCookieStore(storage) {
+function WebStorageCookieStore(storage, storeKey) {
     ToughCookie.Store.call(this);
     this._storage = storage || window.localStorage;
+    this._storeKey = storeKey || '__cookieStore__';
     this.synchronous = true;
 }
 
@@ -50,7 +47,7 @@ WebStorageCookieStore.prototype.findCookie = function(domain, path, key, callbac
     var store = this._readStore();
     var cookie = _.get(store, [domain, path, key], null);
 
-    callback(null, Cookie.fromJSON(cookie));
+    callback(null, ToughCookie.Cookie.fromJSON(cookie));
 };
 
 WebStorageCookieStore.prototype.findCookies = function(domain, path, callback) {
@@ -83,7 +80,7 @@ WebStorageCookieStore.prototype.findCookies = function(domain, path, callback) {
     });
 
     cookies = cookies.map(function(cookie) {
-        return Cookie.fromJSON(cookie);
+        return ToughCookie.Cookie.fromJSON(cookie);
     });
 
     callback(null, cookies);
@@ -157,7 +154,7 @@ WebStorageCookieStore.prototype.getAllCookies = function(callback) {
     });
 
     cookies = cookies.map(function(cookie) {
-        Cookie.fromJSON(cookie)
+        return ToughCookie.Cookie.fromJSON(cookie);
     });
 
     cookies.sort(function(c1, c2) {
@@ -168,7 +165,7 @@ WebStorageCookieStore.prototype.getAllCookies = function(callback) {
 };
 
 WebStorageCookieStore.prototype._readStore = function() {
-    var json = this._storage.getItem(STORE_KEY);
+    var json = this._storage.getItem(this._storeKey);
 
     if (json !== null) {
         try {
@@ -180,7 +177,7 @@ WebStorageCookieStore.prototype._readStore = function() {
 };
 
 WebStorageCookieStore.prototype._writeStore = function(store) {
-    this._storage.setItem(STORE_KEY, JSON.stringify(store));
+    this._storage.setItem(this._storeKey, JSON.stringify(store));
 };
 
 module.exports = WebStorageCookieStore;

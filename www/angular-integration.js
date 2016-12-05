@@ -44,6 +44,9 @@ function registerService(http) {
             setDataSerializer: function (serializer) {
                 return http.setParamSerializer(serializer);
             },
+            clearCookies: function () {
+                return http.clearCookies();
+            },
             enableSSLPinning: function (enable) {
                 return makePromise(http.enableSSLPinning, [enable]);
             },

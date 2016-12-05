@@ -106,7 +106,10 @@ var http = {
         this.headers[header] = value;
     },
     setDataSerializer: function (serializer) {
-      this.dataSerializer = checkSerializer(serializer);
+        this.dataSerializer = checkSerializer(serializer);
+    },
+    clearCookies: function () {
+        return cookieHandler.clearCookies();
     },
     enableSSLPinning: function (enable, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'enableSSLPinning', [enable]);
