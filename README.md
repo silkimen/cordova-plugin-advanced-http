@@ -66,6 +66,10 @@ You can choose one of these two:
 
 Caution: `urlencoded` does not support serializing deep structures whereas `json` does.
 
+### clearCookies
+Clear the cookie store.
+
+    cordovaHTTP.clearCookies();
 
 ## Asynchronous Functions
 These functions all take success and error callbacks as their last 2 arguments.
@@ -205,11 +209,6 @@ This plugin utilizes some awesome open source networking libraries.  These are b
  - Android - [http-request](https://github.com/kevinsawicki/http-request)
 
 We made a few modifications to http-request.  They can be found in a separate repo here: https://github.com/wymsee/http-request
-
-## Cookies
-
-Cookies are not persisted, they are hold in memory. They are gone when you close the app or even if you do a `window.location` change.
-Take this into account when using this plugin in your application.
 
 ## License
 
