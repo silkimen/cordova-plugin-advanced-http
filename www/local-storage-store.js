@@ -98,7 +98,7 @@ WebStorageCookieStore.prototype._isOnPath = function(cookiePath, urlPath) {
         return true;
     }
 
-    if (!urlPath.startsWith(cookiePath)) {
+    if (urlPath.indexOf(cookiePath) !== 0) {
         return false;
     }
 
