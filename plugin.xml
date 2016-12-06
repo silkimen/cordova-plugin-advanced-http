@@ -16,7 +16,17 @@
 
     <dependency id="cordova-plugin-file" version=">=2.0.0" />
 
-    <js-module src="www/cordovaHttp.js" name="http">
+    <js-module src="www/lodash.js" name="lodash">
+    </js-module>
+    <js-module src="www/umd-tough-cookie.js" name="tough-cookie">
+    </js-module>
+    <js-module src="www/local-storage-store.js" name="local-storage-store">
+    </js-module>
+    <js-module src="www/cookie-handler.js" name="cookie-handler">
+    </js-module>
+    <js-module src="www/angular-integration.js" name="angular-integration">
+    </js-module>
+    <js-module src="www/advanced-http.js" name="http">
         <clobbers target="cordova.plugin.http" />
     </js-module>
 
