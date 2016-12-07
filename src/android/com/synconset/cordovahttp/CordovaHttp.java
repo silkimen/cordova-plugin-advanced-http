@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Iterator;
 
+import android.text.TextUtils;
+
 import com.github.kevinsawicki.http.HttpRequest;
 
 abstract class CordovaHttp {
@@ -122,15 +124,18 @@ abstract class CordovaHttp {
 
     protected void addResponseHeaders(HttpRequest request, JSONObject response) throws JSONException {
         Map<String, List<String>> headers = request.headers();
-        Map<String, String> parsed_headers = new HashMap<String, String>();
+        Map<String, String> filteredHeaders = new HashMap<String, String>();
+
         for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             String key = entry.getKey();
             List<String> value = entry.getValue();
+
             if ((key != null) && (!value.isEmpty())) {
-                parsed_headers.put(key, value.get(0));
+                filteredHeaders.put(key, TextUtils.join(", ", value));
             }
         }
-        response.put("headers", new JSONObject(parsed_headers));
+
+        response.put("headers", new JSONObject(filteredHeaders));
     }
 
     protected HashMap<String, String> getStringMapFromJSONObject(JSONObject object) throws JSONException {

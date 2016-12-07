@@ -83,13 +83,13 @@ function resolveCookieString(headers) {
 
 function getSuccessHandler(url, cb) {
     return function(response) {
-        cookieHandler.setCookie(url, resolveCookieString(response.headers));
+        cookieHandler.setCookieFromString(url, resolveCookieString(response.headers));
         cb(response);
     }
 }
 
 function getCookieHeader(url) {
-    return { Cookie: cookieHandler.getCookie(url) };
+    return { Cookie: cookieHandler.getCookieString(url) };
 }
 
 var http = {

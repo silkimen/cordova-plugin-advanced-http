@@ -9,17 +9,42 @@ var store = new WebStorageCookieStore(storage, storeKey);
 var cookieJar = new ToughCookie.CookieJar(store);
 
 module.exports = {
-    setCookie: setCookie,
-    getCookie: getCookie,
+    setCookieFromString: setCookieFromString,
+    getCookieString: getCookieString,
     clearCookies: clearCookies
 }
 
-function setCookie(url, cookieStr) {
-    if (!cookieStr) return;
-    cookieJar.setCookieSync(cookieStr, url);
+function splitCookieString(cookieStr) {
+    var cookieParts = cookieStr.split(',');
+    var splitCookies = [];
+    var processedCookie = null;
+
+    for (var i = 0; i < cookieParts.length; ++i) {
+        if (cookieParts[i].substr(-11, 8) === 'expires=') {
+            processedCookie = cookieParts[i] + ',' + cookieParts[i + 1];
+            i++;
+        } else {
+            processedCookie = cookieParts[i];
+        }
+
+        processedCookie = processedCookie.trim();
+        splitCookies.push(processedCookie);
+    }
+
+    return splitCookies;
 }
 
-function getCookie(url) {
+function setCookieFromString(url, cookieStr) {
+    if (!cookieStr) return;
+
+    var cookies = splitCookieString(cookieStr);
+
+    for (var i = 0; i < cookies.length; ++i) {
+        cookieJar.setCookieSync(cookies[i], url);
+    }
+}
+
+function getCookieString(url) {
     return cookieJar.getCookieStringSync(url);
 }
 
