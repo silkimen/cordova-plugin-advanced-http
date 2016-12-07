@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.2
+
+- fixed missing file "umd-tough-cookie.js“ (caused by missing file ".npmignore")
+
 ## v1.5.1
 
 - fixed case-sensitive path name of android source files ("CordovaHTTP" --> "cordovahttp")
