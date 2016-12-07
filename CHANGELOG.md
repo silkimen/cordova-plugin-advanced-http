@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.1
+
+- fixed case-sensitive path name of android source files ("CordovaHTTP" --> "cordovahttp")
+
 ## v1.5.0
 
 - added cookie handling
