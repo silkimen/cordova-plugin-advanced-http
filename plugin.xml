@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="cordova-plugin-advanced-http"
-  version="1.4.0">
+  version="1.5.0">
 
     <name>Advanced HTTP plugin</name>
 
@@ -11,7 +11,7 @@
 	 </description>
 
     <engines>
-        <engine name="cordova" version=">=3.5.0" />
+        <engine name="cordova" version=">=4.0.0" />
     </engines>
 
     <dependency id="cordova-plugin-file" version=">=2.0.0" />

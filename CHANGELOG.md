@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.0
+
+- added cookie handling
+- cookies are persisted via web storage API
+
 ## v1.4.0
 
 - forked from "cordova-plugin-http" v1.2.0 (see https://github.com/wymsee/cordova-HTTP)
