@@ -22,6 +22,9 @@
  * Modified by Andrew Stephan for Sync OnSet
  * Modified by Sefa Ilkimen:
  *  - added configurable params serializer
+ *  - added put and delete methods
+ *  - using cordova www module pattern
+ *  - some minor improvements
  *
 */
 
@@ -81,15 +84,44 @@ function resolveCookieString(headers) {
     return null;
 }
 
-function getSuccessHandler(url, cb) {
+function createFileEntry(rawEntry) {
+    var entry = new (require('cordova-plugin-file.FileEntry'))();
+
+    entry.isDirectory = rawEntry.isDirectory;
+    entry.isFile = rawEntry.isFile;
+    entry.name = rawEntry.name;
+    entry.fullPath = rawEntry.fullPath;
+    entry.filesystem = new FileSystem(rawEntry.filesystemName || (rawEntry.filesystem == window.PERSISTENT ? 'persistent' : 'temporary'));
+    entry.nativeURL = rawEntry.nativeURL;
+
+    return entry;
+}
+
+function injectCookieHandler(url, cb) {
     return function(response) {
         cookieHandler.setCookieFromString(url, resolveCookieString(response.headers));
         cb(response);
     }
 }
 
+function injectFileEntryHandler(cb) {
+    return function(response) {
+        cb(createFileEntry(response.file));
+    }
+}
+
 function getCookieHeader(url) {
     return { Cookie: cookieHandler.getCookieString(url) };
+}
+
+function handleMissingCallbacks(successFn, failFn) {
+    if (Object.prototype.toString.call(successFn) !== '[object Function]') {
+        throw new Error('advanced-http: missing mandatory "onSuccess" callback function');
+    }
+
+    if (Object.prototype.toString.call(failFn) !== '[object Function]') {
+        throw new Error('advanced-http: missing mandatory "onFail" callback function');
+    }
 }
 
 var http = {
@@ -121,65 +153,95 @@ var http = {
         return exec(success, failure, 'CordovaHttpPlugin', 'validateDomainName', [validate]);
     },
     post: function (url, data, headers, success, failure) {
+        handleMissingCallbacks(success, failure);
+
         data = data || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
         headers = mergeHeaders(getCookieHeader(url), headers);
 
-        return exec(getSuccessHandler(url, success), failure, 'CordovaHttpPlugin', 'post', [url, data, this.dataSerializer, headers]);
+        var onSuccess = injectCookieHandler(url, success);
+        var onFail = injectCookieHandler(url, failure);
+
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'post', [url, data, this.dataSerializer, headers]);
     },
     get: function (url, params, headers, success, failure) {
+        handleMissingCallbacks(success, failure);
+
         params = params || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
         headers = mergeHeaders(getCookieHeader(url), headers);
 
-        return exec(getSuccessHandler(url, success), failure, 'CordovaHttpPlugin', 'get', [url, params, headers]);
+        var onSuccess = injectCookieHandler(url, success);
+        var onFail = injectCookieHandler(url, failure);
+
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'get', [url, params, headers]);
     },
     put: function (url, data, headers, success, failure) {
+        handleMissingCallbacks(success, failure);
+
         data = data || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
         headers = mergeHeaders(getCookieHeader(url), headers);
 
-        return exec(getSuccessHandler(url, success), failure, 'CordovaHttpPlugin', 'put', [url, data, this.dataSerializer, headers]);
+        var onSuccess = injectCookieHandler(url, success);
+        var onFail = injectCookieHandler(url, failure);
+
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'put', [url, data, this.dataSerializer, headers]);
     },
     delete: function (url, params, headers, success, failure) {
+        handleMissingCallbacks(success, failure);
+
         params = params || {};
         headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
         headers = mergeHeaders(getCookieHeader(url), headers);
 
-        return exec(getSuccessHandler(url, success), failure, 'CordovaHttpPlugin', 'delete', [url, params, headers]);
+        var onSuccess = injectCookieHandler(url, success);
+        var onFail = injectCookieHandler(url, failure);
+
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'delete', [url, params, headers]);
     },
     head: function (url, params, headers, success, failure) {
+        handleMissingCallbacks(success, failure);
+
+        params = params || {};
+        headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
         headers = mergeHeaders(getCookieHeader(url), headers);
 
-        return exec(getSuccessHandler(url, success), failure, 'CordovaHttpPlugin', 'head', [url, params, headers]);
+        var onSuccess = injectCookieHandler(url, success);
+        var onFail = injectCookieHandler(url, failure);
+
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'head', [url, params, headers]);
     },
     uploadFile: function (url, params, headers, filePath, name, success, failure) {
+        handleMissingCallbacks(success, failure);
+
+        params = params || {};
+        headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
         headers = mergeHeaders(getCookieHeader(url), headers);
 
-        return exec(getSuccessHandler(url, success), failure, 'CordovaHttpPlugin', 'uploadFile', [url, params, headers, filePath, name]);
+        var onSuccess = injectCookieHandler(url, success);
+        var onFail = injectCookieHandler(url, failure);
+
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [url, params, headers, filePath, name]);
     },
     downloadFile: function (url, params, headers, filePath, success, failure) {
+        handleMissingCallbacks(success, failure);
+
+        params = params || {};
+        headers = headers || {};
         headers = mergeHeaders(this.headers, headers);
         headers = mergeHeaders(getCookieHeader(url), headers);
 
-        var win = function (result) {
-            var entry = new (require('cordova-plugin-file.FileEntry'))();
-            entry.isDirectory = false;
-            entry.isFile = true;
-            entry.name = result.file.name;
-            entry.fullPath = result.file.fullPath;
-            entry.filesystem = new FileSystem(result.file.filesystemName || (result.file.filesystem == window.PERSISTENT ? 'persistent' : 'temporary'));
-            entry.nativeURL = result.file.nativeURL;
-            success(entry);
-        };
+        var onSuccess = injectCookieHandler(url, injectFileEntryHandler(success));
+        var onFail = injectCookieHandler(url, failure);
 
-        return exec(win, failure, 'CordovaHttpPlugin', 'downloadFile', [url, params, headers, filePath]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, params, headers, filePath]);
     }
 };
 
