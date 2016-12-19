@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.3
+
+- handles cookies correctly on non-success response from server
+- throws error when a callback function is missing
+
 ## v1.5.2
 
 - fixed missing file "umd-tough-cookie.js“ (caused by missing file ".npmignore")
