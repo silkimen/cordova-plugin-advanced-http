@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.4
+
+- fixed an error if the response has no "headers" field
+
 ## v1.5.3
 
 - handles cookies correctly on non-success response from server
