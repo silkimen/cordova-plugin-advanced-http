@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.5
+
+- added a function to remove all cookies for a URL
+
 ## v1.5.4
 
 - fixed an error if the response has no "headers" field

@@ -11,7 +11,8 @@ var cookieJar = new ToughCookie.CookieJar(store);
 module.exports = {
     setCookieFromString: setCookieFromString,
     getCookieString: getCookieString,
-    clearCookies: clearCookies
+    clearCookies: clearCookies,
+    removeCookies: removeCookies
 }
 
 function splitCookieString(cookieStr) {
@@ -50,4 +51,16 @@ function getCookieString(url) {
 
 function clearCookies() {
     window.localStorage.removeItem(storeKey);
+}
+
+function removeCookies(url, cb) {
+    cookieJar.getCookies(url, function(error, cookies) {
+        if (!cookies || cookies.length === 0) {
+        return cb(null, []);
+        }
+
+        var domain = cookies[0].domain;
+
+        cookieJar.store.removeCookies(domain, null, cb);
+    });
 }

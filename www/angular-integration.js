@@ -47,6 +47,9 @@ function registerService(http) {
             clearCookies: function () {
                 return http.clearCookies();
             },
+            removeCookies: function (url) {
+                return http.removeCookies(url);
+            },
             enableSSLPinning: function (enable) {
                 return makePromise(http.enableSSLPinning, [enable]);
             },

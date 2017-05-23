@@ -143,6 +143,9 @@ var http = {
     clearCookies: function () {
         return cookieHandler.clearCookies();
     },
+    removeCookies: function (url, callback) {
+        cookieHandler.removeCookies(url, callback);
+    },
     enableSSLPinning: function (enable, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'enableSSLPinning', [enable]);
     },
