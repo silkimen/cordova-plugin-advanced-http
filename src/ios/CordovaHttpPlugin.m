@@ -7,6 +7,7 @@
 
 - (void)setRequestHeaders:(NSDictionary*)headers forManager:(AFHTTPSessionManager*)manager;
 - (void)setResults:(NSMutableDictionary*)dictionary withTask:(NSURLSessionTask*)task;
+- (NSMutableDictionary*)copyHeaderFields:(NSDictionary*)headerFields;
 
 @end
 
@@ -37,8 +38,20 @@
     if (task.response != nil) {
         NSHTTPURLResponse *response = (NSHTTPURLResponse *)task.response;
         [dictionary setObject:[NSNumber numberWithInt:response.statusCode] forKey:@"status"];
-        [dictionary setObject:response.allHeaderFields forKey:@"headers"];
+        [dictionary setObject:[self copyHeaderFields:response.allHeaderFields] forKey:@"headers"];
     }
+}
+
+- (NSMutableDictionary*)copyHeaderFields:(NSDictionary *)headerFields {
+	NSMutableDictionary *headerFieldsCopy = [[NSMutableDictionary alloc] initWithCapacity:headerFields.count];
+	NSString *headerKeyCopy;
+
+	for (NSString *headerKey in headerFields.allKeys) {
+		headerKeyCopy = [[headerKey mutableCopy] lowercaseString];
+		[headerFieldsCopy setValue:[headerFields objectForKey:headerKey] forKey:headerKeyCopy];
+	}
+
+	return headerFieldsCopy;
 }
 
 - (void)enableSSLPinning:(CDVInvokedUrlCommand*)command {

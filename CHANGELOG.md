@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.6
+
+- All response header keys are converted to lowercase (iOS only)
+
 ## v1.5.5
 
 - added a function to remove all cookies for a URL
