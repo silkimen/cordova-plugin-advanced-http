@@ -142,7 +142,11 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             for (int i = 0; i < cerFiles.size(); i++) {
                 InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
                 InputStream caInput = new BufferedInputStream(in);
-                HttpRequest.addCert(caInput);
+                try {
+                    HttpRequest.addCert(caInput);
+                } catch (Exception e) {
+                    this.respondWithError(495, "Certificate invalid");
+                }
             }
             CordovaHttp.enableSSLPinning(true);
         } else {
