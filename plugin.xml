@@ -20,6 +20,8 @@
     </js-module>
     <js-module src="www/local-storage-store.js" name="local-storage-store">
     </js-module>
+    <js-module src="www/umd-tough-cookie.js" name="umd-tough-cookie">
+    </js-module>
     <js-module src="www/cookie-handler.js" name="cookie-handler">
     </js-module>
     <js-module src="www/angular-integration.js" name="angular-integration">
