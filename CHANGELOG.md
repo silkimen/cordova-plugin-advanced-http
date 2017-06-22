@@ -1,4 +1,7 @@
 # Changelog
+## v1.5.7
+
+- Add custom error on certificate fail
 
 ## v1.5.6
 
