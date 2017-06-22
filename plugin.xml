@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
-  id="cordova-plugin-advanced-http"
+  id="cordova-plugin-advanced-http-custom-error"
   version="1.5.7">
 
     <name>Advanced HTTP plugin</name>
@@ -20,7 +20,7 @@
     </js-module>
     <js-module src="www/local-storage-store.js" name="local-storage-store">
     </js-module>
-    <js-module src="www/umd-tough-cookie.js" name="umd-tough-cookie">
+    <js-module src="www/umd-tough-cookie.js" name="tough-cookie">
     </js-module>
     <js-module src="www/cookie-handler.js" name="cookie-handler">
     </js-module>

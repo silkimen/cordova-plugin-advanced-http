@@ -7,7 +7,7 @@
     "prepublish": "npm run build"
   },
   "cordova": {
-    "id": "cordova-plugin-advanced-http",
+    "id": "cordova-plugin-advanced-http-custom-error",
     "platforms": [
       "ios",
       "android"

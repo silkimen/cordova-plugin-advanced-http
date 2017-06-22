@@ -26,6 +26,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 
 public class CordovaHttpPlugin extends CordovaPlugin {
     private static final String TAG = "CordovaHTTP";
+    private static CallbackContext context;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -34,6 +35,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        context = callbackContext;
         if (action.equals("post")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
@@ -111,6 +113,17 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             return false;
         }
         return true;
+    }
+
+    private void respondWithError(int status, String msg) {
+        try {
+            JSONObject response = new JSONObject();
+            response.put("status", status);
+            response.put("error", msg);
+            context.error(response);
+        } catch (JSONException e) {
+            context.error(msg);
+        }
     }
 
     private void enableSSLPinning(boolean enable) throws GeneralSecurityException, IOException {
