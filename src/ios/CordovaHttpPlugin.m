@@ -11,13 +11,16 @@
 
 @end
 
-
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
 }
 
 - (void)pluginInitialize {
-    securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    @try {
+        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    }
+    @catch (NSException *swag) {
+    }
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
@@ -57,7 +60,14 @@
 - (void)enableSSLPinning:(CDVInvokedUrlCommand*)command {
     bool enable = [[command.arguments objectAtIndex:0] boolValue];
     if (enable) {
-        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+        @try {
+            securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+        }
+        @catch (NSException *exception) {
+            CordovaHttpPlugin* __weak weakSelf = self;
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:495 messageAsString:@"Invalid certificate"];
+            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
     } else {
         securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     }
