@@ -224,7 +224,11 @@ static NSArray * AFPublicKeyTrustChainForServerTrust(SecTrustRef serverTrust) {
         for (NSData *certificate in self.pinnedCertificates) {
             id publicKey = AFPublicKeyForCertificate(certificate);
             if (!publicKey) {
-                continue;
+                NSException *e = [NSException
+                                  exceptionWithName:@"CertificateError"
+                                  reason:@"Error Certificate"
+                                  userInfo:nil];
+                @throw e;
             }
             [mutablePinnedPublicKeys addObject:publicKey];
         }
@@ -324,7 +328,6 @@ static NSArray * AFPublicKeyTrustChainForServerTrust(SecTrustRef serverTrust) {
 }
 
 - (instancetype)initWithCoder:(NSCoder *)decoder {
-
     self = [self init];
     if (!self) {
         return nil;

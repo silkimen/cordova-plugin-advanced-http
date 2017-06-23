@@ -26,6 +26,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 
 public class CordovaHttpPlugin extends CordovaPlugin {
     private static final String TAG = "CordovaHTTP";
+    private static CallbackContext context;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -34,6 +35,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        context = callbackContext;
         if (action.equals("post")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
@@ -113,6 +115,17 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         return true;
     }
 
+    private void respondWithError(int status, String msg) {
+        try {
+            JSONObject response = new JSONObject();
+            response.put("status", status);
+            response.put("error", msg);
+            context.error(response);
+        } catch (JSONException e) {
+            context.error(msg);
+        }
+    }
+
     private void enableSSLPinning(boolean enable) throws GeneralSecurityException, IOException {
         if (enable) {
             AssetManager assetManager = cordova.getActivity().getAssets();
@@ -142,7 +155,11 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             for (int i = 0; i < cerFiles.size(); i++) {
                 InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
                 InputStream caInput = new BufferedInputStream(in);
-                HttpRequest.addCert(caInput);
+                try {
+                    HttpRequest.addCert(caInput);
+                } catch (Exception e) {
+                    this.respondWithError(495, "Certificate invalid");
+                }
             }
             CordovaHttp.enableSSLPinning(true);
         } else {
