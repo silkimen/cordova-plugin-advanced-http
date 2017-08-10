@@ -39,14 +39,16 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             JSONObject params = args.getJSONObject(1);
             String serializerName = args.getString(2);
             JSONObject headers = args.getJSONObject(3);
-            CordovaHttpPost post = new CordovaHttpPost(urlString, params, serializerName, headers, callbackContext);
+            int timeoutInMilliseconds = args.getInt(4) * 1000;
+            CordovaHttpPost post = new CordovaHttpPost(urlString, params, serializerName, headers, callbackContext, timeoutInMilliseconds);
 
             cordova.getThreadPool().execute(post);
         } else if (action.equals("get")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
-            CordovaHttpGet get = new CordovaHttpGet(urlString, params, headers, callbackContext);
+            int timeoutInMilliseconds = args.getInt(3) * 1000;
+            CordovaHttpGet get = new CordovaHttpGet(urlString, params, headers, callbackContext, timeoutInMilliseconds);
 
             cordova.getThreadPool().execute(get);
         } else if (action.equals("put")) {
@@ -54,21 +56,24 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             JSONObject params = args.getJSONObject(1);
             String serializerName = args.getString(2);
             JSONObject headers = args.getJSONObject(3);
-            CordovaHttpPut put = new CordovaHttpPut(urlString, params, serializerName, headers, callbackContext);
+            int timeoutInMilliseconds = args.getInt(4) * 1000;
+            CordovaHttpPut put = new CordovaHttpPut(urlString, params, serializerName, headers, callbackContext, timeoutInMilliseconds);
 
             cordova.getThreadPool().execute(put);
         } else if (action.equals("delete")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
-            CordovaHttpDelete delete = new CordovaHttpDelete(urlString, params, headers, callbackContext);
+            int timeoutInMilliseconds = args.getInt(3) * 1000;
+            CordovaHttpDelete delete = new CordovaHttpDelete(urlString, params, headers, callbackContext, timeoutInMilliseconds);
 
             cordova.getThreadPool().execute(delete);
         } else if (action.equals("head")) {
             String urlString = args.getString(0);
             JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
-            CordovaHttpHead head = new CordovaHttpHead(urlString, params, headers, callbackContext);
+            int timeoutInMilliseconds = args.getInt(3) * 1000;
+            CordovaHttpHead head = new CordovaHttpHead(urlString, params, headers, callbackContext, timeoutInMilliseconds);
 
             cordova.getThreadPool().execute(head);
         } else if (action.equals("enableSSLPinning")) {
@@ -96,7 +101,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             JSONObject headers = args.getJSONObject(2);
             String filePath = args.getString(3);
             String name = args.getString(4);
-            CordovaHttpUpload upload = new CordovaHttpUpload(urlString, params, headers, callbackContext, filePath, name);
+            int timeoutInMilliseconds = args.getInt(5) * 1000;
+            CordovaHttpUpload upload = new CordovaHttpUpload(urlString, params, headers, callbackContext, filePath, name, timeoutInMilliseconds);
 
             cordova.getThreadPool().execute(upload);
         } else if (action.equals("downloadFile")) {
@@ -104,7 +110,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
             String filePath = args.getString(3);
-            CordovaHttpDownload download = new CordovaHttpDownload(urlString, params, headers, callbackContext, filePath);
+            int timeoutInMilliseconds = args.getInt(4) * 1000;
+            CordovaHttpDownload download = new CordovaHttpDownload(urlString, params, headers, callbackContext, filePath, timeoutInMilliseconds);
 
             cordova.getThreadPool().execute(download);
         } else {

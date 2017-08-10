@@ -8,6 +8,7 @@
 - (void)setRequestHeaders:(NSDictionary*)headers forManager:(AFHTTPSessionManager*)manager;
 - (void)setResults:(NSMutableDictionary*)dictionary withTask:(NSURLSessionTask*)task;
 - (NSMutableDictionary*)copyHeaderFields:(NSDictionary*)headerFields;
+- (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager;
 
 @end
 
@@ -54,6 +55,10 @@
 	return headerFieldsCopy;
 }
 
+- (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager {
+    [manager.requestSerializer setTimeoutInterval:timeout];
+}
+
 - (void)enableSSLPinning:(CDVInvokedUrlCommand*)command {
     bool enable = [[command.arguments objectAtIndex:0] boolValue];
     if (enable) {
@@ -89,12 +94,16 @@
 - (void)post:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSString *serializerName = [command.arguments objectAtIndex:2];
     NSDictionary *headers = [command.arguments objectAtIndex:3];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
+
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
+    [self setTimeout:timeoutInSeconds forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -117,11 +126,16 @@
 - (void)get:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
+
+
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
+    [self setTimeout:timeoutInSeconds forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
 
@@ -145,12 +159,16 @@
 - (void)put:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSString *serializerName = [command.arguments objectAtIndex:2];
     NSDictionary *headers = [command.arguments objectAtIndex:3];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
+
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
+    [self setTimeout:timeoutInSeconds forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -173,11 +191,15 @@
 - (void)delete:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
+
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
+    [self setTimeout:timeoutInSeconds forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
 
@@ -204,7 +226,10 @@
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
+
     [self setRequestHeaders: headers forManager: manager];
+    [self setTimeout:timeoutInSeconds forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
 
@@ -228,15 +253,18 @@
 - (void)uploadFile:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
     NSString *filePath = [command.arguments objectAtIndex: 3];
     NSString *name = [command.arguments objectAtIndex: 4];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:5] doubleValue];
 
     NSURL *fileURL = [NSURL URLWithString: filePath];
 
     [self setRequestHeaders: headers forManager: manager];
+    [self setTimeout:timeoutInSeconds forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -270,12 +298,16 @@
 - (void)downloadFile:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
     NSString *filePath = [command.arguments objectAtIndex: 3];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
+
 
     [self setRequestHeaders: headers forManager: manager];
+    [self setTimeout:timeoutInSeconds forManager:manager];
 
     if ([filePath hasPrefix:@"file://"]) {
         filePath = [filePath substringFromIndex:7];

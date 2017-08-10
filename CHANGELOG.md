@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.7
+
+- Added setRequestTimeout function to set the timeout in seconds for all further requests
+
 ## v1.5.6
 
 - All response header keys are converted to lowercase (iOS only)

@@ -50,6 +50,9 @@ function registerService(http) {
             removeCookies: function (url) {
                 return http.removeCookies(url);
             },
+            setRequestTimeout: function (timeout) {
+                return http.setRequestTimeout(timeout);
+            },
             enableSSLPinning: function (enable) {
                 return makePromise(http.enableSSLPinning, [enable]);
             },

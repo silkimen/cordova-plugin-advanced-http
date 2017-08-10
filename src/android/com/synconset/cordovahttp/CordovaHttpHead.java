@@ -15,8 +15,8 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpHead extends CordovaHttp implements Runnable {
-    public CordovaHttpHead(String urlString, JSONObject params, JSONObject headers, CallbackContext callbackContext) {
-        super(urlString, params, headers, callbackContext);
+    public CordovaHttpHead(String urlString, JSONObject params, JSONObject headers, CallbackContext callbackContext, int timeout) {
+        super(urlString, params, headers, timeout, callbackContext);
     }
 
     @Override
@@ -24,6 +24,7 @@ class CordovaHttpHead extends CordovaHttp implements Runnable {
         try {
             HttpRequest request = HttpRequest.head(this.getUrlString(), this.getParamsMap(), true);
 
+            request.readTimeout(this.getRequestTimeout());
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeadersMap());

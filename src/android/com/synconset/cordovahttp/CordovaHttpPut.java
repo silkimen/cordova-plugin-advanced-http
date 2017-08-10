@@ -15,8 +15,8 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpPut extends CordovaHttp implements Runnable {
-    public CordovaHttpPut(String urlString, JSONObject data, String serializerName, JSONObject headers, CallbackContext callbackContext) {
-        super(urlString, data, serializerName, headers, callbackContext);
+    public CordovaHttpPut(String urlString, JSONObject data, String serializerName, JSONObject headers, CallbackContext callbackContext, int timeout) {
+        super(urlString, data, serializerName, headers, timeout, callbackContext);
     }
 
     @Override
@@ -24,6 +24,7 @@ class CordovaHttpPut extends CordovaHttp implements Runnable {
         try {
             HttpRequest request = HttpRequest.put(this.getUrlString());
 
+            request.readTimeout(this.getRequestTimeout());
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeadersMap());

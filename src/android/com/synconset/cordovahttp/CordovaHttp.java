@@ -30,21 +30,24 @@ abstract class CordovaHttp {
     private JSONObject params;
     private String serializerName;
     private JSONObject headers;
+    private int timeoutInMilliseconds;
     private CallbackContext callbackContext;
 
-    public CordovaHttp(String urlString, JSONObject params, JSONObject headers, CallbackContext callbackContext) {
+    public CordovaHttp(String urlString, JSONObject params, JSONObject headers, int timeout, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.serializerName = "default";
         this.headers = headers;
+        this.timeoutInMilliseconds = timeout;
         this.callbackContext = callbackContext;
     }
 
-    public CordovaHttp(String urlString, JSONObject params, String serializerName, JSONObject headers, CallbackContext callbackContext) {
+    public CordovaHttp(String urlString, JSONObject params, String serializerName, JSONObject headers, int timeout, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.serializerName = serializerName;
         this.headers = headers;
+        this.timeoutInMilliseconds = timeout;
         this.callbackContext = callbackContext;
     }
 
@@ -88,6 +91,10 @@ abstract class CordovaHttp {
 
     protected HashMap<String, String> getHeadersMap() throws JSONException {
         return this.getStringMapFromJSONObject(this.headers);
+    }
+
+    protected int getRequestTimeout() {
+        return this.timeoutInMilliseconds;
     }
 
     protected CallbackContext getCallbackContext() {

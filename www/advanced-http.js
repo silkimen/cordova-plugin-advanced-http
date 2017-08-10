@@ -128,6 +128,7 @@ var http = {
     headers: {},
     dataSerializer: 'urlencoded',
     sslPinning: false,
+    timeoutInSeconds: 60.0,
     getBasicAuthHeader: function (username, password) {
         return {'Authorization': 'Basic ' + b64EncodeUnicode(username + ':' + password)};
     },
@@ -145,6 +146,9 @@ var http = {
     },
     removeCookies: function (url, callback) {
         cookieHandler.removeCookies(url, callback);
+    },
+    setRequestTimeout: function(timeout) {
+        this.timeoutInSeconds = timeout;
     },
     enableSSLPinning: function (enable, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'enableSSLPinning', [enable]);
@@ -166,7 +170,7 @@ var http = {
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'post', [url, data, this.dataSerializer, headers]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'post', [url, data, this.dataSerializer, headers, this.timeoutInSeconds]);
     },
     get: function (url, params, headers, success, failure) {
         handleMissingCallbacks(success, failure);
@@ -179,7 +183,7 @@ var http = {
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'get', [url, params, headers]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'get', [url, params, headers, this.timeoutInSeconds]);
     },
     put: function (url, data, headers, success, failure) {
         handleMissingCallbacks(success, failure);
@@ -192,7 +196,7 @@ var http = {
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'put', [url, data, this.dataSerializer, headers]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'put', [url, data, this.dataSerializer, headers, this.timeoutInSeconds]);
     },
     delete: function (url, params, headers, success, failure) {
         handleMissingCallbacks(success, failure);
@@ -205,7 +209,7 @@ var http = {
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'delete', [url, params, headers]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'delete', [url, params, headers, this.timeoutInSeconds]);
     },
     head: function (url, params, headers, success, failure) {
         handleMissingCallbacks(success, failure);
@@ -218,7 +222,7 @@ var http = {
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'head', [url, params, headers]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'head', [url, params, headers, this.timeoutInSeconds]);
     },
     uploadFile: function (url, params, headers, filePath, name, success, failure) {
         handleMissingCallbacks(success, failure);
@@ -231,7 +235,7 @@ var http = {
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [url, params, headers, filePath, name]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [url, params, headers, filePath, name, this.timeoutInSeconds]);
     },
     downloadFile: function (url, params, headers, filePath, success, failure) {
         handleMissingCallbacks(success, failure);
@@ -244,7 +248,7 @@ var http = {
         var onSuccess = injectCookieHandler(url, injectFileEntryHandler(success));
         var onFail = injectCookieHandler(url, failure);
 
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, params, headers, filePath]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, params, headers, filePath, this.timeoutInSeconds]);
     }
 };
 

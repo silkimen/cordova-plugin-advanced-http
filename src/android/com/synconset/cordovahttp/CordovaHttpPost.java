@@ -15,8 +15,8 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpPost extends CordovaHttp implements Runnable {
-    public CordovaHttpPost(String urlString, JSONObject params, String serializerName, JSONObject headers, CallbackContext callbackContext) {
-        super(urlString, params, serializerName, headers, callbackContext);
+    public CordovaHttpPost(String urlString, JSONObject params, String serializerName, JSONObject headers, CallbackContext callbackContext, int timeout) {
+        super(urlString, params, serializerName, headers, timeout, callbackContext);
     }
 
     @Override
@@ -24,6 +24,7 @@ class CordovaHttpPost extends CordovaHttp implements Runnable {
         try {
             HttpRequest request = HttpRequest.post(this.getUrlString());
 
+            request.readTimeout(this.getRequestTimeout());
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeadersMap());
@@ -51,7 +52,7 @@ class CordovaHttpPost extends CordovaHttp implements Runnable {
             }
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
-        }  catch (HttpRequestException e) {
+        } catch (HttpRequestException e) {
             if (e.getCause() instanceof UnknownHostException) {
                 this.respondWithError(0, "The host could not be resolved");
             } else if (e.getCause() instanceof SSLHandshakeException) {
