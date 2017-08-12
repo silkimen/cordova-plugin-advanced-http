@@ -21,7 +21,7 @@ function splitCookieString(cookieStr) {
     var processedCookie = null;
 
     for (var i = 0; i < cookieParts.length; ++i) {
-        if (cookieParts[i].substr(-11, 8) === 'expires=') {
+        if (cookieParts[i].substr(-11, 8) === 'expires=' || 'Expires=') {
             processedCookie = cookieParts[i] + ',' + cookieParts[i + 1];
             i++;
         } else {
