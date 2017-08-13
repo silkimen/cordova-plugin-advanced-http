@@ -2,6 +2,7 @@
 
 ## v1.5.7
 
+- Fixed a bug in cookie handling (cookies containing an "Expires" string)
 - Added setRequestTimeout function to set the timeout in seconds for all further requests
 
 ## v1.5.6
