@@ -7,6 +7,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 import java.io.File;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -59,6 +60,8 @@ class CordovaHttpDownload extends CordovaHttp implements Runnable {
         } catch (HttpRequestException e) {
             if (e.getCause() instanceof UnknownHostException) {
                 this.respondWithError(0, "The host could not be resolved");
+            } else if (e.getCause() instanceof SocketTimeoutException) {
+                this.respondWithError(1, "The request timed out");
             } else if (e.getCause() instanceof SSLHandshakeException) {
                 this.respondWithError("SSL handshake failed");
             } else {

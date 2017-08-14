@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.8
+
+- Use the same error codes if a request timed out
+
 ## v1.5.7
 
 - Fixed a bug in cookie handling (cookies containing an "Expires" string)

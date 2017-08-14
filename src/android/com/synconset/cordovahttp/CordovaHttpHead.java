@@ -3,6 +3,7 @@
  */
 package com.synconset.cordovahttp;
 
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -48,6 +49,8 @@ class CordovaHttpHead extends CordovaHttp implements Runnable {
         } catch (HttpRequestException e) {
             if (e.getCause() instanceof UnknownHostException) {
                 this.respondWithError(0, "The host could not be resolved");
+            } else if (e.getCause() instanceof SocketTimeoutException) {
+                this.respondWithError(1, "The request timed out");
             } else if (e.getCause() instanceof SSLHandshakeException) {
                 this.respondWithError("SSL handshake failed");
             } else {
