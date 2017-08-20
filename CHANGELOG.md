@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.9
+
+- Fixed case-sensitive folder name of Android source files
+
 ## v1.5.8
 
 - Use the same error codes if a request timed out
