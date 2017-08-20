@@ -2,3 +2,4 @@ node_modules/**
 tags
 .zedstate
 /www/umd-tough-cookie.js
+/temp

@@ -4,7 +4,8 @@
   "description": "Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning",
   "scripts": {
     "build": "cp node_modules/umd-tough-cookie/lib/umd-tough-cookie.js www/umd-tough-cookie.js",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "npm run build && ./scripts/test-installation.sh"
   },
   "cordova": {
     "id": "cordova-plugin-advanced-http",
@@ -50,6 +51,7 @@
   },
   "homepage": "https://github.com/silkimen/cordova-plugin-advanced-http#readme",
   "devDependencies": {
+    "cordova": "7.0.1",
     "umd-tough-cookie": "2.3.2"
   }
 }
