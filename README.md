@@ -1,5 +1,6 @@
 Cordova Advanced HTTP
 =====================
+[![Build Status](https://travis-ci.org/silkimen/cordova-plugin-advanced-http.svg?branch=master)](https://travis-ci.org/silkimen/cordova-plugin-advanced-http)
 
 Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and Android.
 This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordova-HTTP).
