@@ -37,6 +37,7 @@ class CordovaHttpDownload extends CordovaHttp implements Runnable {
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeadersMap());
+            request.uncompress(true);
             int code = request.code();
 
             JSONObject response = new JSONObject();
