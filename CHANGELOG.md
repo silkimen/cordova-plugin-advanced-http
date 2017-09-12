@@ -1,5 +1,9 @@
 # Changelog
 
+## v.1.5.10
+
+-Fixed #10: fix gzip decompression when request header accepts gzip compression (thanks to DayBr3ak)
+
 ## v1.5.9
 
 - Fixed case-sensitive folder name of Android source files
