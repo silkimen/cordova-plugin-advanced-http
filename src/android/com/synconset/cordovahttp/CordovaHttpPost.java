@@ -29,6 +29,7 @@ class CordovaHttpPost extends CordovaHttp implements Runnable {
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeadersMap());
+            request.uncompress(true);
 
             if (new String("json").equals(this.getSerializerName())) {
                 request.contentType(request.CONTENT_TYPE_JSON, request.CHARSET_UTF8);

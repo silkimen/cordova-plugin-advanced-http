@@ -45,6 +45,7 @@ class CordovaHttpUpload extends CordovaHttp implements Runnable {
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeadersMap());
+            request.uncompress(true);
 
             URI uri = new URI(filePath);
 
