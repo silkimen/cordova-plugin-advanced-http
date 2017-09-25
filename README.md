@@ -67,6 +67,11 @@ You can choose one of these two:
 
 Caution: `urlencoded` does not support serializing deep structures whereas `json` does.
 
+### setRequestTimeout
+Set how long to wait for a request to respond, in seconds.
+
+    cordovaHTTP.setRequestTimeout(5.0);
+
 ### clearCookies
 Clear the cookie store.
 
@@ -105,6 +110,11 @@ Whether or not to validate the domain name in the certificate.  This defaults to
     }, function() {
         console.log('error :(');
     });
+
+### removeCookies
+Remove all cookies associated with a given URL.
+
+    cordovaHTTP.removeCookies(url);
 
 ### post<a name="post"></a>
 Execute a POST request.  Takes a URL, data, and headers.
@@ -172,6 +182,9 @@ Execute a PUT request.  Takes a URL, data, and headers.  See the [post](#post) d
 
 ### delete
 Execute a DELETE request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
+
+### head
+Execute a HEAD request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ### uploadFile
 Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
