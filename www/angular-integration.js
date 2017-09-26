@@ -42,7 +42,7 @@ function registerService(http) {
                 return http.setHeader(header, value);
             },
             setDataSerializer: function (serializer) {
-                return http.setParamSerializer(serializer);
+                return http.setDataSerializer(serializer);
             },
             clearCookies: function () {
                 return http.clearCookies();
