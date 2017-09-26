@@ -2,7 +2,9 @@
 
 ## v.1.5.10
 
--Fixed #10: fix gzip decompression when request header accepts gzip compression (thanks to DayBr3ak)
+- Fixed #10: fix gzip decompression when request header accepts gzip compression (thanks to DayBr3ak)
+- Fixed #13: fix angular integration for `setDataSerializer` (thanks to RangerRick)
+- Added some missing documentation (thanks to RangerRick)
 
 ## v1.5.9
 
