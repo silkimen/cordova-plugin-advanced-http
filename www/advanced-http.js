@@ -201,6 +201,19 @@ var http = {
 
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'put', [url, data, this.dataSerializer, headers, this.timeoutInSeconds]);
     },
+    patch: function (url, data, headers, success, failure) {
+        handleMissingCallbacks(success, failure);
+
+        data = data || {};
+        headers = headers || {};
+        headers = mergeHeaders(this.headers, headers);
+        headers = mergeHeaders(getCookieHeader(url), headers);
+
+        var onSuccess = injectCookieHandler(url, success);
+        var onFail = injectCookieHandler(url, failure);
+
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'patch', [url, data, this.dataSerializer, headers]);
+        },
     delete: function (url, params, headers, success, failure) {
         handleMissingCallbacks(success, failure);
 
