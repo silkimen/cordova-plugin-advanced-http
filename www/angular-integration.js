@@ -59,6 +59,9 @@ function registerService(http) {
             acceptAllCerts: function (allow) {
                 return makePromise(http.acceptAllCerts, [allow]);
             },
+            disableRedirect: function(disable) {
+                return makePromise(http.disableRedirect, [disable]);
+            },
             validateDomainName: function (validate) {
                 return makePromise(http.validateDomainName, [validate]);
             },
