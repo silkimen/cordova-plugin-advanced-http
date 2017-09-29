@@ -11,15 +11,18 @@
 - (NSNumber*)getStatusCode:(NSError*) error;
 - (NSMutableDictionary*)copyHeaderFields:(NSDictionary*)headerFields;
 - (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager;
+- (void)setRedirect:(AFHTTPSessionManager*)manager;
 
 @end
 
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
+    bool redirect;
 }
 
 - (void)pluginInitialize {
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    redirect = true;
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
@@ -33,6 +36,16 @@
 - (void)setRequestHeaders:(NSDictionary*)headers forManager:(AFHTTPSessionManager*)manager {
     [headers enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         [manager.requestSerializer setValue:obj forHTTPHeaderField:key];
+    }];
+}
+
+- (void)setRedirect:(AFHTTPSessionManager*)manager {
+    [manager setTaskWillPerformHTTPRedirectionBlock:^NSURLRequest * _Nonnull(NSURLSession * _Nonnull session, NSURLSessionTask * _Nonnull task, NSURLResponse * _Nonnull response, NSURLRequest * _Nonnull request) {
+        if (redirect) {
+            return request;
+        } else {
+            return nil;
+        }
     }];
 }
 
@@ -105,6 +118,16 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)disableRedirect:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = nil;
+    bool disable = [[command.arguments objectAtIndex:0] boolValue];
+
+    redirect = !disable;
+
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)acceptAllCerts:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = nil;
     bool allow = [[command.arguments objectAtIndex:0] boolValue];
@@ -138,6 +161,7 @@
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setRedirect: manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -169,6 +193,7 @@
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setRedirect: manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
 
@@ -201,6 +226,7 @@
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setRedirect: manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -231,6 +257,7 @@
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setRedirect: manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
 
@@ -260,6 +287,7 @@
 
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setRedirect: manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
 
@@ -295,6 +323,7 @@
 
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setRedirect: manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -337,6 +366,7 @@
 
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setRedirect: manager];
 
     if ([filePath hasPrefix:@"file://"]) {
         filePath = [filePath substringFromIndex:7];

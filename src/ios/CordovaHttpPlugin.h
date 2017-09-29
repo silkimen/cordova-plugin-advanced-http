@@ -7,6 +7,7 @@
 - (void)enableSSLPinning:(CDVInvokedUrlCommand*)command;
 - (void)acceptAllCerts:(CDVInvokedUrlCommand*)command;
 - (void)validateDomainName:(CDVInvokedUrlCommand*)command;
+- (void)disableRedirect:(CDVInvokedUrlCommand*)command;
 - (void)post:(CDVInvokedUrlCommand*)command;
 - (void)get:(CDVInvokedUrlCommand*)command;
 - (void)put:(CDVInvokedUrlCommand*)command;
