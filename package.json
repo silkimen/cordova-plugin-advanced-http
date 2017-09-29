@@ -3,9 +3,7 @@
   "version": "1.5.10",
   "description": "Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning",
   "scripts": {
-    "build": "cp node_modules/umd-tough-cookie/lib/umd-tough-cookie.js www/umd-tough-cookie.js",
-    "prepublish": "npm run build",
-    "test": "npm run build && ./scripts/test-installation.sh"
+    "test": "./scripts/test-installation.sh"
   },
   "cordova": {
     "id": "cordova-plugin-advanced-http",
