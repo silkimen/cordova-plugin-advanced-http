@@ -56,6 +56,11 @@ Set a header for all future requests.  Takes a header and a value.
 
     cordovaHTTP.setHeader("Header", "Value");
 
+### disableRedirect
+If set to `true`, it won't follow redirects automatically. This is a global setting.
+
+    cordovaHTTP.disableRedirect(true);
+
 ### setDataSerializer
 Set the data serializer which will be used for all future POST and PUT requests. Takes a string representing the name of the serializer.
 

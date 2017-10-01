@@ -156,6 +156,9 @@ var http = {
     acceptAllCerts: function (allow, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'acceptAllCerts', [allow]);
     },
+    disableRedirect: function(disable, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "disableRedirect", [disable]);
+    },
     validateDomainName: function (validate, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'validateDomainName', [validate]);
     },

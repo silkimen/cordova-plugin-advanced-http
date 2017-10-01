@@ -1,6 +1,11 @@
 # Changelog
 
-## v.1.5.10
+## v1.6.0
+
+- Fixed #16: cordova tries to run build script during plugin install
+- Added redirection control (thanks to notsyncing and kesozjura)
+
+## v1.5.10
 
 - Fixed #10: fix gzip decompression when request header accepts gzip compression (thanks to DayBr3ak)
 - Fixed #13: fix angular integration for `setDataSerializer` (thanks to RangerRick)
