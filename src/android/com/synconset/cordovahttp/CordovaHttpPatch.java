@@ -16,8 +16,8 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpPatch extends CordovaHttp implements Runnable {
-    public CordovaHttpPatch(String urlString, JSONObject data, String serializerName, JSONObject headers, CallbackContext callbackContext, int timeout) {
-        super(urlString, data, serializerName, headers, timeout, callbackContext);
+    public CordovaHttpPatch(String urlString, JSONObject params, String serializerName, JSONObject headers, CallbackContext callbackContext, int timeout) {
+        super(urlString, params, serializerName, headers, timeout, callbackContext);
     }
 
     @Override
@@ -26,6 +26,7 @@ class CordovaHttpPatch extends CordovaHttp implements Runnable {
             HttpRequest request = HttpRequest.patch(this.getUrlString());
 
             request.readTimeout(this.getRequestTimeout());
+            this.setupRedirect(request);
             this.setupSecurity(request);
             request.acceptCharset(CHARSET);
             request.headers(this.getHeadersMap());
@@ -43,18 +44,18 @@ class CordovaHttpPatch extends CordovaHttp implements Runnable {
             JSONObject response = new JSONObject();
 
             this.addResponseHeaders(request, response);
-            response.patch("status", code);
+            response.put("status", code);
 
             if (code >= 200 && code < 300) {
-                response.patch("data", body);
+                response.put("data", body);
                 this.getCallbackContext().success(response);
             } else {
-                response.patch("error", body);
+                response.put("error", body);
                 this.getCallbackContext().error(response);
             }
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
-        }  catch (HttpRequestException e) {
+        } catch (HttpRequestException e) {
             if (e.getCause() instanceof UnknownHostException) {
                 this.respondWithError(0, "The host could not be resolved");
             } else if (e.getCause() instanceof SocketTimeoutException) {
