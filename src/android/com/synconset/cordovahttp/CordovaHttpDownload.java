@@ -23,7 +23,7 @@ import org.json.JSONObject;
 class CordovaHttpDownload extends CordovaHttp implements Runnable {
     private String filePath;
 
-    public CordovaHttpDownload(String urlString, JSONObject params, JSONObject headers, CallbackContext callbackContext, String filePath, int timeout) {
+    public CordovaHttpDownload(String urlString, JSONObject params, JSONObject headers, String filePath, int timeout, CallbackContext callbackContext) {
         super(urlString, params, headers, timeout, callbackContext);
         this.filePath = filePath;
     }

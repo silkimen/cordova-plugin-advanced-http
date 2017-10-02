@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.1
+
+- Fixed #23: PATCH method broken on android
+
 ## v1.6.0
 
 - Feature #18: implemented PATCH method (thanks akhatri for android implementation)
