@@ -201,6 +201,9 @@ var http = {
 
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'put', [url, data, this.dataSerializer, headers, this.timeoutInSeconds]);
     },
+/*
+ * Disabled because PATCH method is not implemented for iOS
+ *
     patch: function (url, data, headers, success, failure) {
         handleMissingCallbacks(success, failure);
 
@@ -213,7 +216,8 @@ var http = {
         var onFail = injectCookieHandler(url, failure);
 
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'patch', [url, data, this.dataSerializer, headers]);
-        },
+    },
+*/
     delete: function (url, params, headers, success, failure) {
         handleMissingCallbacks(success, failure);
 
