@@ -2,8 +2,9 @@
 
 ## v1.6.0
 
+- Feature #18: implemented PATCH method (thanks akhatri for android implementation)
+- Feature #21: added redirection control (thanks to notsyncing and kesozjura)
 - Fixed #16: cordova tries to run build script during plugin install
-- Added redirection control (thanks to notsyncing and kesozjura)
 
 ## v1.5.10
 
