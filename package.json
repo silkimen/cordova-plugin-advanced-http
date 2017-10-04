@@ -50,6 +50,8 @@
   "homepage": "https://github.com/silkimen/cordova-plugin-advanced-http#readme",
   "devDependencies": {
     "cordova": "7.0.1",
-    "umd-tough-cookie": "2.3.2"
+    "mz": "2.7.0",
+    "umd-tough-cookie": "2.3.2",
+    "xml2js": "0.4.19"
   }
 }

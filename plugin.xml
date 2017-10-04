@@ -1,96 +1,67 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  id="cordova-plugin-advanced-http"
-  version="1.5.10">
-
-    <name>Advanced HTTP plugin</name>
-
-    <description>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-advanced-http" version="1.6.0">
+  <name>Advanced HTTP plugin</name>
+  <description>
         Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning
 	 </description>
-
-    <engines>
-        <engine name="cordova" version=">=4.0.0" />
-    </engines>
-
-    <dependency id="cordova-plugin-file" version=">=2.0.0" />
-
-    <js-module src="www/lodash.js" name="lodash">
-    </js-module>
-    <js-module src="www/umd-tough-cookie.js" name="tough-cookie">
-    </js-module>
-    <js-module src="www/local-storage-store.js" name="local-storage-store">
-    </js-module>
-    <js-module src="www/cookie-handler.js" name="cookie-handler">
-    </js-module>
-    <js-module src="www/angular-integration.js" name="angular-integration">
-    </js-module>
-    <js-module src="www/advanced-http.js" name="http">
-        <clobbers target="cordova.plugin.http" />
-    </js-module>
-
-    <!-- ios -->
-    <platform name="ios">
-        <config-file target="config.xml" parent="/*">
-            <feature name="CordovaHttpPlugin">
-                <param name="ios-package" value="CordovaHttpPlugin"/>
-            </feature>
-        </config-file>
-
-        <header-file src="src/ios/CordovaHttpPlugin.h" />
-        <source-file src="src/ios/CordovaHttpPlugin.m" />
-
-        <header-file src="src/ios/TextResponseSerializer.h" />
-        <source-file src="src/ios/TextResponseSerializer.m" />
-
-        <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h" />
-        <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m" />
-
-        <header-file src="src/ios/AFNetworking/AFNetworking.h" />
-
-        <header-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.h" />
-        <source-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.m" />
-
-        <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h" />
-        <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m" />
-
-        <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h" />
-        <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m" />
-
-        <header-file src="src/ios/AFNetworking/AFURLResponseSerialization.h" />
-        <source-file src="src/ios/AFNetworking/AFURLResponseSerialization.m" />
-
-        <header-file src="src/ios/AFNetworking/AFURLSessionManager.h" />
-        <source-file src="src/ios/AFNetworking/AFURLSessionManager.m" />
-
-        <framework src="Security.framework" />
-        <framework src="SystemConfiguration.framework" />
-    </platform>
-
-    <!--android -->
-    <platform name="android">
-        <config-file target="res/xml/config.xml" parent="/*">
-            <feature name="CordovaHttpPlugin">
-                <param name="android-package" value="com.synconset.cordovahttp.CordovaHttpPlugin"/>
-            </feature>
-        </config-file>
-
-        <config-file target="AndroidManifest.xml" parent="/manifest">
-            <uses-permission android:name="android.permission.INTERNET" />
-        </config-file>
-
-        <source-file src="src/android/com/github/kevinsawicki/http/HttpRequest.java" target-dir="src/com/github/kevinsawicki/http" />
-        <source-file src="src/android/com/github/kevinsawicki/http/TLSSocketFactory.java" target-dir="src/com/github/kevinsawicki/http" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttp.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpDelete.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpDownload.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpGet.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpHead.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPlugin.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPost.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPut.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPatch.java" target-dir="src/com/synconset/cordovahttp" />
-        <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/synconset/cordovahttp" />
-    </platform>
+  <engines>
+    <engine name="cordova" version=">=4.0.0"/>
+  </engines>
+  <dependency id="cordova-plugin-file" version=">=2.0.0"/>
+  <js-module src="www/lodash.js" name="lodash"/>
+  <js-module src="www/umd-tough-cookie.js" name="tough-cookie"/>
+  <js-module src="www/local-storage-store.js" name="local-storage-store"/>
+  <js-module src="www/cookie-handler.js" name="cookie-handler"/>
+  <js-module src="www/angular-integration.js" name="angular-integration"/>
+  <js-module src="www/advanced-http.js" name="http">
+    <clobbers target="cordova.plugin.http"/>
+  </js-module>
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="CordovaHttpPlugin">
+        <param name="ios-package" value="CordovaHttpPlugin"/>
+      </feature>
+    </config-file>
+    <header-file src="src/ios/CordovaHttpPlugin.h"/>
+    <header-file src="src/ios/TextResponseSerializer.h"/>
+    <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h"/>
+    <header-file src="src/ios/AFNetworking/AFNetworking.h"/>
+    <header-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.h"/>
+    <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h"/>
+    <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h"/>
+    <header-file src="src/ios/AFNetworking/AFURLResponseSerialization.h"/>
+    <header-file src="src/ios/AFNetworking/AFURLSessionManager.h"/>
+    <source-file src="src/ios/CordovaHttpPlugin.m"/>
+    <source-file src="src/ios/TextResponseSerializer.m"/>
+    <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m"/>
+    <source-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.m"/>
+    <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m"/>
+    <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m"/>
+    <source-file src="src/ios/AFNetworking/AFURLResponseSerialization.m"/>
+    <source-file src="src/ios/AFNetworking/AFURLSessionManager.m"/>
+    <framework src="Security.framework"/>
+    <framework src="SystemConfiguration.framework"/>
+  </platform>
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="CordovaHttpPlugin">
+        <param name="android-package" value="com.synconset.cordovahttp.CordovaHttpPlugin"/>
+      </feature>
+    </config-file>
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.INTERNET"/>
+    </config-file>
+    <source-file src="src/android/com/github/kevinsawicki/http/HttpRequest.java" target-dir="src/com/github/kevinsawicki/http"/>
+    <source-file src="src/android/com/github/kevinsawicki/http/TLSSocketFactory.java" target-dir="src/com/github/kevinsawicki/http"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttp.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpDelete.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpDownload.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpGet.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpHead.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPlugin.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPost.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPut.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPatch.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/synconset/cordovahttp"/>
+  </platform>
 </plugin>
