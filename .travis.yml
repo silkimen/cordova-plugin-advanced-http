@@ -1,6 +1,43 @@
-language: node_js
-node_js:
-- lts/*
+sudo: false
+
+language: objective-c
+os: osx
+osx_image: xcode9.1
+
+cache: false
+
+addons:
+  sauce_connect:
+    username: silkimen
+  jwt: TwUj8A5qAR53BRhVwcdLCM64kI+f8beOLbZ2VmLJ557ptGAxvkHrhQ19uLEQakL64SWoeznObJjTG/Sp8zbO6O9xkfTw5mbNPk7FBTMd77x62l/PHZSWuwiFEVPfLnG2jSGWBqrLxr/g8cIiruzHSXS9J4C86SYIKIGnz9atJxB7XswwzAkvmyzgzC6iRCFhoAgmnhtY+Xr+QHcbpESoiUPv/MQ8CFNpk65CX+fuvVunWX70e3Qlelcs7nkbF/soFwD1WExCbTaPlaNvKqBIc1YuO4qdNy4Uff4mZZLsARH0X618EwFAVN4VM7AIqeUp3NoQYDw9vpkR7lmoOUJzI0aovasXa8frDNvm8GSP17jtCTQzfYEMK+B9rIA9oBRd46dyGujZtbKoTpDdTMIe0ayqb38NRuNwDzEV7WVMCcUgux0Q8NIAkWYYb21QN9z7XOOznP7BatK7mlJ0V6J7taBW2EBOwQzHWRG7n9GknGXsPzwxDW6aBCiOem/AcxZkajDPcRu/3diq5ZSZcC7cTVBxCZZCqpPCsZH0l47jW8MNh+CYw+i5TGsp7g0YHVmbWzE8dv73tMD9zQP0pUjOSkY55xbS7kTCXvFqP0OdMccpzdZY5h7JER95tIPz3gZwVFCoBg0GvwTqTxhGKR+jNosUD2n6WhCVFAU+AspgCKo=
+
+before_install:
+- export LANG=en_US.UTF-8
+- brew update
+
+install:
+- npm install
+- brew install gradle
+- wget http://dl.google.com/android/android-sdk_r24.4-macosx.zip
+- tar -xvf android-sdk_r24.4-macosx.zip
+- echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter platform-tools
+- echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter build-tools-25.0.0
+- echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter android-25
+- echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter extra-android-support
+- echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter extra-android-m2repository
+- echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter extra-google-m2repository
+- export ANDROID_HOME=./android-sdk-macosx
+- export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/23.0.2
+
+script:
+- scripts/build-test-app.sh
+- scripts/upload-artifact.sh
+- scripts/test.sh --ios --emulator
+
+after_success:
+
+deploy:
+
 notifications:
   slack:
     secure: lXE+2AgsxZU5G5dI91LkMAIgo8MAWfdM7DB5UOtn5LpuNln+2FmJo1gOI7tkdmLOqpXTGYnpI2VyQN3H4nOF21YhuouzD1Sh8n2wtQg1iTm353kuQpqiVhSBX8ZJ7Be1e1G8OsnxoYOxbs4Zo9qI40EruwkvqLCBHWM5MRGyd4M7EFWwb9Z29VZN0y1Nt5g/c3bT76kdKmF+JCLur2OeEKxAity7sIKgZekSqeIMwEVLSxXnda6Dbjc/cg0MJ0iDArkD7iu6fz/Fcrrxgm/pUxjcgvqze7Gy5i31mjEfspnrglWV1cshMd48BTDKCJ2AMmxH8O3GPSWE2txjIvGRWUve7iViNylvmQCVz3Eyf99+4EuuVGa+5PSodQ/CqODx/65EwtcN3PE1tNz2puKOK8nrOJcFkcbG8KTHKUlQtHCkjitbykUnj/hvhLK5/oWlQYVOLWWrHwdGUh8FI8aFPVGjRjWbHbhdayjEIqxwr1ns+6mYrP1EFNXbaeZxnLNC59XpJl1ifuezqYAk7YEiU5j4rtC7YKgyQ3ueb7anOHTJoTMyDn8mpZXgwuyhoBaeEYytQVgRyMtL6Y5cP98Jn2kv0+vdne3rkk9/JEBTo32HOjvoij6rsqEvXC0LhUDJSNadOVdHht0jjoN6zBH37HIE5/3zysLlPcAcHAS83ow=

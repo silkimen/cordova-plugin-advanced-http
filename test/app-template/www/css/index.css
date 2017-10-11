@@ -1,0 +1,24 @@
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
+
+body {
+    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+    height:100%;
+    margin:0px;
+    padding:20px 0;
+    width:100%;
+    font-family: sans-serif;
+}
+
+button, input, textarea {
+  display: block;
+  width: 100%;
+}
+
+h1 {
+  font-size: 12pt;
+  text-align: center;
+}
