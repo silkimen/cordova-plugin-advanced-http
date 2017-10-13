@@ -5,6 +5,7 @@ const apps = require('./helpers/apps');
 const caps = Object.assign({}, require('./helpers/caps'));
 const serverConfig = require('./helpers/server');
 const testDefinitions = require('../test-definitions');
+const pkgjson = require('../../package.json');
 
 describe('Advanced HTTP', function() {
   let driver;
@@ -18,6 +19,7 @@ describe('Advanced HTTP', function() {
     const desiredCaps = caps[(isAndroid ? 'android' : 'ios') + (isDevice ? 'Device' : 'Emulator')];
     const desiredApp = apps[(isAndroid ? 'android' : 'ios') + appName];
 
+    desiredCaps.name = pkgjson.name;
     desiredCaps.app = desiredApp;
 
     return desiredCaps;
@@ -26,14 +28,14 @@ describe('Advanced HTTP', function() {
   const validateTestIndex = number => driver
     .elementById('descriptionLbl')
     .text()
-    .then(text => parseInt(text.match(/(\d):/)[1], 10))
-    .should.eventually.become(number);
+    .then(text => parseInt(text.match(/(\d+):/)[1], 10))
+    .should.eventually.become(number, 'Test index is not matching!');
 
   const validateTestTitle = testTitle => driver
     .elementById('descriptionLbl')
     .text()
-    .then(text => text.match(/\d:\ (.*)/)[1])
-    .should.eventually.become(testTitle);
+    .then(text => text.match(/\d+:\ (.*)/)[1])
+    .should.eventually.become(testTitle, 'Test description is not matching!');
 
   const validateResult = text => driver
     .elementById('resultTextarea')
@@ -60,7 +62,7 @@ describe('Advanced HTTP', function() {
       }
     }));
 
-  testDefinitions.forEach((definition, index) => {
+  testDefinitions.tests.forEach((definition, index) => {
     it(definition.description, function() {
       return clickNext()
         .then(() => validateTestIndex(index))
