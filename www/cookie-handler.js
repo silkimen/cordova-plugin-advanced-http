@@ -41,7 +41,7 @@ function setCookieFromString(url, cookieStr) {
     var cookies = splitCookieString(cookieStr);
 
     for (var i = 0; i < cookies.length; ++i) {
-        cookieJar.setCookieSync(cookies[i], url);
+        cookieJar.setCookieSync(cookies[i], url, { ignoreError: true });
     }
 }
 

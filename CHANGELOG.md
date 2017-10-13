@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.2
+
+- Fixed #31: request fails throwing error on erroneous cookies
+
 ## v1.6.1
 
 - Fixed #23: PATCH method broken on android
