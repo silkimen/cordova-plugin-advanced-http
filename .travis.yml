@@ -30,7 +30,7 @@ install:
 - export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/23.0.2
 
 script:
-- scripts/build-test-app.sh
+- travis_wait scripts/build-test-app.sh
 - scripts/upload-artifact.sh
 - scripts/test.sh --ios --emulator
 
