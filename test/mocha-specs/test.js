@@ -11,7 +11,7 @@ describe('Advanced HTTP', function() {
   let driver;
   let allPassed = true;
 
-  this.timeout(300000);
+  this.timeout(900000);
 
   const getCaps = appName => {
     const isDevice = process.argv.includes('--device');
