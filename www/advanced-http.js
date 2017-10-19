@@ -157,10 +157,10 @@ var http = {
         return exec(success, failure, 'CordovaHttpPlugin', 'acceptAllCerts', [allow]);
     },
     disableRedirect: function(disable, success, failure) {
-        return exec(success, failure, "CordovaHttpPlugin", "disableRedirect", [disable]);
+        return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [disable]);
     },
     validateDomainName: function (validate, success, failure) {
-        return exec(success, failure, 'CordovaHttpPlugin', 'validateDomainName', [validate]);
+        failure('advanced-http: "validateDomainName" is no more supported, please see change log for further info');
     },
     post: function (url, data, headers, success, failure) {
         handleMissingCallbacks(success, failure);

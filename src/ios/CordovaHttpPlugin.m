@@ -108,6 +108,7 @@
 
 - (void)enableSSLPinning:(CDVInvokedUrlCommand*)command {
     bool enable = [[command.arguments objectAtIndex:0] boolValue];
+
     if (enable) {
         securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
     } else {
@@ -133,16 +134,7 @@
     bool allow = [[command.arguments objectAtIndex:0] boolValue];
 
     securityPolicy.allowInvalidCertificates = allow;
-
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)validateDomainName:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = nil;
-    bool validate = [[command.arguments objectAtIndex:0] boolValue];
-
-    securityPolicy.validatesDomainName = validate;
+    securityPolicy.validatesDomainName = !allow;
 
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

@@ -99,11 +99,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             boolean accept = args.getBoolean(0);
 
             CordovaHttp.acceptAllCerts(accept);
-            callbackContext.success();
-        } else if (action.equals("validateDomainName")) {
-            boolean accept = args.getBoolean(0);
-
-            CordovaHttp.validateDomainName(accept);
+            CordovaHttp.validateDomainName(!accept);
             callbackContext.success();
         } else if (action.equals("uploadFile")) {
             String urlString = args.getString(0);

@@ -1,6 +1,10 @@
 Cordova Advanced HTTP
 =====================
+[![npm version](https://badge.fury.io/js/cordova-plugin-advanced-http.svg)](https://badge.fury.io/js/cordova-plugin-advanced-http)
+[![downloads/month](https://img.shields.io/npm/dm/cordova-plugin-advanced-http.svg)](https://www.npmjs.com/package/cordova-plugin-advanced-http)
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.png)](https://opensource.org/licenses/mit-license.php)
 [![Build Status](https://travis-ci.org/silkimen/cordova-plugin-advanced-http.svg?branch=master)](https://travis-ci.org/silkimen/cordova-plugin-advanced-http)
+
 
 Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and Android.
 This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordova-HTTP).
@@ -108,13 +112,7 @@ Accept all SSL certificates.  Or disable accepting all certificates.  This defau
     });
 
 ### validateDomainName
-Whether or not to validate the domain name in the certificate.  This defaults to true.
-
-    cordovaHTTP.validateDomainName(false, function() {
-        console.log('success!');
-    }, function() {
-        console.log('error :(');
-    });
+This function was removed in v1.6.2. Domain name validation is disabled automatically when you enable "acceptAllCerts".
 
 ### removeCookies
 Remove all cookies associated with a given URL.
@@ -227,4 +225,4 @@ This plugin utilizes some awesome open source networking libraries. These are bo
  - iOS - [AFNetworking](https://github.com/AFNetworking/AFNetworking)
  - Android - [http-request](https://github.com/kevinsawicki/http-request)
 
-We made a few modifications to http-request.
+We made a few modifications to both of them.

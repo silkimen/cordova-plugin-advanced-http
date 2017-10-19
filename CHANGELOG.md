@@ -2,7 +2,16 @@
 
 ## v1.6.2
 
+- Change #29: removed "validateDomainName" (see info notice)
 - Fixed #31: request fails throwing error on erroneous cookies
+- Fixed #28: added support for content type "application/hal+json" on iOS (thanks ryandegruyter)
+
+#### Important information
+We've decided to remove the `validateDomainName()` method, because people were complaining that `acceptAllCerts(true)` is not behaving as expected. And also it's not a good idea to disable domain name validation while using valid certs, because it pretends having a secure connection, but it isn't.
+
+You should either use valid certs with domain name validation enabled (safe for production use) or accept any certs without domain name validation (only for private dev environments). I strongly discourage using fake certs in public networks.
+
+Therefore we are disabling domain name validation automatically, when you set `acceptAllCerts(true)`. So if you were using `validateDomainName()` function, you need to remove this function call for v1.6.2+.
 
 ## v1.6.1
 
