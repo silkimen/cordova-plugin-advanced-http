@@ -1,9 +1,10 @@
 {
   "name": "cordova-plugin-advanced-http",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning",
   "scripts": {
-    "test": "./scripts/build-test-app.sh && ./scripts/test.sh --ios --emulator"
+    "test": "./scripts/build-test-app.sh && ./scripts/test.sh --ios --emulator",
+    "release": "npm run test && ./scripts/release.sh"
   },
   "cordova": {
     "id": "cordova-plugin-advanced-http",
