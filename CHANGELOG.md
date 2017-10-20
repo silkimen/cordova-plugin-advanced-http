@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.7.0
+
+- Feature #24: "setHeader" allows configuring headers for specified host
+
 ## v1.6.2
 
 - Change #29: removed "validateDomainName" (see info notice)

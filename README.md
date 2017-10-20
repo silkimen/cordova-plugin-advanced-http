@@ -48,27 +48,32 @@ You can then inject the cordovaHTTP service into your controllers.  The function
 ### getBasicAuthHeader
 This returns an object representing a basic HTTP Authorization header of the form `{'Authorization': 'Basic base64encodedusernameandpassword'}`
 
-    var header = cordovaHTTP.getBasicAuthHeader("user", "password");
+    var header = cordova.plugin.http.getBasicAuthHeader("user", "password");
 
 ### useBasicAuth
 This sets up all future requests to use Basic HTTP authentication with the given username and password.
 
-    cordovaHTTP.useBasicAuth("user", "password");
+    cordova.plugin.http.useBasicAuth("user", "password");
 
 ### setHeader
-Set a header for all future requests.  Takes a header and a value.
+Set a header for all future requests to a specified host. Takes a hostname, a header and a value.
 
-    cordovaHTTP.setHeader("Header", "Value");
+    cordova.plugin.http.setHeader("Hostname", "Header", "Value");
+
+You can also define headers used for all hosts by using wildcard character "\*" or providing only two params.
+
+    cordova.plugin.http.setHeader("\*", "Header", "Value");
+    cordova.plugin.http.setHeader("Header", "Value");
 
 ### disableRedirect
 If set to `true`, it won't follow redirects automatically. This is a global setting.
 
-    cordovaHTTP.disableRedirect(true);
+    cordova.plugin.http.disableRedirect(true);
 
 ### setDataSerializer
 Set the data serializer which will be used for all future POST and PUT requests. Takes a string representing the name of the serializer.
 
-    cordovaHTTP.setDataSerializer("urlencoded");
+    cordova.plugin.http.setDataSerializer("urlencoded");
 
 You can choose one of these two:
 * `urlencoded`: send data as url encoded content in body (content type "application/x-www-form-urlencoded")
@@ -79,12 +84,12 @@ Caution: `urlencoded` does not support serializing deep structures whereas `json
 ### setRequestTimeout
 Set how long to wait for a request to respond, in seconds.
 
-    cordovaHTTP.setRequestTimeout(5.0);
+    cordova.plugin.http.setRequestTimeout(5.0);
 
 ### clearCookies
 Clear the cookie store.
 
-    cordovaHTTP.clearCookies();
+    cordova.plugin.http.clearCookies();
 
 ## Asynchronous Functions
 These functions all take success and error callbacks as their last 2 arguments.
@@ -96,7 +101,7 @@ To use SSL pinning you must include at least one .cer SSL certificate in your ap
 
 As an alternative, you can store your .cer files in the www/certificates folder.
 
-    cordovaHTTP.enableSSLPinning(true, function() {
+    cordova.plugin.http.enableSSLPinning(true, function() {
         console.log('success!');
     }, function() {
         console.log('error :(');
@@ -105,7 +110,7 @@ As an alternative, you can store your .cer files in the www/certificates folder.
 ### acceptAllCerts
 Accept all SSL certificates.  Or disable accepting all certificates.  This defaults to false.
 
-    cordovaHTTP.acceptAllCerts(true, function() {
+    cordova.plugin.http.acceptAllCerts(true, function() {
         console.log('success!');
     }, function() {
         console.log('error :(');
@@ -117,7 +122,7 @@ This function was removed in v1.6.2. Domain name validation is disabled automati
 ### removeCookies
 Remove all cookies associated with a given URL.
 
-    cordovaHTTP.removeCookies(url);
+    cordova.plugin.http.removeCookies(url);
 
 ### post<a name="post"></a>
 Execute a POST request.  Takes a URL, data, and headers.
@@ -135,7 +140,7 @@ The success function receives a response object with 3 properties: status, data,
 
 Most apis will return JSON meaning you'll want to parse the data like in the example below:
 
-    cordovaHTTP.post("https://google.com/", {
+    cordova.plugin.http.post("https://google.com/", {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, function(response) {
@@ -171,7 +176,7 @@ The error function receives a response object with 3 properties: status, error a
 ### get
 Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-    cordovaHTTP.get("https://google.com/", {
+    cordova.plugin.http.get("https://google.com/", {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, function(response) {
@@ -192,7 +197,7 @@ Execute a HEAD request.  Takes a URL, parameters, and headers.  See the [post](#
 ### uploadFile
 Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-    cordovaHTTP.uploadFile("https://google.com/", {
+    cordova.plugin.http.uploadFile("https://google.com/", {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, "file:///somepicture.jpg", "picture", function(response) {
@@ -204,7 +209,7 @@ Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath,
 ### downloadFile
 Downloads a file and saves it to the device.  Takes a URL, parameters, headers, and a filePath.  See [post](#post) documentation for details on what is returned on failure.  On success this function returns a cordova [FileEntry object](http://cordova.apache.org/docs/en/3.3.0/cordova_file_file.md.html#FileEntry).
 
-    cordovaHTTP.downloadFile("https://google.com/", {
+    cordova.plugin.http.downloadFile("https://google.com/", {
         id: 12,
         message: "test"
     }, { Authorization: "OAuth2: token" }, "file:///somepicture.jpg", function(entry) {
