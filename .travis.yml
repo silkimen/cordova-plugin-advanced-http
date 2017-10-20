@@ -32,7 +32,8 @@ install:
 script:
 - travis_wait scripts/build-test-app.sh
 - scripts/upload-artifact.sh
-- scripts/test.sh --ios --emulator
+- npm run testjs
+- scripts/test-app.sh --ios --emulator
 
 after_success:
 

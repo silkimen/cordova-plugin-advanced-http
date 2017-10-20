@@ -3,7 +3,9 @@
   "version": "1.6.2",
   "description": "Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning",
   "scripts": {
-    "test": "./scripts/build-test-app.sh && ./scripts/test.sh --ios --emulator",
+    "testapp": "./scripts/build-test-app.sh && ./scripts/test-app.sh --ios --emulator",
+    "testjs": "mocha ./test/js-mocha-specs.js",
+    "test": "npm run testjs && npm run testapp",
     "release": "npm run test && ./scripts/release.sh"
   },
   "cordova": {
@@ -55,6 +57,7 @@
     "colors": "1.1.2",
     "cordova": "7.0.1",
     "mocha": "4.0.0",
+    "mock-require": "2.0.2",
     "mz": "2.7.0",
     "umd-tough-cookie": "2.3.2",
     "wd": "1.4.1",

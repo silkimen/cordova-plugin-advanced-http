@@ -62,6 +62,6 @@ const tests = [
   }
 ];
 
-if (module && module.exports) {
+if (typeof module !== 'undefined' && module.exports) {
   module.exports = { tests: tests, hooks: hooks };
 }

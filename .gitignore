@@ -1,4 +1,5 @@
 node_modules/**
 tags
 .zedstate
+npm-debug.log
 /temp

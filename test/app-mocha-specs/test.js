@@ -4,7 +4,7 @@ const wd = require('wd');
 const apps = require('./helpers/apps');
 const caps = Object.assign({}, require('./helpers/caps'));
 const serverConfig = require('./helpers/server');
-const testDefinitions = require('../test-definitions');
+const testDefinitions = require('../app-test-definitions');
 const pkgjson = require('../../package.json');
 
 describe('Advanced HTTP', function() {

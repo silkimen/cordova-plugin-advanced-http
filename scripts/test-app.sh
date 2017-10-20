@@ -4,5 +4,5 @@ set -e
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/..
 
 pushd $ROOT
-./node_modules/.bin/mocha ./test/mocha-specs/test.js "$@"
+./node_modules/.bin/mocha ./test/app-mocha-specs/test.js "$@"
 popd

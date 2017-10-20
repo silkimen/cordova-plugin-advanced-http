@@ -38,8 +38,8 @@ function registerService(http) {
             useBasicAuth: function (username, password) {
                 return http.useBasicAuth(username, password);
             },
-            setHeader: function (header, value) {
-                return http.setHeader(header, value);
+            setHeader: function (host, header, value) {
+                return http.setHeader(host, header, value);
             },
             setDataSerializer: function (serializer) {
                 return http.setDataSerializer(serializer);
