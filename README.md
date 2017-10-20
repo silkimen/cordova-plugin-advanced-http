@@ -71,7 +71,7 @@ If set to `true`, it won't follow redirects automatically. This is a global sett
     cordova.plugin.http.disableRedirect(true);
 
 ### setDataSerializer
-Set the data serializer which will be used for all future POST and PUT requests. Takes a string representing the name of the serializer.
+Set the data serializer which will be used for all future PATCH, POST and PUT requests. Takes a string representing the name of the serializer.
 
     cordova.plugin.http.setDataSerializer("urlencoded");
 
@@ -187,6 +187,9 @@ Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#p
 
 ### put
 Execute a PUT request.  Takes a URL, data, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
+
+### patch
+Execute a PATCH request.  Takes a URL, data, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ### delete
 Execute a DELETE request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
