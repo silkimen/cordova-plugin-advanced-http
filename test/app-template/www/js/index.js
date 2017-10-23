@@ -1,6 +1,8 @@
 const app = {
   testIndex: -1,
 
+  lastResult: null,
+
   initialize: function() {
     document.getElementById('nextBtn').addEventListener('click', app.onNextBtnClick);
   },
@@ -12,11 +14,27 @@ const app = {
   },
 
   reject: function(content) {
+    document.getElementById('statusInput').value = 'finished';
     app.printResult('result - rejected', content);
+
+    app.lastResult = {
+      type: 'rejected',
+      data: content
+    };
   },
 
   resolve: function(content) {
+    document.getElementById('statusInput').value = 'finished';
     app.printResult('result - resolved', content);
+
+    app.lastResult = {
+      type: 'resolved',
+      data: content
+    };
+  },
+
+  getResult: function(cb) {
+    cb(app.lastResult);
   },
 
   runTest: function(index) {
@@ -24,6 +42,7 @@ const app = {
     const titleText = app.testIndex + ': ' + testDefinition.description;
     const expectedText = 'expected - ' + testDefinition.expected;
 
+    document.getElementById('statusInput').value = 'running';
     document.getElementById('expectedTextarea').value = expectedText;
     document.getElementById('resultTextarea').value = '';
     document.getElementById('descriptionLbl').innerText = titleText;
@@ -31,6 +50,8 @@ const app = {
   },
 
   onBeforeTest: function(testIndex, cb) {
+    app.lastResult = null;
+
     if (hooks && hooks.onBeforeEachTest) {
       return hooks.onBeforeEachTest(function() {
         const testDefinition = tests[testIndex];

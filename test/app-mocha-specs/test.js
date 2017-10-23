@@ -8,7 +8,7 @@ const testDefinitions = require('../app-test-definitions');
 const pkgjson = require('../../package.json');
 
 describe('Advanced HTTP', function() {
-  let driver;
+  let driver = null;
   let allPassed = true;
 
   this.timeout(900000);
@@ -37,10 +37,27 @@ describe('Advanced HTTP', function() {
     .then(text => text.match(/\d+:\ (.*)/)[1])
     .should.eventually.become(testTitle, 'Test description is not matching!');
 
-  const validateResult = text => driver
-    .elementById('resultTextarea')
-    .getAttribute('value')
-    .should.eventually.include(text);
+  const waitToBeFinished = timeout => new Promise((resolve, reject) => {
+    const timeoutTimestamp = Date.now() + timeout;
+    const checkIfFinished = () => driver
+      .elementById('statusInput')
+      .getValue()
+      .then(value => {
+        if (value === 'finished') {
+          resolve();
+        } else if (Date.now() > timeoutTimestamp) {
+          reject('Test function timed out!');
+        } else {
+          setTimeout(checkIfFinished, 500);
+        }
+      });
+
+    checkIfFinished();
+  });
+
+  const validateResult = testDefinition => driver
+    .safeExecute('app.lastResult')
+    .then(result => testDefinition.validationFunc(driver, result));
 
   const clickNext = () => driver
     .elementById('nextBtn')
@@ -67,7 +84,8 @@ describe('Advanced HTTP', function() {
       return clickNext()
         .then(() => validateTestIndex(index))
         .then(() => validateTestTitle(this.test.title))
-        .then(() => validateResult(definition.expected))
+        .then(() => waitToBeFinished(definition.timeout || 10000))
+        .then(() => validateResult(definition))
       });
   });
 });

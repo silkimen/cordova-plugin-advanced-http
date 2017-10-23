@@ -18,6 +18,10 @@ button, input, textarea {
   width: 100%;
 }
 
+input {
+  text-align: center;
+}
+
 h1 {
   font-size: 12pt;
   text-align: center;
