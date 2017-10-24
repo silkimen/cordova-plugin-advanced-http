@@ -234,3 +234,7 @@ This plugin utilizes some awesome open source networking libraries. These are bo
  - Android - [http-request](https://github.com/kevinsawicki/http-request)
 
 We made a few modifications to both of them.
+
+## Contribute & Develop
+
+We've set up a separate document for our [contribution guidelines](CONTRIBUTING.md).
