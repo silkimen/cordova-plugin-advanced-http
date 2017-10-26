@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.7.1
+
+- Fixed #36: setting basic authentication not working correctly
+- Fixed #35: Android headers not normalized (not returned in lowercase)
+
 ## v1.7.0
 
 - Feature #24: "setHeader" allows configuring headers for specified host

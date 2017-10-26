@@ -128,13 +128,15 @@ Remove all cookies associated with a given URL.
 Execute a POST request.  Takes a URL, data, and headers.
 
 #### success
-The success function receives a response object with 3 properties: status, data, and headers.  Status is the HTTP response code. Data is the response from the server as a string. Headers is an object with the headers.  Here's a quick example:
+The success function receives a response object with 3 properties: status, data, and headers.  **status** is the HTTP response code as numeric value. **data** is the response from the server as a string. **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
+
+Here's a quick example:
 
     {
         status: 200,
         data: "{'id': 12, 'message': 'test'}",
         headers: {
-            "Content-Length": "247"
+            "content-length": "247"
         }
     }
 
@@ -163,13 +165,15 @@ Most apis will return JSON meaning you'll want to parse the data like in the exa
 
 
 #### failure
-The error function receives a response object with 3 properties: status, error and headers.  Status is the HTTP response code.  Error is the error response from the server as a string.  Headers is an object with the headers.  Here's a quick example:
+The error function receives a response object with 3 properties: status, error and headers.  **status** is the HTTP response code as numeric value. **error** is the error response from the server as a string.  **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
+
+Here's a quick example:
 
     {
         status: 403,
         error: "Permission denied",
         headers: {
-            "Content-Length": "247"
+            "content-length": "247"
         }
     }
 

@@ -150,7 +150,7 @@ abstract class CordovaHttp {
             List<String> value = entry.getValue();
 
             if ((key != null) && (!value.isEmpty())) {
-                filteredHeaders.put(key, TextUtils.join(", ", value));
+                filteredHeaders.put(key.toLowerCase(), TextUtils.join(", ", value));
             }
         }
 
