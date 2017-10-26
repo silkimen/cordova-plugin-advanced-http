@@ -15,6 +15,9 @@ describe('Advanced HTTP www interface', function() {
   this.timeout(900000);
 
   beforeEach(() => {
+    // mocked btoa function (base 64 encoding strings)
+    global.btoa = decoded => new Buffer(decoded).toString('base64');
+
     mock('cordova/exec', noop);
     mock(`${PLUGIN_ID}.angular-integration`, { registerService: noop });
     mock(`${PLUGIN_ID}.cookie-handler`, {});
@@ -90,5 +93,10 @@ describe('Advanced HTTP www interface', function() {
     loadHttp();
 
     http.get('https://www.google.de/?gws_rd=ssl', {}, { myKey: 'myValue' }, noop, noop);
+  });
+
+  it('sets basic authentication header correctly', () => {
+    http.useBasicAuth('name', 'pass');
+    http.headers['*'].Authorization.should.equal('Basic bmFtZTpwYXNz');
   });
 });
