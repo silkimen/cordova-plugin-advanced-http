@@ -16,7 +16,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpPut extends CordovaHttp implements Runnable {
-    public CordovaHttpPut(String urlString, JSONObject data, String serializerName, JSONObject headers, int timeout, CallbackContext callbackContext) {
+    public CordovaHttpPut(String urlString, Object data, String serializerName, JSONObject headers, int timeout, CallbackContext callbackContext) {
         super(urlString, data, serializerName, headers, timeout, callbackContext);
     }
 
@@ -55,7 +55,7 @@ class CordovaHttpPut extends CordovaHttp implements Runnable {
             }
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
-        }  catch (HttpRequestException e) {
+        } catch (HttpRequestException e) {
             if (e.getCause() instanceof UnknownHostException) {
                 this.respondWithError(0, "The host could not be resolved");
             } else if (e.getCause() instanceof SocketTimeoutException) {
@@ -65,6 +65,8 @@ class CordovaHttpPut extends CordovaHttp implements Runnable {
             } else {
                 this.respondWithError("There was an error with the request");
             }
+        } catch (Exception e) {
+          this.respondWithError(-1, e.getMessage());
         }
     }
 }

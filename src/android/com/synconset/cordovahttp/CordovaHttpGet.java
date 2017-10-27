@@ -17,7 +17,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpGet extends CordovaHttp implements Runnable {
-    public CordovaHttpGet(String urlString, JSONObject params, JSONObject headers, int timeout, CallbackContext callbackContext) {
+    public CordovaHttpGet(String urlString, Object params, JSONObject headers, int timeout, CallbackContext callbackContext) {
         super(urlString, params, headers, timeout, callbackContext);
     }
 
@@ -59,6 +59,8 @@ class CordovaHttpGet extends CordovaHttp implements Runnable {
             } else {
                 this.respondWithError("There was an error with the request");
             }
+        } catch (Exception e) {
+          this.respondWithError(-1, e.getMessage());
         }
     }
 }

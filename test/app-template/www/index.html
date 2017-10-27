@@ -5,17 +5,17 @@
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <link rel="stylesheet" type="text/css" href="index.css">
     </head>
     <body>
         <h1 id="descriptionLbl">Advanced HTTP test suite</h1>
         <input value="idle" id="statusInput" readonly></input>
-        <textarea rows="16" cols="50" id="expectedTextarea">Click next to run first test.</textarea>
-        <textarea rows="16" cols="50" id="resultTextarea"></textarea>
+        <textarea rows="16" cols="50" id="expectedTextarea" readonly>Click next to run first test.</textarea>
+        <textarea rows="16" cols="50" id="resultTextarea" readonly></textarea>
         <button id="nextBtn">Run next test</button>
 
         <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/app-test-definitions.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="app-test-definitions.js"></script>
+        <script type="text/javascript" src="index.js"></script>
     </body>
 </html>

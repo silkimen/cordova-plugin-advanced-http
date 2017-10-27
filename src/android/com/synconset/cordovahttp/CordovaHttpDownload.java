@@ -23,7 +23,7 @@ import org.json.JSONObject;
 class CordovaHttpDownload extends CordovaHttp implements Runnable {
     private String filePath;
 
-    public CordovaHttpDownload(String urlString, JSONObject params, JSONObject headers, String filePath, int timeout, CallbackContext callbackContext) {
+    public CordovaHttpDownload(String urlString, Object params, JSONObject headers, String filePath, int timeout, CallbackContext callbackContext) {
         super(urlString, params, headers, timeout, callbackContext);
         this.filePath = filePath;
     }
@@ -69,6 +69,8 @@ class CordovaHttpDownload extends CordovaHttp implements Runnable {
             } else {
                 this.respondWithError("There was an error with the request");
             }
+        } catch (Exception e) {
+          this.respondWithError(-1, e.getMessage());
         }
     }
 }

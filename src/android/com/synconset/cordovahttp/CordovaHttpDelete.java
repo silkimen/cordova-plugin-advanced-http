@@ -17,7 +17,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpDelete extends CordovaHttp implements Runnable {
-    public CordovaHttpDelete(String urlString, JSONObject data, JSONObject headers, int timeout, CallbackContext callbackContext) {
+    public CordovaHttpDelete(String urlString, Object data, JSONObject headers, int timeout, CallbackContext callbackContext) {
         super(urlString, data, headers, timeout, callbackContext);
     }
 
@@ -59,6 +59,8 @@ class CordovaHttpDelete extends CordovaHttp implements Runnable {
             } else {
                 this.respondWithError("There was an error with the request");
             }
+        } catch (Exception e) {
+          this.respondWithError(-1, e.getMessage());
         }
     }
 }

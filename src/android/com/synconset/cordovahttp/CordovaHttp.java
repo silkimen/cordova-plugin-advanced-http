@@ -28,13 +28,13 @@ abstract class CordovaHttp {
     private static AtomicBoolean disableRedirect = new AtomicBoolean(false);
 
     private String urlString;
-    private JSONObject params;
+    private Object params;
     private String serializerName;
     private JSONObject headers;
     private int timeoutInMilliseconds;
     private CallbackContext callbackContext;
 
-    public CordovaHttp(String urlString, JSONObject params, JSONObject headers, int timeout, CallbackContext callbackContext) {
+    public CordovaHttp(String urlString, Object params, JSONObject headers, int timeout, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.serializerName = "default";
@@ -43,7 +43,7 @@ abstract class CordovaHttp {
         this.callbackContext = callbackContext;
     }
 
-    public CordovaHttp(String urlString, JSONObject params, String serializerName, JSONObject headers, int timeout, CallbackContext callbackContext) {
+    public CordovaHttp(String urlString, Object params, String serializerName, JSONObject headers, int timeout, CallbackContext callbackContext) {
         this.urlString = urlString;
         this.params = params;
         this.serializerName = serializerName;
@@ -78,7 +78,7 @@ abstract class CordovaHttp {
         return this.urlString;
     }
 
-    protected JSONObject getParamsObject() {
+    protected Object getParamsObject() {
         return this.params;
     }
 
@@ -86,8 +86,12 @@ abstract class CordovaHttp {
         return this.serializerName;
     }
 
-    protected HashMap<String, Object> getParamsMap() throws JSONException {
-        return this.getMapFromJSONObject(this.params);
+    protected HashMap<String, Object> getParamsMap() throws JSONException, Exception {
+        if (this.params instanceof JSONObject) {
+          return this.getMapFromJSONObject((JSONObject) this.params);
+        } else {
+          throw new Exception("unsupported params type, needs to be a JSON object");
+        }
     }
 
     protected JSONObject getHeadersObject() {

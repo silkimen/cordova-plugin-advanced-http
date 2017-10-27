@@ -36,7 +36,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("post")) {
             String urlString = args.getString(0);
-            JSONObject params = args.getJSONObject(1);
+            Object params = args.get(1);
             String serializerName = args.getString(2);
             JSONObject headers = args.getJSONObject(3);
             int timeoutInMilliseconds = args.getInt(4) * 1000;
@@ -45,7 +45,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             cordova.getThreadPool().execute(post);
         } else if (action.equals("get")) {
             String urlString = args.getString(0);
-            JSONObject params = args.getJSONObject(1);
+            Object params = args.get(1);
             JSONObject headers = args.getJSONObject(2);
             int timeoutInMilliseconds = args.getInt(3) * 1000;
             CordovaHttpGet get = new CordovaHttpGet(urlString, params, headers, timeoutInMilliseconds, callbackContext);
@@ -53,7 +53,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             cordova.getThreadPool().execute(get);
         } else if (action.equals("put")) {
             String urlString = args.getString(0);
-            JSONObject params = args.getJSONObject(1);
+            Object params = args.get(1);
             String serializerName = args.getString(2);
             JSONObject headers = args.getJSONObject(3);
             int timeoutInMilliseconds = args.getInt(4) * 1000;
@@ -62,7 +62,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             cordova.getThreadPool().execute(put);
         } else if (action.equals("patch")) {
             String urlString = args.getString(0);
-            JSONObject params = args.getJSONObject(1);
+            Object params = args.get(1);
             String serializerName = args.getString(2);
             JSONObject headers = args.getJSONObject(3);
             int timeoutInMilliseconds = args.getInt(4) * 1000;
@@ -72,7 +72,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         }
          else if (action.equals("delete")) {
             String urlString = args.getString(0);
-            JSONObject params = args.getJSONObject(1);
+            Object params = args.get(1);
             JSONObject headers = args.getJSONObject(2);
             int timeoutInMilliseconds = args.getInt(3) * 1000;
             CordovaHttpDelete delete = new CordovaHttpDelete(urlString, params, headers, timeoutInMilliseconds, callbackContext);
@@ -80,7 +80,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             cordova.getThreadPool().execute(delete);
         } else if (action.equals("head")) {
             String urlString = args.getString(0);
-            JSONObject params = args.getJSONObject(1);
+            Object params = args.get(1);
             JSONObject headers = args.getJSONObject(2);
             int timeoutInMilliseconds = args.getInt(3) * 1000;
             CordovaHttpHead head = new CordovaHttpHead(urlString, params, headers, timeoutInMilliseconds, callbackContext);
@@ -103,7 +103,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             callbackContext.success();
         } else if (action.equals("uploadFile")) {
             String urlString = args.getString(0);
-            JSONObject params = args.getJSONObject(1);
+            Object params = args.get(1);
             JSONObject headers = args.getJSONObject(2);
             String filePath = args.getString(3);
             String name = args.getString(4);
@@ -113,7 +113,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             cordova.getThreadPool().execute(upload);
         } else if (action.equals("downloadFile")) {
             String urlString = args.getString(0);
-            JSONObject params = args.getJSONObject(1);
+            Object params = args.get(1);
             JSONObject headers = args.getJSONObject(2);
             String filePath = args.getString(3);
             int timeoutInMilliseconds = args.getInt(4) * 1000;

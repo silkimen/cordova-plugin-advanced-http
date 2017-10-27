@@ -15,7 +15,13 @@ body {
 
 button, input, textarea {
   display: block;
+  box-sizing: border-box;
   width: 100%;
+}
+
+button {
+  height: 2.5em;
+  font-size: 10pt;
 }
 
 input {

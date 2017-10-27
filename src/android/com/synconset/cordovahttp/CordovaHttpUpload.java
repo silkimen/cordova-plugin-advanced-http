@@ -30,7 +30,7 @@ class CordovaHttpUpload extends CordovaHttp implements Runnable {
     private String filePath;
     private String name;
 
-    public CordovaHttpUpload(String urlString, JSONObject params, JSONObject headers, String filePath, String name, int timeout, CallbackContext callbackContext) {
+    public CordovaHttpUpload(String urlString, Object params, JSONObject headers, String filePath, String name, int timeout, CallbackContext callbackContext) {
         super(urlString, params, headers, timeout, callbackContext);
         this.filePath = filePath;
         this.name = name;
@@ -97,7 +97,7 @@ class CordovaHttpUpload extends CordovaHttp implements Runnable {
             this.respondWithError("There was an error loading the file");
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
-        }  catch (HttpRequestException e) {
+        } catch (HttpRequestException e) {
             if (e.getCause() instanceof UnknownHostException) {
                 this.respondWithError(0, "The host could not be resolved");
             } else if (e.getCause() instanceof SocketTimeoutException) {
@@ -107,6 +107,8 @@ class CordovaHttpUpload extends CordovaHttp implements Runnable {
             } else {
                 this.respondWithError("There was an error with the request");
             }
+        } catch (Exception e) {
+          this.respondWithError(-1, e.getMessage());
         }
     }
 }
