@@ -58,7 +58,7 @@ describe('Advanced HTTP www interface', function() {
     http.get('url', {}, {}, noop, noop);
   });
 
-  it('resolves host headers correctly', () => {
+  it('resolves host headers correctly (set without port number)', () => {
     mock(`${PLUGIN_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
@@ -75,6 +75,25 @@ describe('Advanced HTTP www interface', function() {
 
     http.setHeader('www.google.de', 'myKey', 'myValue');
     http.get('https://www.google.de/?gws_rd=ssl', {}, {}, noop, noop);
+  });
+
+  it('resolves host headers correctly (set with port number)', () => {
+    mock(`${PLUGIN_ID}.cookie-handler`, {
+      getCookieString: () => 'fakeCookieString'
+    });
+
+    mock('cordova/exec', (onSuccess, onFail, namespace, method, params) => {
+      const headers = params[2];
+      headers.should.eql({
+        Cookie: 'fakeCookieString',
+        myKey: 'myValue'
+      });
+    });
+
+    loadHttp();
+
+    http.setHeader('www.google.de:8080', 'myKey', 'myValue');
+    http.get('https://www.google.de:8080/?gws_rd=ssl', {}, {}, noop, noop);
   });
 
   it('resolves request headers correctly', () => {

@@ -3,7 +3,7 @@
 ## v1.7.1
 
 - Fixed #36: setting basic authentication not working correctly
-- Fixed #35: Android headers not normalized (not returned in lowercase)
+- Fixed #35: Android headers are not normalized (not returned in lowercase)
 
 ## v1.7.0
 
