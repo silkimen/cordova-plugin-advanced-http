@@ -2,8 +2,9 @@
 
 ## v1.7.1
 
-- Fixed #36: setting basic authentication not working correctly
+- Fixed #36: setting basic authentication not working correctly (thanks jkfb)
 - Fixed #35: Android headers are not normalized (not returned in lowercase)
+- Fixed #26: JSON request with array data is not working on Android (JSON error)
 
 ## v1.7.0
 

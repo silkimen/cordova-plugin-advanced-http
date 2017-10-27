@@ -4,7 +4,9 @@ language: objective-c
 os: osx
 osx_image: xcode9.1
 
-cache: false
+cache:
+  directories:
+    - node_modules
 
 addons:
   sauce_connect:
