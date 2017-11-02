@@ -33,17 +33,15 @@ class CordovaHttpDownload extends CordovaHttp implements Runnable {
         try {
             HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParamsMap(), true);
 
-            request.readTimeout(this.getRequestTimeout());
-            this.setupRedirect(request);
-            this.setupSecurity(request);
-            request.acceptCharset(CHARSET);
-            request.headers(this.getHeadersMap());
-            request.uncompress(true);
-            int code = request.code();
+            this.prepareRequest(request);
 
             JSONObject response = new JSONObject();
-            this.addResponseHeaders(request, response);
+            int code = request.code();
+
             response.put("status", code);
+            response.put("url", request.url().toString());
+            this.addResponseHeaders(request, response);
+
             if (code >= 200 && code < 300) {
                 URI uri = new URI(filePath);
                 File file = new File(uri);
@@ -60,17 +58,9 @@ class CordovaHttpDownload extends CordovaHttp implements Runnable {
         } catch (JSONException e) {
             this.respondWithError("There was an error generating the response");
         } catch (HttpRequestException e) {
-            if (e.getCause() instanceof UnknownHostException) {
-                this.respondWithError(0, "The host could not be resolved");
-            } else if (e.getCause() instanceof SocketTimeoutException) {
-                this.respondWithError(1, "The request timed out");
-            } else if (e.getCause() instanceof SSLHandshakeException) {
-                this.respondWithError("SSL handshake failed");
-            } else {
-                this.respondWithError("There was an error with the request");
-            }
+            this.handleHttpRequestException(e);
         } catch (Exception e) {
-          this.respondWithError(-1, e.getMessage());
+          this.respondWithError(e.getMessage());
         }
     }
 }

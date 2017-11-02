@@ -29,17 +29,17 @@ describe('Advanced HTTP www interface', function() {
     http.headers['*'].myKey.should.equal('myValue');
   });
 
-  it('sets global headers correctly with three args (new interface)', () => {
+  it('sets global headers correctly with three args (new interface) #24', () => {
     http.setHeader('*', 'myKey', 'myValue');
     http.headers['*'].myKey.should.equal('myValue');
   });
 
-  it('sets host headers correctly', () => {
+  it('sets host headers correctly #24', () => {
     http.setHeader('www.google.de', 'myKey', 'myValue');
     http.headers['www.google.de'].myKey.should.equal('myValue');
   });
 
-  it('resolves global headers correctly', () => {
+  it('resolves global headers correctly #24', () => {
     mock(`${PLUGIN_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
@@ -58,7 +58,7 @@ describe('Advanced HTTP www interface', function() {
     http.get('url', {}, {}, noop, noop);
   });
 
-  it('resolves host headers correctly (set without port number)', () => {
+  it('resolves host headers correctly (set without port number) #37', () => {
     mock(`${PLUGIN_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
@@ -77,7 +77,7 @@ describe('Advanced HTTP www interface', function() {
     http.get('https://www.google.de/?gws_rd=ssl', {}, {}, noop, noop);
   });
 
-  it('resolves host headers correctly (set with port number)', () => {
+  it('resolves host headers correctly (set with port number) #37', () => {
     mock(`${PLUGIN_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
@@ -114,7 +114,7 @@ describe('Advanced HTTP www interface', function() {
     http.get('https://www.google.de/?gws_rd=ssl', {}, { myKey: 'myValue' }, noop, noop);
   });
 
-  it('sets basic authentication header correctly', () => {
+  it('sets basic authentication header correctly #36', () => {
     http.useBasicAuth('name', 'pass');
     http.headers['*'].Authorization.should.equal('Basic bmFtZTpwYXNz');
   });

@@ -132,7 +132,7 @@ const tests = [
       JSON.parse(result.data.data).json.should.eql({ test: 'testString' });
     }
   },{
-    description: 'should send JSON array correctly (POST)',
+    description: 'should send JSON array correctly (POST) #26',
     expected: 'resolved: {"status": 200, data: "[ 1, 2, 3 ]\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', [ 1, 2, 3 ], {}, resolve, reject); },
@@ -141,7 +141,7 @@ const tests = [
       JSON.parse(result.data.data).json.should.eql([ 1, 2, 3 ]);
     }
   },{
-    description: 'should send JSON array correctly (PUT)',
+    description: 'should send JSON array correctly (PUT) #26',
     expected: 'resolved: {"status": 200, data: "[ 1, 2, 3 ]\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.put('http://httpbin.org/anything', [ 1, 2, 3 ], {}, resolve, reject); },
@@ -150,13 +150,21 @@ const tests = [
       JSON.parse(result.data.data).json.should.eql([ 1, 2, 3 ]);
     }
   },{
-    description: 'should send JSON array correctly (PATCH)',
+    description: 'should send JSON array correctly (PATCH) #26',
     expected: 'resolved: {"status": 200, data: "[ 1, 2, 3 ]\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', [ 1, 2, 3 ], {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
       JSON.parse(result.data.data).json.should.eql([ 1, 2, 3 ]);
+    }
+  },{
+    description: 'should resolve correct URL after redirect (GET) #33',
+    expected: 'resolved: {"status": 200, url: "http://httpbin.org/anything", ...',
+    func: function(resolve, reject) { cordova.plugin.http.get('http://httpbin.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.url.should.be.equal('http://httpbin.org/anything');
     }
   }
 ];

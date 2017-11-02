@@ -8,6 +8,11 @@ import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+
+import javax.net.ssl.SSLHandshakeException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +22,7 @@ import java.util.Iterator;
 import android.text.TextUtils;
 
 import com.github.kevinsawicki.http.HttpRequest;
+import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
@@ -120,6 +126,7 @@ abstract class CordovaHttp {
         if (sslPinning.get()) {
             request.pinToCerts();
         }
+
         return request;
     }
 
@@ -127,7 +134,19 @@ abstract class CordovaHttp {
         if (disableRedirect.get()) {
             request.followRedirects(false);
         }
+
         return request;
+    }
+
+    protected HttpRequest setupDataSerializer(HttpRequest request) throws JSONException, Exception {
+      if (new String("json").equals(this.getSerializerName())) {
+          request.contentType(request.CONTENT_TYPE_JSON, request.CHARSET_UTF8);
+          request.send(this.getParamsObject().toString());
+      } else {
+          request.form(this.getParamsMap());
+      }
+
+      return request;
     }
 
     protected void respondWithError(int status, String msg) {
@@ -181,5 +200,48 @@ abstract class CordovaHttp {
             map.put(key, object.get(key));
         }
         return map;
+    }
+
+    protected void prepareRequest(HttpRequest request) throws HttpRequestException, JSONException {
+      this.setupRedirect(request);
+      this.setupSecurity(request);
+      request.readTimeout(this.getRequestTimeout());
+      request.acceptCharset(CHARSET);
+      request.headers(this.getHeadersMap());
+      request.uncompress(true);
+    }
+
+    protected void returnResponseObject(HttpRequest request) throws HttpRequestException {
+      try {
+        JSONObject response = new JSONObject();
+        int code = request.code();
+        String body = request.body(CHARSET);
+
+        response.put("status", code);
+        response.put("url", request.url().toString());
+        this.addResponseHeaders(request, response);
+
+        if (code >= 200 && code < 300) {
+            response.put("data", body);
+            this.getCallbackContext().success(response);
+        } else {
+            response.put("error", body);
+            this.getCallbackContext().error(response);
+        }
+      } catch(JSONException e) {
+        this.respondWithError("There was an error generating the response");
+      }
+    }
+
+    protected void handleHttpRequestException(HttpRequestException e) {
+      if (e.getCause() instanceof UnknownHostException) {
+          this.respondWithError(0, "The host could not be resolved");
+      } else if (e.getCause() instanceof SocketTimeoutException) {
+          this.respondWithError(1, "The request timed out");
+      } else if (e.getCause() instanceof SSLHandshakeException) {
+          this.respondWithError("SSL handshake failed");
+      } else {
+          this.respondWithError("There was an error with the request");
+      }
     }
 }
