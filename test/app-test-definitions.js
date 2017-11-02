@@ -6,7 +6,17 @@ const hooks = {
 
 const helpers = {
   acceptAllCerts: function(done) { cordova.plugin.http.acceptAllCerts(true, done, done); },
-  setJsonSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('json')); }
+  setJsonSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('json')); },
+  getWithXhr: function(done, url) {
+    var xhr = new XMLHttpRequest();
+
+    xhr.addEventListener('load', function() {
+      done(this.responseText);
+    });
+
+    xhr.open('GET', url);
+    xhr.send();
+  }
 };
 
 const tests = [
@@ -165,6 +175,30 @@ const tests = [
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
       result.data.url.should.be.equal('http://httpbin.org/anything');
+    }
+  },{
+    description: 'should download a file from given URL to given path in local filesystem',
+    expected: 'resolved: {"content": "<?xml version=\'1.0\' encoding=\'us-ascii\'?>\\n\\n<!--  A SAMPLE set of slides  -->" ...',
+    func: function(resolve, reject) {
+      var sourceUrl = 'http://httpbin.org/xml';
+      var targetPath = cordova.file.cacheDirectory + 'test.xml';
+
+      cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function(entry) {
+        helpers.getWithXhr(function(content) {
+          resolve({
+            sourceUrl: sourceUrl,
+            targetPath: targetPath,
+            fullPath: entry.fullPath,
+            name: entry.name,
+            content: content
+          });
+        }, targetPath);
+      }, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.name.should.be.equal('test.xml');
+      result.data.content.should.be.equal("<?xml version='1.0' encoding='us-ascii'?>\n\n<!--  A SAMPLE set of slides  -->\n\n<slideshow \n    title=\"Sample Slide Show\"\n    date=\"Date of publication\"\n    author=\"Yours Truly\"\n    >\n\n    <!-- TITLE SLIDE -->\n    <slide type=\"all\">\n      <title>Wake up to WonderWidgets!</title>\n    </slide>\n\n    <!-- OVERVIEW -->\n    <slide type=\"all\">\n        <title>Overview</title>\n        <item>Why <em>WonderWidgets</em> are great</item>\n        <item/>\n        <item>Who <em>buys</em> WonderWidgets</item>\n    </slide>\n\n</slideshow>");
     }
   }
 ];
