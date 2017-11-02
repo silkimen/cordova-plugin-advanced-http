@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.8.0
+
+- Feature #33: response object contains response url
+
 ## v1.7.1
 
 - Fixed #36: setting basic authentication not working correctly (thanks jkfb)
