@@ -16,6 +16,19 @@ const helpers = {
 
     xhr.open('GET', url);
     xhr.send();
+  },
+  writeToFile: function (done, fileName, content) {
+    window.resolveLocalFileSystemURL(cordova.file.cacheDirectory, function (directoryEntry) {
+      directoryEntry.getFile(fileName, { create: true, exclusive: false }, function (fileEntry) {
+        fileEntry.createWriter(function (fileWriter) {
+          var blob = new Blob([ content ], { type: 'text/plain' });
+
+          fileWriter.onwriteend = done;
+          fileWriter.onerror = done;
+          fileWriter.write(blob);
+        }, done);
+      }, done);
+    }, done);
   }
 };
 
@@ -166,6 +179,7 @@ const tests = [
     func: function(resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', [ 1, 2, 3 ], {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
+      result.data.data.should.be.a('string');
       JSON.parse(result.data.data).json.should.eql([ 1, 2, 3 ]);
     }
   },{
@@ -199,6 +213,31 @@ const tests = [
       result.type.should.be.equal('resolved');
       result.data.name.should.be.equal('test.xml');
       result.data.content.should.be.equal("<?xml version='1.0' encoding='us-ascii'?>\n\n<!--  A SAMPLE set of slides  -->\n\n<slideshow \n    title=\"Sample Slide Show\"\n    date=\"Date of publication\"\n    author=\"Yours Truly\"\n    >\n\n    <!-- TITLE SLIDE -->\n    <slide type=\"all\">\n      <title>Wake up to WonderWidgets!</title>\n    </slide>\n\n    <!-- OVERVIEW -->\n    <slide type=\"all\">\n        <title>Overview</title>\n        <item>Why <em>WonderWidgets</em> are great</item>\n        <item/>\n        <item>Who <em>buys</em> WonderWidgets</item>\n    </slide>\n\n</slideshow>");
+    }
+  },{
+    description: 'should upload a file from given path in local filesystem to given URL #27',
+    expected: 'resolved: {"status": 200, "data": "files": {"test-file.txt": "I am a dummy file. I am used ...',
+    func: function(resolve, reject) {
+      var fileName = 'test-file.txt';
+      var fileContent = 'I am a dummy file. I am used for testing purposes!';
+      var sourcePath = cordova.file.cacheDirectory + fileName;
+      var targetUrl = 'http://httpbin.org/post';
+
+      helpers.writeToFile(function() {
+        cordova.plugin.http.uploadFile(targetUrl, {}, {}, sourcePath, fileName, resolve, reject);
+      }, fileName, fileContent);
+    },
+    validationFunc: function(driver, result) {
+      var fileName = 'test-file.txt';
+      var fileContent = 'I am a dummy file. I am used for testing purposes!';
+
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.a('string');
+
+      JSON
+        .parse(result.data.data)
+        .files[fileName]
+        .should.be.equal(fileContent);
     }
   }
 ];

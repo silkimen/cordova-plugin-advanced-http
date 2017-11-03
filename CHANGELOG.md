@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.8.1
+
+- Fixed #27: "uploadFile" method doesn't return data object on iOS (thanks Faisalali23 and laiyinjie)
+
 ## v1.8.0
 
 - Feature #33: response object contains response url
