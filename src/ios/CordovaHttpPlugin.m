@@ -366,7 +366,7 @@
         }
     } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-        [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
+        [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
         [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
