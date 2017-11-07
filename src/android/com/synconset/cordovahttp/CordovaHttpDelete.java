@@ -57,7 +57,7 @@ class CordovaHttpDelete extends CordovaHttp implements Runnable {
             } else if (e.getCause() instanceof SSLHandshakeException) {
                 this.respondWithError("SSL handshake failed");
             } else {
-                this.respondWithError("There was an error with the request");
+                this.respondWithError("There was an error with the request: " + e.getMessage());
             }
         } catch (Exception e) {
           this.respondWithError(-1, e.getMessage());

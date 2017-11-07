@@ -8,14 +8,16 @@ const testDefinitions = require('../app-test-definitions');
 const pkgjson = require('../../package.json');
 
 describe('Advanced HTTP', function() {
+  const isDevice = process.argv.includes('--device');
+  const isAndroid = process.argv.includes('--android');
+  const targetInfo = { isDevice, isAndroid };
+
   let driver = null;
   let allPassed = true;
 
   this.timeout(900000);
 
   const getCaps = appName => {
-    const isDevice = process.argv.includes('--device');
-    const isAndroid = process.argv.includes('--android');
     const desiredCaps = caps[(isAndroid ? 'android' : 'ios') + (isDevice ? 'Device' : 'Emulator')];
     const desiredApp = apps[(isAndroid ? 'android' : 'ios') + appName];
 
@@ -57,7 +59,7 @@ describe('Advanced HTTP', function() {
 
   const validateResult = testDefinition => driver
     .safeExecute('app.lastResult')
-    .then(result => testDefinition.validationFunc(driver, result));
+    .then(result => testDefinition.validationFunc(driver, result, targetInfo));
 
   const clickNext = () => driver
     .elementById('nextBtn')

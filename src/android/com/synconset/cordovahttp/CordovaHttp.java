@@ -161,7 +161,7 @@ abstract class CordovaHttp {
     }
 
     protected void respondWithError(String msg) {
-        this.respondWithError(500, msg);
+        this.respondWithError(-1, msg);
     }
 
     protected void addResponseHeaders(HttpRequest request, JSONObject response) throws JSONException {
@@ -241,7 +241,7 @@ abstract class CordovaHttp {
       } else if (e.getCause() instanceof SSLHandshakeException) {
           this.respondWithError("SSL handshake failed");
       } else {
-          this.respondWithError("There was an error with the request");
+          this.respondWithError("There was an error with the request: " + e.getMessage());
       }
     }
 }
