@@ -28,7 +28,7 @@ install:
 - echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter extra-android-support
 - echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter extra-android-m2repository
 - echo y | ./android-sdk-macosx/tools/android update sdk --no-ui --all --filter extra-google-m2repository
-- export ANDROID_HOME=./android-sdk-macosx
+- export ANDROID_HOME=$(pwd)/android-sdk-macosx
 - export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/23.0.2
 
 script:
