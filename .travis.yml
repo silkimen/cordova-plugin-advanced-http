@@ -32,10 +32,13 @@ install:
 - export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/23.0.2
 
 script:
-- travis_wait scripts/build-test-app.sh
-- scripts/upload-artifact.sh
 - npm run testjs
+- travis_wait scripts/build-test-app.sh --ios --emulator
+- scripts/upload-artifact.sh --ios
 - scripts/test-app.sh --ios --emulator
+- travis_wait scripts/build-test-app.sh --android --emulator
+- scripts/upload-artifact.sh --android
+- scripts/test-app.sh --android --emulator
 
 after_success:
 
