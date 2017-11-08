@@ -19,20 +19,22 @@ addons:
 
 before_install:
 - export LANG=en_US.UTF-8
-- brew update
 
 install:
 - npm install
-- if [ $TARGET_PLATFORM = "android" ]; then brew install gradle; fi
-- if [ $TARGET_PLATFORM = "android" ]; then scripts/setup-android-sdk.sh; fi
-- if [ $TARGET_PLATFORM = "android" ]; then export ANDROID_HOME=$(pwd)/android-sdk-macosx; fi
-- if [ $TARGET_PLATFORM = "android" ]; then export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/23.0.2; fi
+- if [ $TARGET_PLATFORM = "android" ]; then
+    brew update &&
+    brew install gradle &&
+    scripts/setup-android-sdk.sh &&
+    export ANDROID_HOME=$(pwd)/android-sdk-macosx &&
+    export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/23.0.2;
+  fi
 
 script:
 - npm run testjs
-- travis_wait scripts/build-test-app.sh --$TARGET_PLATFORM --emulator
-- scripts/upload-artifact.sh --$TARGET_PLATFORM
-- scripts/test-app.sh --$TARGET_PLATFORM --emulator
+- travis_wait scripts/build-test-app.sh --$TARGET_PLATFORM --emulator &&
+  scripts/upload-artifact.sh --$TARGET_PLATFORM &&
+  scripts/test-app.sh --$TARGET_PLATFORM --emulator;
 
 after_success:
 
