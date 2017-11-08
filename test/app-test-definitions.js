@@ -7,6 +7,7 @@ const hooks = {
 const helpers = {
   acceptAllCerts: function(done) { cordova.plugin.http.acceptAllCerts(true, done, done); },
   setJsonSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('json')); },
+  setUrlEncodedSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('urlencoded')); },
   getWithXhr: function(done, url) {
     var xhr = new XMLHttpRequest();
 
@@ -181,6 +182,33 @@ const tests = [
       result.type.should.be.equal('resolved');
       result.data.data.should.be.a('string');
       JSON.parse(result.data.data).json.should.eql([ 1, 2, 3 ]);
+    }
+  },{
+    description: 'should send url encoded data correctly (POST) #41',
+    expected: 'resolved: {"status": 200, data: "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    before: helpers.setUrlEncodedSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).form.should.eql({ test: 'testString' });
+    }
+  },{
+    description: 'should send url encoded data correctly (PUT)',
+    expected: 'resolved: {"status": 200, data: "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    before: helpers.setUrlEncodedSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.put('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).form.should.eql({ test: 'testString' });
+    }
+  },{
+    description: 'should send url encoded data correctly (PATCH)',
+    expected: 'resolved: {"status": 200, data: "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    before: helpers.setUrlEncodedSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).form.should.eql({ test: 'testString' });
     }
   },{
     description: 'should resolve correct URL after redirect (GET) #33',
