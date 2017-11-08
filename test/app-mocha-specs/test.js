@@ -18,10 +18,11 @@ describe('Advanced HTTP', function() {
   this.timeout(900000);
 
   const getCaps = appName => {
-    const desiredCaps = caps[(isAndroid ? 'android' : 'ios') + (isDevice ? 'Device' : 'Emulator')];
-    const desiredApp = apps[(isAndroid ? 'android' : 'ios') + appName];
+    const desiredOs = isAndroid ? 'android' : 'ios';
+    const desiredCaps = caps[desiredOs + (isDevice ? 'Device' : 'Emulator')];
+    const desiredApp = apps[desiredOs + appName];
 
-    desiredCaps.name = pkgjson.name;
+    desiredCaps.name = pkgjson.name + ` (${desiredOs})`;
     desiredCaps.app = desiredApp;
 
     return desiredCaps;
