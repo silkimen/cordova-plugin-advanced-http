@@ -24,4 +24,5 @@
     </platform>
     <engine name="android" spec="6.2.3" />
     <engine name="ios" spec="4.4.0" />
+    <plugin name="cordova-plugin-file" spec="4.3.3" />
 </widget>
