@@ -177,7 +177,10 @@ var http = {
     removeCookies: function (url, callback) {
         cookieHandler.removeCookies(url, callback);
     },
-    setRequestTimeout: function(timeout) {
+    getCookieString: function (url) {
+        return cookieHandler.getCookieString(url);
+    },
+    setRequestTimeout: function (timeout) {
         this.timeoutInSeconds = timeout;
     },
     enableSSLPinning: function (enable, success, failure) {
@@ -186,7 +189,7 @@ var http = {
     acceptAllCerts: function (allow, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'acceptAllCerts', [allow]);
     },
-    disableRedirect: function(disable, success, failure) {
+    disableRedirect: function (disable, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [disable]);
     },
     validateDomainName: function (validate, success, failure) {
