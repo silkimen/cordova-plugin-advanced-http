@@ -293,12 +293,13 @@ cordova.plugin.http.downloadFile("https://google.com/", {
 
 ## Libraries
 
-This plugin utilizes some awesome open source networking libraries. These are both MIT licensed:
+This plugin utilizes some awesome open source libraries:
 
- - iOS - [AFNetworking](https://github.com/AFNetworking/AFNetworking)
- - Android - [http-request](https://github.com/kevinsawicki/http-request)
+ - iOS - [AFNetworking](https://github.com/AFNetworking/AFNetworking) (MIT licensed)
+ - Android - [http-request](https://github.com/kevinsawicki/http-request) (MIT licensed)
+ - Cookie handling - [tough-cookie](https://github.com/salesforce/tough-cookie) (BSD-3-Clause licensed)
 
-We made a few modifications to both of them.
+We made a few modifications to the networking libraries.
 
 ## Contribute & Develop
 
