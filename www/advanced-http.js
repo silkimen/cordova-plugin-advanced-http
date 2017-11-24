@@ -39,6 +39,10 @@ var exec = require('cordova/exec');
 var angularIntegration = require(pluginId +'.angular-integration');
 var cookieHandler = require(pluginId + '.cookie-handler');
 
+var MANDATORY_SUCCESS = 'advanced-http: missing mandatory "onSuccess" callback function';
+var MANDATORY_FAIL = 'advanced-http: missing mandatory "onFail" callback function';
+var ADDING_COOKIES_NOT_SUPPORTED = 'advanced-http: "setHeader" does not support adding cookies, please use "setCookie" function instead';
+
 // Thanks Mozilla: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
 function b64EncodeUnicode(str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
@@ -134,11 +138,11 @@ function getMergedHeaders(url, requestHeaders, predefinedHeaders) {
 
 function handleMissingCallbacks(successFn, failFn) {
     if (Object.prototype.toString.call(successFn) !== '[object Function]') {
-        throw new Error('advanced-http: missing mandatory "onSuccess" callback function');
+        throw new Error(MANDATORY_SUCCESS);
     }
 
     if (Object.prototype.toString.call(failFn) !== '[object Function]') {
-        throw new Error('advanced-http: missing mandatory "onFail" callback function');
+        throw new Error(MANDATORY_FAIL);
     }
 }
 
@@ -163,6 +167,10 @@ var http = {
             host = arguments[0];
             header = arguments[1];
             value = arguments[2];
+        }
+
+        if (header.toLowerCase() === 'cookie') {
+          throw new Error(ADDING_COOKIES_NOT_SUPPORTED);
         }
 
         this.headers[host] = this.headers[host] || {};

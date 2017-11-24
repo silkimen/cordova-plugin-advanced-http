@@ -118,4 +118,8 @@ describe('Advanced HTTP www interface', function() {
     http.useBasicAuth('name', 'pass');
     http.headers['*'].Authorization.should.equal('Basic bmFtZTpwYXNz');
   });
+
+  it('throws an Error when you try to add a cookie by using "setHeader" #46', () => {
+    (function() { http.setHeader('*', 'cookie', 'value') }).should.throw();
+  });
 });
