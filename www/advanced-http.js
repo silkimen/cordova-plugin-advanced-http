@@ -171,8 +171,11 @@ var http = {
     setDataSerializer: function (serializer) {
         this.dataSerializer = checkSerializer(serializer);
     },
+    setCookie: function (url, cookie, options) {
+        cookieHandler.setCookie(url, cookie, options);
+    },
     clearCookies: function () {
-        return cookieHandler.clearCookies();
+        cookieHandler.clearCookies();
     },
     removeCookies: function (url, callback) {
         cookieHandler.removeCookies(url, callback);

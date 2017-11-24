@@ -4,6 +4,7 @@
 
 - Feature #44: "getCookieString" method is exposed
 - Feature #43: added support for content type "application/javascript" on iOS (thanks wh33ler)
+- Feature #46: "setCookie" allows adding custom cookies
 
 ## v1.8.1
 

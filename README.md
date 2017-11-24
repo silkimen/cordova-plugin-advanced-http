@@ -114,6 +114,20 @@ Set how long to wait for a request to respond, in seconds.
 cordova.plugin.http.setRequestTimeout(5.0);
 ```
 
+### getCookieString
+Returns saved cookies (as string) matching given URL.
+
+```js
+cordova.plugin.http.getCookieString(url);
+```
+
+### setCookie
+Add a custom cookie. Takes a URL, a cookie string and an options object. See [ToughCookie documentation](https://github.com/salesforce/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie) for allowed options.
+
+```js
+cordova.plugin.http.setCookie(url, cookie, options);
+```
+
 ### clearCookies
 Clear the cookie store.
 
@@ -157,7 +171,7 @@ This function was removed in v1.6.2. Domain name validation is disabled automati
 Remove all cookies associated with a given URL.
 
 ```js
-cordova.plugin.http.removeCookies(url);
+cordova.plugin.http.removeCookies(url, callback);
 ```
 
 ### post<a name="post"></a>
