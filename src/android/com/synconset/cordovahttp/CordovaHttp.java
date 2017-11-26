@@ -6,6 +6,7 @@ package com.synconset.cordovahttp;
 import org.apache.cordova.CallbackContext;
 
 import org.json.JSONException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.SocketTimeoutException;
@@ -13,6 +14,7 @@ import java.net.UnknownHostException;
 
 import javax.net.ssl.SSLHandshakeException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -191,13 +193,28 @@ abstract class CordovaHttp {
         return map;
     }
 
+    protected ArrayList<Object> getListFromJSONArray(JSONArray array) throws JSONException {
+      ArrayList<Object> list = new ArrayList<Object>();
+
+      for (int i = 0; i < array.length(); i++) {
+          list.add(array.get(i));
+      }
+      return list;
+    }
+
     protected HashMap<String, Object> getMapFromJSONObject(JSONObject object) throws JSONException {
         HashMap<String, Object> map = new HashMap<String, Object>();
         Iterator<?> i = object.keys();
 
         while(i.hasNext()) {
             String key = (String)i.next();
-            map.put(key, object.get(key));
+            Object value = object.get(key);
+
+            if (value instanceof JSONArray) {
+                map.put(key, getListFromJSONArray((JSONArray)value));
+            } else {
+                map.put(key, object.get(key));
+            }
         }
         return map;
     }

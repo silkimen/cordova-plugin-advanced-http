@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.1
+
+- Fixed #45: does not encode arrays correctly as HTTP GET parameter on Android
+
 ## v1.9.0
 
 - Feature #44: "getCookieString" method is exposed

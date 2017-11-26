@@ -130,7 +130,7 @@ const tests = [
     }
   },{
     description: 'should send JSON object correctly (POST)',
-    expected: 'resolved: {"status": 200, data: "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -139,7 +139,7 @@ const tests = [
     }
   },{
     description: 'should send JSON object correctly (PUT)',
-    expected: 'resolved: {"status": 200, data: "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.put('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -148,7 +148,7 @@ const tests = [
     }
   },{
     description: 'should send JSON object correctly (PATCH)',
-    expected: 'resolved: {"status": 200, data: "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -157,7 +157,7 @@ const tests = [
     }
   },{
     description: 'should send JSON array correctly (POST) #26',
-    expected: 'resolved: {"status": 200, data: "[ 1, 2, 3 ]\" ...',
+    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', [ 1, 2, 3 ], {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -166,7 +166,7 @@ const tests = [
     }
   },{
     description: 'should send JSON array correctly (PUT) #26',
-    expected: 'resolved: {"status": 200, data: "[ 1, 2, 3 ]\" ...',
+    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.put('http://httpbin.org/anything', [ 1, 2, 3 ], {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -175,7 +175,7 @@ const tests = [
     }
   },{
     description: 'should send JSON array correctly (PATCH) #26',
-    expected: 'resolved: {"status": 200, data: "[ 1, 2, 3 ]\" ...',
+    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]\" ...',
     before: helpers.setJsonSerializer,
     func: function(resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', [ 1, 2, 3 ], {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -185,7 +185,7 @@ const tests = [
     }
   },{
     description: 'should send url encoded data correctly (POST) #41',
-    expected: 'resolved: {"status": 200, data: "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
     before: helpers.setUrlEncodedSerializer,
     func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -194,7 +194,7 @@ const tests = [
     }
   },{
     description: 'should send url encoded data correctly (PUT)',
-    expected: 'resolved: {"status": 200, data: "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
     before: helpers.setUrlEncodedSerializer,
     func: function(resolve, reject) { cordova.plugin.http.put('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -203,7 +203,7 @@ const tests = [
     }
   },{
     description: 'should send url encoded data correctly (PATCH)',
-    expected: 'resolved: {"status": 200, data: "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
     before: helpers.setUrlEncodedSerializer,
     func: function(resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
@@ -266,6 +266,21 @@ const tests = [
         .parse(result.data.data)
         .files[fileName]
         .should.be.equal(fileContent);
+    }
+  },{
+    description: 'should encode HTTP array params correctly (GET) #45',
+    expected: 'resolved: {"status": 200, "data": "{\\"url\\":\\"http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3\\"}\" ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://httpbin.org/get', { myArray: [ 'val1', 'val2', 'val3' ], myString: 'testString' }, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.a('string');
+
+      JSON
+        .parse(result.data.data)
+        .url
+        .should.be.equal('http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
     }
   }
 ];
