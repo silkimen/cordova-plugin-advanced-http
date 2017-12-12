@@ -33,7 +33,7 @@
  */
 
 var pluginId = module.id.slice(0, module.id.indexOf('.'));
-var validSerializers = ['urlencoded', 'json'];
+var validSerializers = ['urlencoded', 'json', 'raw' ];
 
 var exec = require('cordova/exec');
 var angularIntegration = require(pluginId +'.angular-integration');
