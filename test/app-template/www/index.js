@@ -33,6 +33,16 @@ const app = {
     };
   },
 
+  throw: function(error) {
+    document.getElementById('statusInput').value = 'finished';
+    app.printResult('result - throwed', error.message);
+
+    app.lastResult = {
+      type: 'throwed',
+      message: error.message
+    };
+  },
+
   getResult: function(cb) {
     cb(app.lastResult);
   },
@@ -46,7 +56,12 @@ const app = {
     document.getElementById('expectedTextarea').value = expectedText;
     document.getElementById('resultTextarea').value = '';
     document.getElementById('descriptionLbl').innerText = titleText;
-    testDefinition.func(app.resolve, app.reject);
+
+    try {
+      testDefinition.func(app.resolve, app.reject);
+    } catch (error) {
+      app.throw(error);
+    }
   },
 
   onBeforeTest: function(testIndex, cb) {

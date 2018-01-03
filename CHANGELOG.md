@@ -3,6 +3,7 @@
 ## 1.9.1
 
 - Fixed #45: does not encode arrays correctly as HTTP GET parameter on Android
+- Fixed #54: requests are not responding on iOS with non-string values in header object
 
 ## v1.9.0
 

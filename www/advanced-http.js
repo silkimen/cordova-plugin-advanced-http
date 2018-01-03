@@ -42,6 +42,7 @@ var cookieHandler = require(pluginId + '.cookie-handler');
 var MANDATORY_SUCCESS = 'advanced-http: missing mandatory "onSuccess" callback function';
 var MANDATORY_FAIL = 'advanced-http: missing mandatory "onFail" callback function';
 var ADDING_COOKIES_NOT_SUPPORTED = 'advanced-http: "setHeader" does not support adding cookies, please use "setCookie" function instead';
+var HEADER_VALUE_MUST_BE_STRING = 'advanced-http: header values must be strings';
 
 // Thanks Mozilla: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
 function b64EncodeUnicode(str) {
@@ -63,6 +64,23 @@ function mergeHeaders(globalHeaders, localHeaders) {
     }
 
     return localHeaders;
+}
+
+function checkHeaders(headers, onFail) {
+  var keys = Object.keys(headers);
+  var key;
+
+  for (var i = 0; i < keys.length; i++) {
+      key = keys[i];
+
+      if (typeof headers[key] !== 'string') {
+        return onFail({
+          status: 0,
+          error: HEADER_VALUE_MUST_BE_STRING,
+          headers: {}
+        });
+      }
+  }
 }
 
 function checkSerializer(serializer) {
@@ -173,6 +191,10 @@ var http = {
           throw new Error(ADDING_COOKIES_NOT_SUPPORTED);
         }
 
+        if (typeof value !== 'string') {
+          throw new Error(HEADER_VALUE_MUST_BE_STRING);
+        }
+
         this.headers[host] = this.headers[host] || {};
         this.headers[host][header] = value;
     },
@@ -212,6 +234,8 @@ var http = {
         data = data || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
+        checkHeaders(headers, failure);
+
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
@@ -223,6 +247,8 @@ var http = {
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
+        checkHeaders(headers, failure);
+
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
@@ -233,6 +259,8 @@ var http = {
 
         data = data || {};
         headers = getMergedHeaders(url, headers, this.headers);
+
+        checkHeaders(headers, failure);
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -246,6 +274,8 @@ var http = {
         data = data || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
+        checkHeaders(headers, failure);
+
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
@@ -258,6 +288,8 @@ var http = {
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
+        checkHeaders(headers, failure);
+
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
@@ -268,6 +300,8 @@ var http = {
 
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
+
+        checkHeaders(headers, failure);
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -280,6 +314,8 @@ var http = {
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
+        checkHeaders(headers, failure);
+
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
 
@@ -290,6 +326,8 @@ var http = {
 
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
+
+        checkHeaders(headers, failure);
 
         var onSuccess = injectCookieHandler(url, injectFileEntryHandler(success));
         var onFail = injectCookieHandler(url, failure);
