@@ -445,32 +445,91 @@ public class HttpRequest {
   * @throws IOException
   */
   public static void addCert(Certificate ca) throws GeneralSecurityException, IOException  {
-      if (PINNED_CERTS == null) {
-        PINNED_CERTS = new ArrayList<Certificate>();
-      }
-      PINNED_CERTS.add(ca);
-      String keyStoreType = KeyStore.getDefaultType();
-      KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-      keyStore.load(null, null);
+    if (PINNED_CERTS == null) {
+      PINNED_CERTS = new ArrayList<Certificate>();
+    }
+    PINNED_CERTS.add(ca);
+    KeyStore keyStore = getKeyStoreForPinnedCertificates();
 
+    // Create a TrustManager that trusts the CAs in our KeyStore
+    String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+    TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+    tmf.init(keyStore);
+
+    // Create an SSLContext that uses our TrustManager
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(null, tmf.getTrustManagers(), null);
+
+    if (android.os.Build.VERSION.SDK_INT < 20) {
+      PINNED_FACTORY = new TLSSocketFactory(sslContext);
+    } else {
+      PINNED_FACTORY = sslContext.getSocketFactory();
+    }
+  }
+
+  private static KeyStore getKeyStoreForPinnedCertificates() throws GeneralSecurityException, IOException{
+
+    String keyStoreType = KeyStore.getDefaultType();
+    KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+    keyStore.load(null, null);
+    if(PINNED_CERTS!=null) {
       for (int i = 0; i < PINNED_CERTS.size(); i++) {
         keyStore.setCertificateEntry("CA" + i, PINNED_CERTS.get(i));
       }
+    }
+    return keyStore;
+  }
+
+  /**
+   * Set the client Credentials for X509 client authentication
+   * @param pkcs12Container
+   * @param password
+   * @throws GeneralSecurityException
+   * @throws IOException
+   */
+  public static void setX509ClientAuthentication(byte[] pkcs12Container, String password) throws GeneralSecurityException, IOException {
+    KeyManagerFactory kmf = null;
+    if (pkcs12Container != null) {
+      KeyStore keystore = KeyStore.getInstance("PKCS12");
+      ByteArrayInputStream bis = new ByteArrayInputStream(pkcs12Container);
+      keystore.load(bis, password.toCharArray());
+      kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+      kmf.init(keystore, password.toCharArray());
+    }
+    TrustManagerFactory tmf =null;
+    if (PINNED_CERTS != null) {
+
+      KeyStore keyStoreForPinnedCertificates = getKeyStoreForPinnedCertificates();
 
       // Create a TrustManager that trusts the CAs in our KeyStore
       String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-      TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-      tmf.init(keyStore);
+      tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+      tmf.init(keyStoreForPinnedCertificates);
+    }
+    KeyManager[] keyManagers= kmf!=null? kmf.getKeyManagers() : null;
+    TrustManager[] trustManagers= tmf!=null? tmf.getTrustManagers() :  new TrustManager[] { new X509TrustManager() {
 
-      // Create an SSLContext that uses our TrustManager
-      SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(null, tmf.getTrustManagers(), null);
-
-      if (android.os.Build.VERSION.SDK_INT < 20) {
-        PINNED_FACTORY = new TLSSocketFactory(sslContext);
-      } else {
-        PINNED_FACTORY = sslContext.getSocketFactory();
+      public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
       }
+
+      public void checkClientTrusted(X509Certificate[] chain, String authType) {
+        // Intentionally left blank
+      }
+
+      public void checkServerTrusted(X509Certificate[] chain, String authType) {
+        // Intentionally left blank
+      }
+    } };;
+    // Create an SSLContext that uses our TrustManager
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(keyManagers, trustManagers, null);
+
+    if (android.os.Build.VERSION.SDK_INT < 20) {
+      PINNED_FACTORY = new TLSSocketFactory(sslContext);
+    } else {
+      PINNED_FACTORY = sslContext.getSocketFactory();
+    }
   }
 
   /**
@@ -3345,6 +3404,22 @@ public class HttpRequest {
     return this;
   }
 
+  /**
+   * Configure HTTPS connection to Authenticate with X509 client certificate
+   *
+   * @return this request
+   *
+   */
+  public HttpRequest authenticateWithX509Certificate(){
+    final HttpURLConnection connection = getConnection();
+    if(connection instanceof HttpsURLConnection){
+      ((HttpsURLConnection)connection).setSSLSocketFactory(getPinnedFactory());
+    }else{
+      IOException e = new IOException("You must use a https url to Authenticate with an X509 Certificate");
+      throw new HttpRequestException(e);
+    }
+    return this;
+  }
   /**
    * Configure HTTPS connection to trust all certificates
    * <p>

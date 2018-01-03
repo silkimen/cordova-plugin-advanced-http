@@ -18,11 +18,34 @@
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
     bool redirect;
+    NSURLCredential *x509Credentials;
+    NSURLSessionAuthChallengeDisposition (^authenticationChallengeBlock)(NSURLSession *session, NSURLAuthenticationChallenge *challenge, NSURLCredential * __autoreleasing *credential);
 }
 
 - (void)pluginInitialize {
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     redirect = true;
+    __weak AFSecurityPolicy* weakSecurityPolicy = securityPolicy;
+    authenticationChallengeBlock= ^NSURLSessionAuthChallengeDisposition(NSURLSession *session, NSURLAuthenticationChallenge *challenge, NSURLCredential * __autoreleasing *credential)  {
+        
+        if ([[challenge protectionSpace] authenticationMethod] == NSURLAuthenticationMethodClientCertificate) {
+            *credential = x509Credentials;
+            return NSURLSessionAuthChallengeUseCredential;
+        } if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]) {
+            if ([weakSecurityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
+                *credential = [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust];
+                if (credential) {
+                    return NSURLSessionAuthChallengeUseCredential;
+                } else {
+                    return NSURLSessionAuthChallengePerformDefaultHandling;
+                }
+            } else {
+                return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
+            }
+        } else {
+            return NSURLSessionAuthChallengePerformDefaultHandling;
+        }
+    };
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
@@ -130,7 +153,40 @@
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
+- (void)setX509AuthClientCredentials:(CDVInvokedUrlCommand*)command {
+    NSData *pkcs12Container = [command.arguments objectAtIndex:0];
+    NSString *password = [command.arguments objectAtIndex:1];
+    CFStringRef passwordRef = (__bridge CFStringRef) password;
+    const void *keys[] = { kSecImportExportPassphrase };
+    const void *values[] = { passwordRef };
+    CFDictionaryRef optionsDictionary = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
+    CFArrayRef p12Items;
+    
+    OSStatus result = SecPKCS12Import((__bridge CFDataRef)pkcs12Container, optionsDictionary, &p12Items);
+    
+    if(result == noErr) {
+        CFDictionaryRef identityDict = CFArrayGetValueAtIndex(p12Items, 0);
+        SecIdentityRef identityApp =(SecIdentityRef)CFDictionaryGetValue(identityDict,kSecImportItemIdentity);
+        
+        SecCertificateRef certRef;
+        SecIdentityCopyCertificate(identityApp, &certRef);
+        
+        SecCertificateRef certArray[1] = { certRef };
+        CFArrayRef clientCerts = CFArrayCreate(NULL, (void *)certArray, 1, NULL);
+        CFRelease(certRef);
+        
+        x509Credentials = [NSURLCredential credentialWithIdentity:identityApp certificates:(__bridge NSArray *)clientCerts persistence:NSURLCredentialPersistencePermanent];
+        CFRelease(clientCerts);
+    }
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+- (void)resetX509AuthClientCredentials:(CDVInvokedUrlCommand*)command {
+    x509Credentials = nil;
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 - (void)acceptAllCerts:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = nil;
     bool allow = [[command.arguments objectAtIndex:0] boolValue];
@@ -145,6 +201,7 @@
 - (void)post:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:authenticationChallengeBlock];
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
@@ -177,6 +234,7 @@
 - (void)get:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:authenticationChallengeBlock];
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
@@ -210,6 +268,7 @@
 - (void)put:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:authenticationChallengeBlock];
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
@@ -242,6 +301,7 @@
 - (void)patch:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:authenticationChallengeBlock];
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
@@ -274,6 +334,7 @@
 - (void)delete:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:authenticationChallengeBlock];
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
@@ -306,6 +367,7 @@
 - (void)head:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:authenticationChallengeBlock];
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
@@ -337,6 +399,7 @@
 - (void)uploadFile:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:authenticationChallengeBlock];
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
@@ -383,6 +446,7 @@
 - (void)downloadFile:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:authenticationChallengeBlock];
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];

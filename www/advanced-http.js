@@ -157,6 +157,12 @@ var http = {
     useBasicAuth: function (username, password) {
         this.setHeader('*', 'Authorization', 'Basic ' + b64EncodeUnicode(username + ':' + password));
     },
+    setX509AuthClientCredentials: function(pkcs10Container, password, success, failure){
+        return exec(success, failure, "CordovaHttpPlugin", "setX509AuthClientCredentials", [pkcs10Container, password]);
+    },
+    resetX509AuthClientCredentials: function(success, failure){
+        return exec(success, failure, "CordovaHttpPlugin", "resetX509AuthClientCredentials", []);
+    },
     setHeader: function () {
         // this one is for being backward compatible
         var host = '*';

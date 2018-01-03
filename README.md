@@ -173,6 +173,26 @@ Remove all cookies associated with a given URL.
 ```js
 cordova.plugin.http.removeCookies(url, callback);
 ```
+### setX509AuthClientCredentials
+Use certificate and private key for X.509 client authentication during TLS handshake (if requested by server)
+The PKCS#12 container is expected to be an ArrayBuffer, and the password as string
+```js
+cordova.plugin.http.setX509AuthClientCredentials(pkcs10Container, passwordForPkcs12Container, function() {
+console.log('success!');
+}, function() {
+console.log('error :(');
+});
+```
+
+### resetX509AuthClientCredentials
+Removes the PKCS#12 Container for client authentication
+```js
+cordova.plugin.http.resetX509AuthClientCredentials(function() {
+console.log('success!');
+}, function() {
+console.log('error :(');
+});
+```
 
 ### post<a name="post"></a>
 Execute a POST request.  Takes a URL, data, and headers.
