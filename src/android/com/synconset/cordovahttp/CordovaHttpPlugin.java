@@ -15,6 +15,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.CordovaArgs;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +34,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     }
 
     @Override
-    public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    public boolean execute(String action, final CordovaArgs args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("post")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
@@ -155,7 +156,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         HttpRequest.setX509ClientAuthentication(null,null);
         CordovaHttp.setX509ClientAuthentication(false);
     }
-    
+
     private void enableSSLPinning(boolean enable) throws GeneralSecurityException, IOException {
         if (enable) {
             AssetManager assetManager = cordova.getActivity().getAssets();
