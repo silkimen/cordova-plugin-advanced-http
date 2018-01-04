@@ -331,6 +331,38 @@ const tests = [
         .Cookie
         .should.be.equal('myCookie=myValue; mySecondCookie=mySecondValue');
     }
+  },{
+    description: 'should send programmatically set cookies correctly (DOWNLOAD) #57',
+    expected: 'resolved: {"content":{"cookies":{"myCookie":"myValue ...',
+    func: function(resolve, reject) {
+      var sourceUrl = 'http://httpbin.org/cookies';
+      var targetPath = cordova.file.cacheDirectory + 'cookies.json';
+
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'myCookie=myValue');
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'mySecondCookie=mySecondValue');
+
+      cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function(entry) {
+        helpers.getWithXhr(function(content) {
+          resolve({
+            sourceUrl: sourceUrl,
+            targetPath: targetPath,
+            fullPath: entry.fullPath,
+            name: entry.name,
+            content: content
+          });
+        }, targetPath);
+      }, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.name.should.be.equal('cookies.json');
+      result.data.content.should.be.a('string');
+
+      var cookies = JSON.parse(result.data.content).cookies;
+
+      cookies.myCookie.should.be.equal('myValue');
+      cookies.mySecondCookie.should.be.equal('mySecondValue');
+    }
   }
 ];
 
