@@ -66,7 +66,7 @@ function mergeHeaders(globalHeaders, localHeaders) {
     return localHeaders;
 }
 
-function checkHeaders(headers, onFail) {
+function checkHeaders(headers) {
   var keys = Object.keys(headers);
   var key;
 
@@ -74,13 +74,19 @@ function checkHeaders(headers, onFail) {
       key = keys[i];
 
       if (typeof headers[key] !== 'string') {
-        return onFail({
-          status: 0,
-          error: HEADER_VALUE_MUST_BE_STRING,
-          headers: {}
-        });
+        return false;
       }
   }
+
+  return true;
+}
+
+function onInvalidHeader(handler) {
+  handler({
+    status: 0,
+    error: HEADER_VALUE_MUST_BE_STRING,
+    headers: {}
+  });
 }
 
 function checkSerializer(serializer) {
@@ -234,7 +240,9 @@ var http = {
         data = data || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
-        checkHeaders(headers, failure);
+        if (!checkHeaders(headers)) {
+          return onInvalidHeader(failure);
+        }
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -247,7 +255,9 @@ var http = {
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
-        checkHeaders(headers, failure);
+        if (!checkHeaders(headers)) {
+          return onInvalidHeader(failure);
+        }
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -260,7 +270,9 @@ var http = {
         data = data || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
-        checkHeaders(headers, failure);
+        if (!checkHeaders(headers)) {
+          return onInvalidHeader(failure);
+        }
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -274,7 +286,9 @@ var http = {
         data = data || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
-        checkHeaders(headers, failure);
+        if (!checkHeaders(headers)) {
+          return onInvalidHeader(failure);
+        }
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -288,7 +302,9 @@ var http = {
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
-        checkHeaders(headers, failure);
+        if (!checkHeaders(headers)) {
+          return onInvalidHeader(failure);
+        }
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -301,7 +317,9 @@ var http = {
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
-        checkHeaders(headers, failure);
+        if (!checkHeaders(headers)) {
+          return onInvalidHeader(failure);
+        }
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -314,7 +332,9 @@ var http = {
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
-        checkHeaders(headers, failure);
+        if (!checkHeaders(headers)) {
+          return onInvalidHeader(failure);
+        }
 
         var onSuccess = injectCookieHandler(url, success);
         var onFail = injectCookieHandler(url, failure);
@@ -327,7 +347,9 @@ var http = {
         params = params || {};
         headers = getMergedHeaders(url, headers, this.headers);
 
-        checkHeaders(headers, failure);
+        if (!checkHeaders(headers)) {
+          return onInvalidHeader(failure);
+        }
 
         var onSuccess = injectCookieHandler(url, injectFileEntryHandler(success));
         var onFail = injectCookieHandler(url, failure);
