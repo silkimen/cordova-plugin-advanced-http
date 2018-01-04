@@ -332,6 +332,25 @@ const tests = [
         .should.be.equal('myCookie=myValue; mySecondCookie=mySecondValue');
     }
   },{
+    description: 'should not send any cookies after running "clearCookies" (GET) #59',
+    expected: 'resolved: {"status": 200, "data": "{\"headers\": {\"Cookie\": \"\"...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'myCookie=myValue');
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'mySecondCookie=mySecondValue');
+      cordova.plugin.http.clearCookies();
+      cordova.plugin.http.get('http://httpbin.org/get', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.a('string');
+
+      JSON
+        .parse(result.data.data)
+        .headers
+        .Cookie
+        .should.be.equal('');
+    }
+  },{
     description: 'should send programmatically set cookies correctly (DOWNLOAD) #57',
     expected: 'resolved: {"content":{"cookies":{"myCookie":"myValue ...',
     func: function(resolve, reject) {
