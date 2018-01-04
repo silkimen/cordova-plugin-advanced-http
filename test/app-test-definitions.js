@@ -302,6 +302,16 @@ const tests = [
       result.type.should.be.equal('throwed');
       result.message.should.be.equal('advanced-http: header values must be strings');
     }
+  },{
+    description: 'should accept content-type "application/xml" #58',
+    expected: 'resolved: {"status": 200, ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://httpbin.org/xml', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.status.should.be.equal(200);
+    }
   }
 ];
 

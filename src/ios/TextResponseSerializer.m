@@ -19,11 +19,12 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
 
 - (instancetype)init {
     self = [super init];
+
     if (!self) {
         return nil;
     }
 
-    self.acceptableContentTypes = [NSSet setWithObjects:@"text/plain", @"text/html", @"text/json", @"application/hal+json", @"application/json", @"text/xml", @"application/xml", @"text/css", @"application/javascript", nil];
+    self.acceptableContentTypes = nil;
 
     return self;
 }

@@ -4,6 +4,7 @@
 
 - Fixed #45: does not encode arrays correctly as HTTP GET parameter on Android
 - Fixed #54: requests are not responding on iOS with non-string values in header object
+- Fixed #58: white-list of allowed content-types should be removed for iOS
 
 ## v1.9.0
 
