@@ -64,7 +64,7 @@ cordova.plugin.http.useBasicAuth('user', 'password');
 ```
 
 ### setHeader
-Set a header for all future requests to a specified host. Takes a hostname, a header and a value.
+Set a header for all future requests to a specified host. Takes a hostname, a header and a value (must be a string value).
 
 ```js
 cordova.plugin.http.setHeader('Hostname', 'Header', 'Value');

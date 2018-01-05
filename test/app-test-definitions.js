@@ -1,5 +1,6 @@
 const hooks = {
   onBeforeEachTest: function(done) {
+    cordova.plugin.http.clearCookies();
     cordova.plugin.http.acceptAllCerts(false, done, done);
   }
 };
@@ -281,6 +282,105 @@ const tests = [
         .parse(result.data.data)
         .url
         .should.be.equal('http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
+    }
+  },{
+    description: 'should reject non-string values in local header object #54',
+    expected: 'rejected: {"status": 0, "error": "advanced-http: header values must be strings" ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://httpbin.org/get', {}, { myTestHeader: 1 }, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.error.should.be.equal('advanced-http: header values must be strings');
+    }
+  },{
+    description: 'should throw an error while setting non-string value as global header #54',
+    expected: 'throwed: "advanced-http: header values must be strings"',
+    func: function(resolve, reject) {
+      cordova.plugin.http.setHeader('myTestHeader', 2);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('throwed');
+      result.message.should.be.equal('advanced-http: header values must be strings');
+    }
+  },{
+    description: 'should accept content-type "application/xml" #58',
+    expected: 'resolved: {"status": 200, ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://httpbin.org/xml', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.status.should.be.equal(200);
+    }
+  },{
+    description: 'should send programmatically set cookies correctly (GET)',
+    expected: 'resolved: {"status": 200, ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'myCookie=myValue');
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'mySecondCookie=mySecondValue');
+      cordova.plugin.http.get('http://httpbin.org/get', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.a('string');
+
+      JSON
+        .parse(result.data.data)
+        .headers
+        .Cookie
+        .should.be.equal('myCookie=myValue; mySecondCookie=mySecondValue');
+    }
+  },{
+    description: 'should not send any cookies after running "clearCookies" (GET) #59',
+    expected: 'resolved: {"status": 200, "data": "{\"headers\": {\"Cookie\": \"\"...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'myCookie=myValue');
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'mySecondCookie=mySecondValue');
+      cordova.plugin.http.clearCookies();
+      cordova.plugin.http.get('http://httpbin.org/get', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.a('string');
+
+      JSON
+        .parse(result.data.data)
+        .headers
+        .Cookie
+        .should.be.equal('');
+    }
+  },{
+    description: 'should send programmatically set cookies correctly (DOWNLOAD) #57',
+    expected: 'resolved: {"content":{"cookies":{"myCookie":"myValue ...',
+    func: function(resolve, reject) {
+      var sourceUrl = 'http://httpbin.org/cookies';
+      var targetPath = cordova.file.cacheDirectory + 'cookies.json';
+
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'myCookie=myValue');
+      cordova.plugin.http.setCookie('http://httpbin.org/get', 'mySecondCookie=mySecondValue');
+
+      cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function(entry) {
+        helpers.getWithXhr(function(content) {
+          resolve({
+            sourceUrl: sourceUrl,
+            targetPath: targetPath,
+            fullPath: entry.fullPath,
+            name: entry.name,
+            content: content
+          });
+        }, targetPath);
+      }, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.name.should.be.equal('cookies.json');
+      result.data.content.should.be.a('string');
+
+      var cookies = JSON.parse(result.data.content).cookies;
+
+      cookies.myCookie.should.be.equal('myValue');
+      cookies.mySecondCookie.should.be.equal('mySecondValue');
     }
   }
 ];
