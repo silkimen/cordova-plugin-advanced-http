@@ -25,14 +25,17 @@
 - (void)pluginInitialize {
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     redirect = true;
-    __weak AFSecurityPolicy* weakSecurityPolicy = securityPolicy;
-    authenticationChallengeBlock= ^NSURLSessionAuthChallengeDisposition(NSURLSession *session, NSURLAuthenticationChallenge *challenge, NSURLCredential * __autoreleasing *credential)  {
+    authenticationChallengeBlock=^NSURLSessionAuthChallengeDisposition(NSURLSession *session, NSURLAuthenticationChallenge *challenge, NSURLCredential * __autoreleasing *credential)  {
         
-        if ([[challenge protectionSpace] authenticationMethod] == NSURLAuthenticationMethodClientCertificate) {
+        if ([[[challenge protectionSpace] authenticationMethod] isEqualToString: NSURLAuthenticationMethodClientCertificate]) {
             *credential = x509Credentials;
-            return NSURLSessionAuthChallengeUseCredential;
+            if (credential) {
+                return NSURLSessionAuthChallengeUseCredential;
+            } else {
+                return NSURLSessionAuthChallengePerformDefaultHandling;
+            }
         } if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]) {
-            if ([weakSecurityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
+            if ([securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
                 *credential = [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust];
                 if (credential) {
                     return NSURLSessionAuthChallengeUseCredential;
