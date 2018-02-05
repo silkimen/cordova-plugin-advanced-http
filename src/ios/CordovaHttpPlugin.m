@@ -12,6 +12,8 @@
 - (NSMutableDictionary*)copyHeaderFields:(NSDictionary*)headerFields;
 - (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager;
 - (void)setRedirect:(AFHTTPSessionManager*)manager;
+- (NSStringEncoding)getEndcoding:(NSString*)contentTypeValue;
+- (NSString*)getErrorString:(NSHTTPURLResponse*)response error:(NSError*)error;
 
 @end
 
@@ -66,11 +68,60 @@
         [dictionary setValue:response.URL.absoluteString forKey:@"url"];
         [dictionary setObject:[NSNumber numberWithInt:response.statusCode] forKey:@"status"];
         [dictionary setObject:[self copyHeaderFields:response.allHeaderFields] forKey:@"headers"];
-        [dictionary setObject:[[NSString alloc] initWithData:(NSData *)error.userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] encoding:NSUTF8StringEncoding] forKey:@"error"];
+
+        @try {
+            [dictionary setObject:[self getErrorString:response error:error] forKey:@"error"];
+        } @catch(NSException *exception) {
+            [dictionary setObject:@"Could not detect charset. Failed to encode response body" forKey:@"error"];
+        }
     } else {
         [dictionary setObject:[self getStatusCode:error] forKey:@"status"];
         [dictionary setObject:[error localizedDescription] forKey:@"error"];
     }
+}
+
+- (NSStringEncoding)getEndcoding:(NSString*)contentTypeValue {
+    NSRange range = [contentTypeValue rangeOfString:@"charset="];
+
+    if (range.location == NSNotFound) {
+        NSLog(@"No charset specified, using \"uft-8\" as default");
+        return NSUTF8StringEncoding;
+    }
+
+    NSString *charSet = [contentTypeValue substringFromIndex:(range.location + range.length)];
+
+    // Objective-C does not support switch-statement with Strings ... so we use simple if statements ...
+    if ([charSet isEqualToString:@"iso-8859-1"]) {
+        return NSISOLatin1StringEncoding;
+    }
+
+    if ([charSet isEqualToString:@"iso-8859-2"]) {
+        return NSISOLatin2StringEncoding;
+    }
+
+    if ([charSet isEqualToString:@"utf-8"]) {
+        return NSUTF8StringEncoding;
+    }
+
+    if ([charSet isEqualToString:@"unicode"]) {
+        return NSUnicodeStringEncoding;
+    }
+
+    if ([charSet isEqualToString:@"us-ascii"]) {
+        return NSASCIIStringEncoding;
+    }
+
+    return NSUTF8StringEncoding;
+}
+
+- (NSString*)getErrorString:(NSHTTPURLResponse*)response error:(NSError*)error {
+    NSData *rawResponseData = error.userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey];
+    NSString *contentType = [response.allHeaderFields valueForKey:@"content-type"];
+    NSStringEncoding responseStringEncoding = [self getEndcoding:contentType];
+
+    return [[NSString alloc] initWithBytes:[rawResponseData bytes]
+                                    length:[rawResponseData length]
+                                  encoding:responseStringEncoding];
 }
 
 - (NSNumber*)getStatusCode:(NSError*) error {
@@ -182,7 +233,6 @@
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
     NSDictionary *headers = [command.arguments objectAtIndex:2];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
-
 
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
