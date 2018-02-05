@@ -32,7 +32,7 @@
  * An HTTP Plugin for PhoneGap.
  */
 
-var pluginId = module.id.slice(0, module.id.indexOf('.'));
+var pluginId = module.id.slice(0, module.id.lastIndexOf('.'));
 var validSerializers = ['urlencoded', 'json'];
 
 var exec = require('cordova/exec');
