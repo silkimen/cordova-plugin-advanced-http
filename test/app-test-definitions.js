@@ -388,7 +388,7 @@ const tests = [
     expected: 'resolved: {"status": 200, "data": "{\\"data\\": \\"this is a test string\\"...',
     before: helpers.setUtf8StringSerializer,
     func: function(resolve, reject) {
-      cordova.plugin.http.post('http://httpbin.org/anything', { text: 'this is a test string' }, {}, resolve, reject);
+      cordova.plugin.http.post('http://httpbin.org/anything', 'this is a test string', {}, resolve, reject);
     },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');

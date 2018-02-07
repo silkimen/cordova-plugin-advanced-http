@@ -38,6 +38,7 @@ var MANDATORY_SUCCESS = 'advanced-http: missing mandatory "onSuccess" callback f
 var MANDATORY_FAIL = 'advanced-http: missing mandatory "onFail" callback function';
 var ADDING_COOKIES_NOT_SUPPORTED = 'advanced-http: "setHeader" does not support adding cookies, please use "setCookie" function instead';
 var HEADER_VALUE_MUST_BE_STRING = 'advanced-http: header values must be strings';
+var DATA_TYPE_MISMATCH = 'advanced-http: "data" argument supports only following data types:';
 
 // Thanks Mozilla: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
 function b64EncodeUnicode(str) {
@@ -155,12 +156,64 @@ function getMergedHeaders(url, requestHeaders, predefinedHeaders) {
   return mergedHeaders;
 }
 
+function getTypeOf(object) {
+  // typeof is not working reliably in JS
+  switch (Object.prototype.toString.call(object)) {
+    case '[object Array]':
+      return 'Array';
+    case '[object Boolean]':
+      return 'Boolean';
+    case '[object Function]':
+      return 'Function';
+    case '[object Null]':
+      return 'Null';
+    case '[object Number]':
+      return 'Number';
+    case '[object Object]':
+      return 'Object';
+    case '[object String]':
+      return 'String';
+    case '[object Undefined]':
+      return 'Undefined';
+    default:
+      return 'Unknown';
+  }
+}
+
+function getAllowedDataTypes(dataSerializer) {
+  switch (dataSerializer) {
+      case 'utf8':
+        return ['String'];
+      case 'urlencoded':
+        return ['Object'];
+      default:
+        return ['Array', 'Object'];
+  }
+}
+
+function getProcessedData(data, dataSerializer) {
+  data = data || {};
+
+  var currentDataType = getTypeOf(data);
+  var allowedDataTypes = getAllowedDataTypes(dataSerializer);
+
+  if (allowedDataTypes.indexOf(currentDataType) === -1) {
+      throw new Error(DATA_TYPE_MISMATCH + ' ' + allowedDataTypes.join(', '));
+  }
+
+  if (dataSerializer === 'utf8') {
+    data = { text: data };
+  }
+
+  return data;
+}
+
 function handleMissingCallbacks(successFn, failFn) {
-    if (Object.prototype.toString.call(successFn) !== '[object Function]') {
+    if (getTypeOf(successFn) !== 'Function') {
         throw new Error(MANDATORY_SUCCESS);
     }
 
-    if (Object.prototype.toString.call(failFn) !== '[object Function]') {
+    if (getTypeOf(failFn) !== 'Function') {
         throw new Error(MANDATORY_FAIL);
     }
 }
@@ -232,7 +285,7 @@ var http = {
     post: function (url, data, headers, success, failure) {
         handleMissingCallbacks(success, failure);
 
-        data = data || {};
+        data = getProcessedData(data, this.dataSerializer);
         headers = getMergedHeaders(url, headers, this.headers);
 
         if (!checkHeaders(headers)) {
@@ -262,7 +315,7 @@ var http = {
     put: function (url, data, headers, success, failure) {
         handleMissingCallbacks(success, failure);
 
-        data = data || {};
+        data = getProcessedData(data, this.dataSerializer);
         headers = getMergedHeaders(url, headers, this.headers);
 
         if (!checkHeaders(headers)) {
@@ -278,7 +331,7 @@ var http = {
     patch: function (url, data, headers, success, failure) {
         handleMissingCallbacks(success, failure);
 
-        data = data || {};
+        data = getProcessedData(data, this.dataSerializer);
         headers = getMergedHeaders(url, headers, this.headers);
 
         if (!checkHeaders(headers)) {
