@@ -20,12 +20,7 @@
  * under the License.
  *
  * Modified by Andrew Stephan for Sync OnSet
- * Modified by Sefa Ilkimen:
- *  - added configurable params serializer
- *  - added put and delete methods
- *  - using cordova www module pattern
- *  - some minor improvements
- *
+ * Modified by Sefa Ilkimen
 */
 
 /*
@@ -33,7 +28,7 @@
  */
 
 var pluginId = module.id.slice(0, module.id.indexOf('.'));
-var validSerializers = ['urlencoded', 'json', 'raw' ];
+var validSerializers = ['urlencoded', 'json', 'utf8' ];
 
 var exec = require('cordova/exec');
 var angularIntegration = require(pluginId +'.angular-integration');

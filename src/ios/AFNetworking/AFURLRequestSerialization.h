@@ -375,19 +375,6 @@ forHTTPHeaderField:(NSString *)field;
 
 @end
 
-
-#pragma mark -
-
-/**
- `AFRAWRequestSerializer` is a subclass of `AFHTTPRequestSerializer`
- */
-@interface AFRAWRequestSerializer : AFHTTPRequestSerializer
-
-
-+ (instancetype)serializer;
-
-@end
-
 #pragma mark -
 
 /**

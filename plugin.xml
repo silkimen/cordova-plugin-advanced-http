@@ -24,6 +24,7 @@
     </config-file>
     <header-file src="src/ios/CordovaHttpPlugin.h"/>
     <header-file src="src/ios/TextResponseSerializer.h"/>
+    <header-file src="src/ios/TextRequestSerializer.h"/>
     <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h"/>
     <header-file src="src/ios/AFNetworking/AFNetworking.h"/>
     <header-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.h"/>
@@ -33,6 +34,7 @@
     <header-file src="src/ios/AFNetworking/AFURLSessionManager.h"/>
     <source-file src="src/ios/CordovaHttpPlugin.m"/>
     <source-file src="src/ios/TextResponseSerializer.m"/>
+    <source-file src="src/ios/TextRequestSerializer.m"/>
     <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m"/>
     <source-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.m"/>
     <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m"/>
