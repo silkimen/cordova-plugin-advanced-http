@@ -3,12 +3,18 @@ const mock = require('mock-require');
 const path = require('path');
 
 const should = chai.should();
+
+const HELPERS_ID = path.resolve(__dirname, '..', 'www', 'helpers');
 const PLUGIN_ID = path.resolve(__dirname, '..', 'www', 'advanced-http');
 
 describe('Advanced HTTP www interface', function() {
   let http = {};
+  let helpers = {};
+
   const noop = () => { /* intentionally doing nothing */ };
+
   const loadHttp = () => {
+    mock(`${PLUGIN_ID}.helpers`, mock.reRequire('../www/helpers'));
     http = mock.reRequire('../www/advanced-http');
   };
 
@@ -19,8 +25,12 @@ describe('Advanced HTTP www interface', function() {
     global.btoa = decoded => new Buffer(decoded).toString('base64');
 
     mock('cordova/exec', noop);
-    mock(`${PLUGIN_ID}.angular-integration`, { registerService: noop });
     mock(`${PLUGIN_ID}.cookie-handler`, {});
+    mock(`${HELPERS_ID}.cookie-handler`, {});
+    mock(`${PLUGIN_ID}.messages`, require('../www/messages'));
+    mock(`${HELPERS_ID}.messages`, require('../www/messages'));
+    mock(`${PLUGIN_ID}.angular-integration`, { registerService: noop });
+
     loadHttp();
   });
 
@@ -40,7 +50,7 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('resolves global headers correctly #24', () => {
-    mock(`${PLUGIN_ID}.cookie-handler`, {
+    mock(`${HELPERS_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
 
@@ -59,7 +69,7 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('resolves host headers correctly (set without port number) #37', () => {
-    mock(`${PLUGIN_ID}.cookie-handler`, {
+    mock(`${HELPERS_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
 
@@ -78,7 +88,7 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('resolves host headers correctly (set with port number) #37', () => {
-    mock(`${PLUGIN_ID}.cookie-handler`, {
+    mock(`${HELPERS_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
 
@@ -97,7 +107,7 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('resolves request headers correctly', () => {
-    mock(`${PLUGIN_ID}.cookie-handler`, {
+    mock(`${HELPERS_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
 
