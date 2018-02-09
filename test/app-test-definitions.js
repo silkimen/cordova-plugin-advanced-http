@@ -8,6 +8,7 @@ const hooks = {
 const helpers = {
   acceptAllCerts: function(done) { cordova.plugin.http.acceptAllCerts(true, done, done); },
   setJsonSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('json')); },
+  setUtf8StringSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('utf8')); },
   setUrlEncodedSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('urlencoded')); },
   getWithXhr: function(done, url) {
     var xhr = new XMLHttpRequest();
@@ -381,6 +382,17 @@ const tests = [
 
       cookies.myCookie.should.be.equal('myValue');
       cookies.mySecondCookie.should.be.equal('mySecondValue');
+    }
+  },{
+    description: 'should send UTF-8 encoded raw string correctly (POST)',
+    expected: 'resolved: {"status": 200, "data": "{\\"data\\": \\"this is a test string\\"...',
+    before: helpers.setUtf8StringSerializer,
+    func: function(resolve, reject) {
+      cordova.plugin.http.post('http://httpbin.org/anything', 'this is a test string', {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).data.should.eql('this is a test string');
     }
   }
 ];

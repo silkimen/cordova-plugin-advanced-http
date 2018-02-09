@@ -144,7 +144,11 @@ abstract class CordovaHttp {
       if (new String("json").equals(this.getSerializerName())) {
           request.contentType(request.CONTENT_TYPE_JSON, request.CHARSET_UTF8);
           request.send(this.getParamsObject().toString());
-      } else {
+      } else if (new String("utf8").equals(this.getSerializerName())) {
+          request.contentType("text/plain", request.CHARSET_UTF8);
+          request.send(this.getParamsMap().get("text").toString());
+      } else
+      {
           request.form(this.getParamsMap());
       }
 
