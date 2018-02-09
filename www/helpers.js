@@ -6,6 +6,7 @@ var validSerializers = ['urlencoded', 'json', 'utf8' ];
 
 module.exports = {
   b64EncodeUnicode: b64EncodeUnicode,
+  getTypeOf: getTypeOf,
   checkHeaders: checkHeaders,
   onInvalidHeader: onInvalidHeader,
   checkSerializer: checkSerializer,
@@ -45,7 +46,7 @@ function checkHeaders(headers) {
   for (var i = 0; i < keys.length; i++) {
     key = keys[i];
 
-    if (typeof headers[key] !== 'string') {
+    if (getTypeOf(headers[key]) !== 'String') {
       return false;
     }
   }

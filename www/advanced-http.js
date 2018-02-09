@@ -67,7 +67,7 @@ var publicInterface = {
           throw new Error(messages.ADDING_COOKIES_NOT_SUPPORTED);
         }
 
-        if (typeof value !== 'string') {
+        if (helpers.getTypeOf(value) !== 'String') {
           throw new Error(messages.HEADER_VALUE_MUST_BE_STRING);
         }
 
