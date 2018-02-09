@@ -36,17 +36,17 @@ describe('Advanced HTTP www interface', function() {
 
   it('sets global headers correctly with two args (old interface)', () => {
     http.setHeader('myKey', 'myValue');
-    http.headers['*'].myKey.should.equal('myValue');
+    http.getHeaders('*').myKey.should.equal('myValue');
   });
 
   it('sets global headers correctly with three args (new interface) #24', () => {
     http.setHeader('*', 'myKey', 'myValue');
-    http.headers['*'].myKey.should.equal('myValue');
+    http.getHeaders('*').myKey.should.equal('myValue');
   });
 
   it('sets host headers correctly #24', () => {
     http.setHeader('www.google.de', 'myKey', 'myValue');
-    http.headers['www.google.de'].myKey.should.equal('myValue');
+    http.getHeaders('www.google.de').myKey.should.equal('myValue');
   });
 
   it('resolves global headers correctly #24', () => {
@@ -126,7 +126,7 @@ describe('Advanced HTTP www interface', function() {
 
   it('sets basic authentication header correctly #36', () => {
     http.useBasicAuth('name', 'pass');
-    http.headers['*'].Authorization.should.equal('Basic bmFtZTpwYXNz');
+    http.getHeaders('*').Authorization.should.equal('Basic bmFtZTpwYXNz');
   });
 
   it('throws an Error when you try to add a cookie by using "setHeader" #46', () => {
