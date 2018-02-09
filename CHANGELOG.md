@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.0
+
+- Feature #34: add new serializer "utf8" sending utf-8 encoded plain text (thanks robertocapuano)
+
 ## 1.9.1
 
 - Fixed #45: does not encode arrays correctly as HTTP GET parameter on Android

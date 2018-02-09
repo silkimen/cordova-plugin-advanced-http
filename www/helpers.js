@@ -2,7 +2,7 @@ var pluginId = module.id.slice(0, module.id.lastIndexOf('.'));
 var cookieHandler = require(pluginId + '.cookie-handler');
 var messages = require(pluginId + '.messages');
 
-var validSerializers = ['urlencoded', 'json', 'utf8' ];
+var validSerializers = [ 'urlencoded', 'json', 'utf8' ];
 
 module.exports = {
   b64EncodeUnicode: b64EncodeUnicode,

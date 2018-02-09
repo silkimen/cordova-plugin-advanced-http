@@ -63,7 +63,7 @@ This sets up all future requests to use Basic HTTP authentication with the given
 cordova.plugin.http.useBasicAuth('user', 'password');
 ```
 
-### setHeader
+### setHeader<a name="setHeader"></a>
 Set a header for all future requests to a specified host. Takes a hostname, a header and a value (must be a string value).
 
 ```js
@@ -101,11 +101,14 @@ Set the data serializer which will be used for all future PATCH, POST and PUT re
 cordova.plugin.http.setDataSerializer('urlencoded');
 ```
 
-You can choose one of these two:
+You can choose one of these:
 * `urlencoded`: send data as url encoded content in body (content type "application/x-www-form-urlencoded")
 * `json`: send data as JSON encoded content in body (content type "application/json")
+* `utf8`: send data as plain UTF8 encoded string in body (content type "plain/text")
 
-Caution: `urlencoded` does not support serializing deep structures whereas `json` does.
+You can also override the default content type headers by specifying your own headers (see [setHeader](#setHeader)).
+
+__Caution__: `urlencoded` does not support serializing deep structures whereas `json` does.
 
 ### setRequestTimeout
 Set how long to wait for a request to respond, in seconds.
