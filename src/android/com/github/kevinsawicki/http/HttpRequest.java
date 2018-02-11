@@ -363,26 +363,35 @@ public class HttpRequest {
   }
 
   private static StringBuilder addParam(final Object key, Object value,
-      final StringBuilder result) {
+      final StringBuilder result) throws HttpRequestException {
+    return addParam(key, value, result, CHARSET_UTF8);
+  }
+
+  private static StringBuilder addParam(final Object key, Object value,
+      final StringBuilder result, String charset) throws HttpRequestException {
     if (value != null && value.getClass().isArray())
       value = arrayToList(value);
 
-    if (value instanceof Iterable<?>) {
-      Iterator<?> iterator = ((Iterable<?>) value).iterator();
-      while (iterator.hasNext()) {
-        result.append(key);
-        result.append("[]=");
-        Object element = iterator.next();
-        if (element != null)
-          result.append(element);
-        if (iterator.hasNext())
-          result.append("&");
+    try {
+      if (value instanceof Iterable<?>) {
+        Iterator<?> iterator = ((Iterable<?>) value).iterator();
+        while (iterator.hasNext()) {
+          result.append(URLEncoder.encode(key.toString(), charset));
+          result.append("[]=");
+          Object element = iterator.next();
+          if (element != null)
+            result.append(URLEncoder.encode(element.toString(), charset));
+          if (iterator.hasNext())
+            result.append("&");
+        }
+      } else {
+        result.append(URLEncoder.encode(key.toString(), charset));
+        result.append("=");
+        if (value != null)
+          result.append(URLEncoder.encode(value.toString(), charset));
       }
-    } else {
-      result.append(key);
-      result.append("=");
-      if (value != null)
-        result.append(value);
+    } catch (UnsupportedEncodingException e) {
+      throw new HttpRequestException(e);
     }
 
     return result;

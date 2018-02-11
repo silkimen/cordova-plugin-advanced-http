@@ -384,7 +384,7 @@ const tests = [
       cookies.mySecondCookie.should.be.equal('mySecondValue');
     }
   },{
-    description: 'should send UTF-8 encoded raw string correctly (POST)',
+    description: 'should send UTF-8 encoded raw string correctly (POST) #34',
     expected: 'resolved: {"status": 200, "data": "{\\"data\\": \\"this is a test string\\"...',
     before: helpers.setUtf8StringSerializer,
     func: function(resolve, reject) {
@@ -393,6 +393,17 @@ const tests = [
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
       JSON.parse(result.data.data).data.should.eql('this is a test string');
+    }
+  },{
+    description: 'should encode spaces in query string (params object) correctly (GET) #71',
+    expected: 'resolved: {"status": 200, "data": "{\\"args\\": \\"query param\\": \\"and value with spaces\\"...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://httpbin.org/get', { 'query param': 'and value with spaces' }, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      console.log(JSON.parse(result.data.data).args);
+      JSON.parse(result.data.data).args['query param'].should.eql('and value with spaces');
     }
   }
 ];
