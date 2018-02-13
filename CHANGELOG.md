@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.1
+
+- Fixed #71: does not encode query string in URL correctly on Android
+
 ## 1.10.0
 
 - Feature #34: add new serializer "utf8" sending utf-8 encoded plain text (thanks robertocapuano)

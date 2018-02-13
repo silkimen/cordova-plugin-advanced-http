@@ -402,8 +402,17 @@ const tests = [
     },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
-      console.log(JSON.parse(result.data.data).args);
       JSON.parse(result.data.data).args['query param'].should.eql('and value with spaces');
+    }
+  },{
+    description: 'should decode latin1 (iso-8859-1) encoded body correctly (GET) #72',
+    expected: 'resolved: {"status": 200, "data": "<!DOCTYPE HTML PUBLIC \\"-//W3C//DTD HTML 4.01 Transitional//EN\\"> ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://www.columbia.edu/kermit/latin1.html', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.include('[¡]  161  10/01  241  A1  INVERTED EXCLAMATION MARK\n[¢]  162  10/02  242  A2  CENT SIGN');
     }
   }
 ];
