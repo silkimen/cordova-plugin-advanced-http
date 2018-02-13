@@ -28,7 +28,7 @@ import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
-    protected static final String CHARSET = "UTF-8";
+    protected static final String[] ACCEPTED_CHARSETS = new String[] {HttpRequest.CHARSET_UTF8, HttpRequest.CHARSET_LATIN1};
 
     private static AtomicBoolean sslPinning = new AtomicBoolean(false);
     private static AtomicBoolean acceptAllCerts = new AtomicBoolean(false);
@@ -141,14 +141,13 @@ abstract class CordovaHttp {
     }
 
     protected HttpRequest setupDataSerializer(HttpRequest request) throws JSONException, Exception {
-      if (new String("json").equals(this.getSerializerName())) {
+      if ("json".equals(this.getSerializerName())) {
           request.contentType(request.CONTENT_TYPE_JSON, request.CHARSET_UTF8);
           request.send(this.getParamsObject().toString());
-      } else if (new String("utf8").equals(this.getSerializerName())) {
+      } else if ("utf8".equals(this.getSerializerName())) {
           request.contentType("text/plain", request.CHARSET_UTF8);
           request.send(this.getParamsMap().get("text").toString());
-      } else
-      {
+      } else {
           request.form(this.getParamsMap());
       }
 
@@ -227,7 +226,7 @@ abstract class CordovaHttp {
       this.setupRedirect(request);
       this.setupSecurity(request);
       request.readTimeout(this.getRequestTimeout());
-      request.acceptCharset(CHARSET);
+      request.acceptCharset(ACCEPTED_CHARSETS);
       request.headers(this.getHeadersMap());
       request.uncompress(true);
     }
@@ -236,7 +235,7 @@ abstract class CordovaHttp {
       try {
         JSONObject response = new JSONObject();
         int code = request.code();
-        String body = request.body(CHARSET);
+        String body = request.body(request.charset());
 
         response.put("status", code);
         response.put("url", request.url().toString());

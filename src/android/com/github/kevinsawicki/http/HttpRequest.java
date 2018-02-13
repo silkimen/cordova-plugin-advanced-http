@@ -92,6 +92,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import android.text.TextUtils;
+
 /**
  * A fluid interface for making HTTP requests using an underlying
  * {@link HttpURLConnection} (or sub-class).
@@ -105,6 +107,11 @@ public class HttpRequest {
    * 'UTF-8' charset name
    */
   public static final String CHARSET_UTF8 = "UTF-8";
+
+  /**
+   * 'ISO-8859-1' charset name
+   */
+  public static final String CHARSET_LATIN1 = "ISO-8859-1";
 
   /**
    * 'application/x-www-form-urlencoded' content type header value
@@ -2536,6 +2543,16 @@ public class HttpRequest {
    */
   public HttpRequest acceptCharset(final String acceptCharset) {
     return header(HEADER_ACCEPT_CHARSET, acceptCharset);
+  }
+
+  /**
+   * Set the 'Accept-Charset' header to given values
+   *
+   * @param acceptCharsets
+   * @return this request
+   */
+  public HttpRequest acceptCharset(final String[] acceptCharsets) {
+    return header(HEADER_ACCEPT_CHARSET, TextUtils.join(", ", acceptCharsets));
   }
 
   /**
