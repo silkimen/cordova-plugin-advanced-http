@@ -13,9 +13,7 @@ cache:
     - node_modules
 
 addons:
-  sauce_connect:
-    username: silkimen
-  jwt: RZHC8x5ggrXdu1xzhhHmQDwege9s3putJXY1ZG8+MNMaBTLfLBWzFsHuR6Lvz+XnrAT/CTGG957kw6ikSaV6VEkGvtO91irZoJyShjPq2hBbn2CaEbo91Eq8iNYaRG+4FVMxoHa6xpF/HtvOLQdIkURc/lzLj/BOFMmtV/d3adLDcryQZuYB211iN4d6exGHMQe8uvJdkCy4ac85guhF8KmAELyaVa0rx0m6gNaszWU9BJ8Rn+4HJbJtfpQcU1bJN43Dx8forRU/Com53K+KFtDKPUdBHZnuENrZrQ+8RU59vdLrHwsCvP9elJFkcX9xk/r45oUGXhqVV3vMyaqTa9YUO772rhgKuAi4TqiaR51H58KWqynp7wOZwL5FqJs0KzL5rNDDIoKKrklnOidS4RAUKXCi1CUNXwDdOo4Kd96cYOIHqpwa7Beci8CtVlzd/49yE9/AXnZYVwp10uKZvJJdliAOHhVEAtCIp8PzHOOPYJsXvUcEU4ORWWWpusBAz6wFiLOL4d/CAHNj6wDFliRexBrv/Wunu5ifva4oVJWrtAtyGDtsX8kBkf8OcIdy/aPUIIBrbW1sapjPFymMGeL/KkSZRjEy7KjFZKZh9L7sJE56sq+IUremFbcyaX1E3rho6Cs3ongLaKhL9f9vz8EFs7//w8pNlNS9EUdOU68=
+  sauce_connect: true
 
 before_install:
 - export LANG=en_US.UTF-8
