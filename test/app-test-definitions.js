@@ -392,7 +392,7 @@ const tests = [
     },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
-      JSON.parse(result.data.data).data.should.eql('this is a test string');
+      JSON.parse(result.data.data).data.should.be.equal('this is a test string');
     }
   },{
     description: 'should encode spaces in query string (params object) correctly (GET) #71',
@@ -402,7 +402,7 @@ const tests = [
     },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
-      JSON.parse(result.data.data).args['query param'].should.eql('and value with spaces');
+      JSON.parse(result.data.data).args['query param'].should.be.equal('and value with spaces');
     }
   },{
     description: 'should decode latin1 (iso-8859-1) encoded body correctly (GET) #72',
@@ -413,6 +413,16 @@ const tests = [
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
       result.data.data.should.include('[¡]  161  10/01  241  A1  INVERTED EXCLAMATION MARK\n[¢]  162  10/02  242  A2  CENT SIGN');
+    }
+  },{
+    description: 'should return empty body string correctly (GET)',
+    expected: 'resolved: {"status": 200, "data": "" ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://httpbin.org/stream/0', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.equal('');
     }
   }
 ];
