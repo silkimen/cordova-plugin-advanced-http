@@ -1945,16 +1945,24 @@ public class HttpRequest {
   }
 
   /**
-   * Get the response body as a {@link String} and set it as the value of the
+   * Get the response body as ByteBuffer and set it as the value of the
    * given reference.
    *
    * @param output
    * @return this request
    * @throws HttpRequestException
    */
-  public HttpRequest body(final AtomicReference<String> output) throws HttpRequestException {
-    output.set(body());
-    return this;
+  public HttpRequest body(final AtomicReference<ByteBuffer> output) throws HttpRequestException {
+    final ByteArrayOutputStream outputStream = byteStream();
+
+    try {
+      copy(buffer(), outputStream);
+      output.set(ByteBuffer.wrap(outputStream.toByteArray()));
+
+      return this;
+    } catch (IOException e) {
+      throw new HttpRequestException(e);
+    }
   }
 
   /**
@@ -1970,7 +1978,6 @@ public class HttpRequest {
     output.set(body(charset));
     return this;
   }
-
 
   /**
    * Is the response body empty?

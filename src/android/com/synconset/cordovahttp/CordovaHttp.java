@@ -12,6 +12,14 @@ import org.json.JSONObject;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import java.nio.ByteBuffer;
+
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.MalformedInputException;
+
 import javax.net.ssl.SSLHandshakeException;
 
 import java.util.ArrayList;
@@ -19,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.Iterator;
 
 import android.text.TextUtils;
@@ -28,7 +37,7 @@ import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
 abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
-    protected static final String[] ACCEPTED_CHARSETS = new String[] {HttpRequest.CHARSET_UTF8, HttpRequest.CHARSET_LATIN1};
+    protected static final String[] ACCEPTED_CHARSETS = new String[] { HttpRequest.CHARSET_UTF8, HttpRequest.CHARSET_LATIN1 };
 
     private static AtomicBoolean sslPinning = new AtomicBoolean(false);
     private static AtomicBoolean acceptAllCerts = new AtomicBoolean(false);
@@ -231,25 +240,68 @@ abstract class CordovaHttp {
       request.uncompress(true);
     }
 
+    private CharsetDecoder createCharsetDecoder(final String charsetName) {
+      return Charset.forName(charsetName).newDecoder()
+        .onMalformedInput(CodingErrorAction.REPORT)
+        .onUnmappableCharacter(CodingErrorAction.REPORT);
+    }
+
+    private String decodeBody(AtomicReference<ByteBuffer> rawOutput, String charsetName)
+      throws CharacterCodingException, MalformedInputException {
+
+      if (charsetName == null) {
+        return tryDecodeByteBuffer(rawOutput);
+      }
+
+      return decodeByteBuffer(rawOutput, charsetName);
+    }
+
+    private String tryDecodeByteBuffer(AtomicReference<ByteBuffer> rawOutput)
+      throws CharacterCodingException, MalformedInputException {
+
+      for (int i = 0; i < ACCEPTED_CHARSETS.length - 1; i++) {
+        try {
+          return decodeByteBuffer(rawOutput, ACCEPTED_CHARSETS[i]);
+        } catch (MalformedInputException e) {
+          continue;
+        } catch (CharacterCodingException e) {
+          continue;
+        }
+      }
+
+      return decodeBody(rawOutput, ACCEPTED_CHARSETS[ACCEPTED_CHARSETS.length - 1]);
+    }
+
+    private String decodeByteBuffer(AtomicReference<ByteBuffer> rawOutput, String charsetName)
+      throws CharacterCodingException, MalformedInputException {
+
+      return createCharsetDecoder(charsetName).decode(rawOutput.get()).toString();
+    }
+
     protected void returnResponseObject(HttpRequest request) throws HttpRequestException {
       try {
         JSONObject response = new JSONObject();
         int code = request.code();
-        String body = request.body(request.charset());
+        AtomicReference<ByteBuffer> rawOutputReference = new AtomicReference<ByteBuffer>();
 
+        request.body(rawOutputReference);
         response.put("status", code);
         response.put("url", request.url().toString());
         this.addResponseHeaders(request, response);
 
         if (code >= 200 && code < 300) {
-            response.put("data", body);
+            response.put("data", decodeBody(rawOutputReference, request.charset()));
             this.getCallbackContext().success(response);
         } else {
-            response.put("error", body);
+            response.put("error", decodeBody(rawOutputReference, request.charset()));
             this.getCallbackContext().error(response);
         }
       } catch(JSONException e) {
         this.respondWithError("There was an error generating the response");
+      } catch(MalformedInputException e) {
+        this.respondWithError("Could not decode response data due to malformed data");
+      } catch(CharacterCodingException e) {
+        this.respondWithError("Could not decode response data due to invalid or unknown charset encoding");
       }
     }
 
