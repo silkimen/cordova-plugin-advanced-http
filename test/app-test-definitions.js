@@ -1,12 +1,15 @@
 const hooks = {
   onBeforeEachTest: function(done) {
     cordova.plugin.http.clearCookies();
-    cordova.plugin.http.acceptAllCerts(false, done, done);
+    cordova.plugin.http.acceptAllCerts(false, function() {
+      cordova.plugin.http.enableSSLPinning(false, done, done);
+    }, done);
   }
 };
 
 const helpers = {
   acceptAllCerts: function(done) { cordova.plugin.http.acceptAllCerts(true, done, done); },
+  enableSSLPinning: function(done) { cordova.plugin.http.enableSSLPinning(true, done, done); },
   setJsonSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('json')); },
   setUtf8StringSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('utf8')); },
   setUrlEncodedSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('urlencoded')); },
@@ -423,6 +426,25 @@ const tests = [
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
       result.data.data.should.be.equal('');
+    }
+  },{
+    description: 'should pin SSL cert correctly (GET)',
+    expected: 'resolved: {"status": 200 ...',
+    before: helpers.enableSSLPinning,
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('https://httpbin.org', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+    }
+  },{
+    description: 'should send deeply structured JSON object correctly (POST) #65',
+    expected: 'resolved: {"status": 200, "data": "{\\"data\\": \\"{\\\\"outerObj\\\\":{\\\\"innerStr\\\\":\\\\"testString\\\\",\\\\"innerArr\\\\":[1,2,3]}}\\" ...',
+    before: helpers.setJsonSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', { outerObj: { innerStr: 'testString', innerArr: [1, 2, 3] }}, {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).json.should.eql({ outerObj: { innerStr: 'testString', innerArr: [1, 2, 3] }});
     }
   }
 ];

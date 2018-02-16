@@ -3,7 +3,7 @@
 ## 1.10.1
 
 - Fixed #71: does not encode query string in URL correctly on Android
-- Fixed #72: app crashes if response encoding is not UTF-8
+- Fixed #72: app crashes if response encoding is not UTF-8 (thanks jkfb)
 
 ## 1.10.0
 
