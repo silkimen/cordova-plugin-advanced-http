@@ -446,6 +446,15 @@ const tests = [
       result.type.should.be.equal('resolved');
       JSON.parse(result.data.data).json.should.eql({ outerObj: { innerStr: 'testString', innerArr: [1, 2, 3] }});
     }
+  },{
+    description: 'should override header "content-type" correctly (POST) #78',
+    expected: 'resolved: {"status": 200, "headers": "{\\"Content-Type\\": \\"text/plain\\" ...',
+    before: helpers.setJsonSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', {}, { 'Content-Type': 'text/plain' }, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).headers['Content-Type'].should.be.equal('text/plain');
+    }
   }
 ];
 

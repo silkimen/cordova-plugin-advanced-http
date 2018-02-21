@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.2
+
+-Fixed #78: overriding header "Content-Type" not working on Android
+
 ## 1.10.1
 
 - Fixed #71: does not encode query string in URL correctly on Android

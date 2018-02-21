@@ -149,18 +149,12 @@ abstract class CordovaHttp {
         return request;
     }
 
-    protected HttpRequest setupDataSerializer(HttpRequest request) throws JSONException, Exception {
+    protected void setupDataSerializer(HttpRequest request) throws JSONException, Exception {
       if ("json".equals(this.getSerializerName())) {
           request.contentType(request.CONTENT_TYPE_JSON, request.CHARSET_UTF8);
-          request.send(this.getParamsObject().toString());
       } else if ("utf8".equals(this.getSerializerName())) {
           request.contentType("text/plain", request.CHARSET_UTF8);
-          request.send(this.getParamsMap().get("text").toString());
-      } else {
-          request.form(this.getParamsMap());
       }
-
-      return request;
     }
 
     protected void respondWithError(int status, String msg) {
@@ -238,6 +232,16 @@ abstract class CordovaHttp {
       request.acceptCharset(ACCEPTED_CHARSETS);
       request.headers(this.getHeadersMap());
       request.uncompress(true);
+    }
+
+    protected void prepareRequestBody(HttpRequest request) throws JSONException, Exception {
+      if ("json".equals(this.getSerializerName())) {
+          request.send(this.getParamsObject().toString());
+      } else if ("utf8".equals(this.getSerializerName())) {
+          request.send(this.getParamsMap().get("text").toString());
+      } else {
+          request.form(this.getParamsMap());
+      }
     }
 
     private CharsetDecoder createCharsetDecoder(final String charsetName) {
