@@ -1,13 +1,8 @@
 Cordova Advanced HTTP
 =====================
-[![npm version](https://badge.fury.io/js/cordova-plugin-advanced-http.svg)](https://badge.fury.io/js/cordova-plugin-advanced-http)
-[![downloads/month](https://img.shields.io/npm/dm/cordova-plugin-advanced-http.svg)](https://www.npmjs.com/package/cordova-plugin-advanced-http)
-[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.png)](https://opensource.org/licenses/mit-license.php)
-[![Build Status](https://travis-ci.org/silkimen/cordova-plugin-advanced-http.svg?branch=master)](https://travis-ci.org/silkimen/cordova-plugin-advanced-http)
-
 
 Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and Android.
-This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordova-HTTP).
+This is a fork of [Silkimen's Cordova-plugin-advanced-http plugin](https://github.com/silkimen/cordova-plugin-advanced-http).
 
 ## Advantages over Javascript requests
 
@@ -153,6 +148,21 @@ cordova.plugin.http.enableSSLPinning(true, function() {
   console.log('success!');
 }, function() {
   console.log('error :(');
+});
+```
+
+### addPinningCerts
+Add additional certificates to pin against at runtime.
+
+If you have a secure channel to distribute certificates, you can update certificates at runtime. This allows you to rotate expired certificates without having to force users to update their app.
+
+After SSL pinning has been enabled you can add Base64 DER encoded certificates.
+
+```js
+CordovaHttpPlugin.addPinningCerts(['MIIEyzCCA7OgAwIBA...', 'MIIFHzCCBAegAwIBA...'], function() {
+    console.log('success!');
+}, function() {
+    console.log('error :(');
 });
 ```
 

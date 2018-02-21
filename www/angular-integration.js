@@ -56,6 +56,9 @@ function registerService(http) {
             enableSSLPinning: function (enable) {
                 return makePromise(http.enableSSLPinning, [enable]);
             },
+            addPinningCerts: function (certs) {
+                return makePromise(http.addPinningCerts, [certs]);
+            },
             acceptAllCerts: function (allow) {
                 return makePromise(http.acceptAllCerts, [allow]);
             },

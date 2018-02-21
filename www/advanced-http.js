@@ -101,6 +101,9 @@ var publicInterface = {
     enableSSLPinning: function (enable, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'enableSSLPinning', [enable]);
     },
+    addPinningCerts: function(certs, success, failure) {
+        return exec(success, failure, "CordovaHttpPlugin", "addPinningCerts", [certs]);
+    },
     acceptAllCerts: function (allow, success, failure) {
         return exec(success, failure, 'CordovaHttpPlugin', 'acceptAllCerts', [allow]);
     },

@@ -4,12 +4,14 @@
 package com.synconset.cordovahttp;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import java.security.GeneralSecurityException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -21,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.res.AssetManager;
+import android.util.Base64;
 
 import com.github.kevinsawicki.http.HttpRequest;
 
@@ -95,6 +98,15 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                 e.printStackTrace();
                 callbackContext.error("There was an error setting up ssl pinning");
             }
+        } else if (action.equals("addPinningCerts")) {
+            try {
+                List<String> certs = this.getStringListFromJSONArray(args.getJSONArray(0));
+                this.addPinningCerts(certs);
+                callbackContext.success();
+            } catch(Exception e) {
+                e.printStackTrace();
+                callbackContext.error("There was an error adding pinning certs");
+            }
         } else if (action.equals("acceptAllCerts")) {
             boolean accept = args.getBoolean(0);
 
@@ -135,25 +147,25 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             AssetManager assetManager = cordova.getActivity().getAssets();
             String[] files = assetManager.list("");
             int index;
-            ArrayList<String> cerFiles = new ArrayList<String>();
-            for (int i = 0; i < files.length; i++) {
-                index = files[i].lastIndexOf('.');
+            ArrayList<String> cerFiles = new ArrayList<>();
+            for (String file : files) {
+                index = file.lastIndexOf('.');
                 if (index != -1) {
-                    if (files[i].substring(index).equals(".cer")) {
-                        cerFiles.add(files[i]);
+                    if (file.substring(index).equals(".cer")) {
+                        cerFiles.add(file);
                     }
                 }
             }
 
             // scan the www/certificates folder for .cer files as well
             files = assetManager.list("www/certificates");
-            for (int i = 0; i < files.length; i++) {
-              index = files[i].lastIndexOf('.');
-              if (index != -1) {
-                if (files[i].substring(index).equals(".cer")) {
-                  cerFiles.add("www/certificates/" + files[i]);
+            for (String file : files) {
+                index = file.lastIndexOf('.');
+                if (index != -1) {
+                    if (file.substring(index).equals(".cer")) {
+                        cerFiles.add("www/certificates/" + file);
+                    }
                 }
-              }
             }
 
             for (int i = 0; i < cerFiles.size(); i++) {
@@ -165,5 +177,21 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         } else {
             CordovaHttp.enableSSLPinning(false);
         }
+    }
+
+    private void addPinningCerts(List<String> certs) throws GeneralSecurityException, IOException {
+      for (int i = 0; i < certs.size(); i++) {
+        byte[] certBytes = Base64.decode(certs.get(i), Base64.NO_WRAP);
+        InputStream inputStream = new ByteArrayInputStream(certBytes);
+        HttpRequest.addCert(inputStream);
+      }
+    }
+
+    private List<String> getStringListFromJSONArray(JSONArray array) throws JSONException {
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            list.add(array.getString(i));
+        }
+        return list;
     }
 }
