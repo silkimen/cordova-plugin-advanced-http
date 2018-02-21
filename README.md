@@ -163,7 +163,8 @@ If you have a secure channel to distribute certificates, you can update certific
 
 After SSL pinning has been enabled you can add Base64 DER encoded certificates.
 
-```jsCordovaHttpPlugin.addPinningCerts(['MIIEyzCCA7OgAwIBA...', 'MIIFHzCCBAegAwIBA...'], function() {
+```js
+CordovaHttpPlugin.addPinningCerts(['MIIEyzCCA7OgAwIBA...', 'MIIFHzCCBAegAwIBA...'], function() {
     console.log('success!');
 }, function() {
     console.log('error :(');
