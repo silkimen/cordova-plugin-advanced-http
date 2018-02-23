@@ -34,6 +34,16 @@ import android.text.TextUtils;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
+import com.github.kevinsawicki.http.HttpRequest.ConnectionFactory;
+
+import okhttp3.OkUrlFactory;
+import okhttp3.OkHttpClient;
+
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLStreamHandler;
+import java.net.Proxy;
+
 
 abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
@@ -231,9 +241,29 @@ abstract class CordovaHttp {
         return map;
     }
 
+    private ConnectionFactory getConnectionFactory() {
+      final OkHttpClient okHttpClient = new OkHttpClient();
+
+      return new ConnectionFactory() {
+        public HttpURLConnection create(URL url) {
+          OkHttpClient okHttpClient = new OkHttpClient();
+          OkUrlFactory okUrlFactory = new OkUrlFactory(okHttpClient);
+          return (HttpURLConnection) okUrlFactory.open(url);
+        }
+    
+        public HttpURLConnection create(URL url, Proxy proxy) {
+          OkHttpClient okHttpClient = new OkHttpClient.Builder().proxy(proxy).build();
+          OkUrlFactory okUrlFactory = new OkUrlFactory(okHttpClient);
+          return (HttpURLConnection) okUrlFactory.open(url);
+        }
+      };
+    }
+
     protected void prepareRequest(HttpRequest request) throws HttpRequestException, JSONException {
       this.setupRedirect(request);
       this.setupSecurity(request);
+
+      request.setConnectionFactory(getConnectionFactory());
       request.readTimeout(this.getRequestTimeout());
       request.acceptCharset(ACCEPTED_CHARSETS);
       request.headers(this.getHeadersMap());
