@@ -56,6 +56,7 @@
       <uses-permission android:name="android.permission.INTERNET"/>
     </config-file>
     <source-file src="src/android/com/github/kevinsawicki/http/HttpRequest.java" target-dir="src/com/github/kevinsawicki/http"/>
+    <source-file src="src/android/com/github/kevinsawicki/http/OkConnectionFactory.java" target-dir="src/com/github/kevinsawicki/http"/>
     <source-file src="src/android/com/github/kevinsawicki/http/TLSSocketFactory.java" target-dir="src/com/github/kevinsawicki/http"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttp.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpDelete.java" target-dir="src/com/synconset/cordovahttp"/>
@@ -67,7 +68,6 @@
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPut.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPatch.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/synconset/cordovahttp"/>
-  
     <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.9.1" />
   </platform>
 </plugin>
