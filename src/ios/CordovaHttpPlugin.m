@@ -69,7 +69,9 @@
         [dictionary setValue:response.URL.absoluteString forKey:@"url"];
         [dictionary setObject:[NSNumber numberWithInt:(int)response.statusCode] forKey:@"status"];
         [dictionary setObject:[self copyHeaderFields:response.allHeaderFields] forKey:@"headers"];
-        [dictionary setObject:error.userInfo[AFNetworkingOperationFailingURLResponseBodyKey] forKey:@"error"];
+        if (error.userInfo[AFNetworkingOperationFailingURLResponseBodyKey]) {
+            [dictionary setObject:error.userInfo[AFNetworkingOperationFailingURLResponseBodyKey] forKey:@"error"];
+        }
     } else {
         [dictionary setObject:[self getStatusCode:error] forKey:@"status"];
         [dictionary setObject:[error localizedDescription] forKey:@"error"];
