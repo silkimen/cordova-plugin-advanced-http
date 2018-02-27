@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-advanced-http" version="1.10.1">
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-advanced-http" version="1.10.2">
   <name>Advanced HTTP plugin</name>
   <description>
         Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning
@@ -68,6 +68,6 @@
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPut.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPatch.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/synconset/cordovahttp"/>
-    <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.9.1" />
+    <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.9.1"/>
   </platform>
 </plugin>
