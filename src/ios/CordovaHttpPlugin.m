@@ -517,6 +517,7 @@
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+            [dictionary setObject:@"There was an error downloading the file" forKey:@"error"];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

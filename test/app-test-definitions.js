@@ -455,6 +455,15 @@ const tests = [
       result.type.should.be.equal('resolved');
       JSON.parse(result.data.data).headers['Content-Type'].should.be.equal('text/plain');
     }
+  },{
+    description: 'should handle error during file download correctly (DOWNLOAD) #83',
+    expected: 'rejected: {"status": 403, "error": "There was an error downloading the file" ...',
+    func: function(resolve, reject) { cordova.plugin.http.downloadFile('http://httpbin.org/status/403', {}, {}, cordova.file.tempDirectory + 'testfile.txt', resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.status.should.be.equal(403);
+      result.data.error.should.be.equal('There was an error downloading the file');
+    }
   }
 ];
 
