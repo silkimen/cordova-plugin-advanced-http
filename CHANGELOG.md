@@ -2,7 +2,9 @@
 
 ## 1.10.2
 
--Fixed #78: overriding header "Content-Type" not working on Android
+- Fixed #78: overriding header "Content-Type" not working on Android
+- Fixed #79: PATCH operation not working on Android API level 19 and older (thanks chax)
+- Fixed #83: App crashes on error during download operation on iOS (thanks troyanskiy)
 
 ## 1.10.1
 
