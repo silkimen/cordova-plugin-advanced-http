@@ -428,15 +428,7 @@ public class HttpRequest {
      * A {@link ConnectionFactory} which uses the built-in
      * {@link URL#openConnection()}
      */
-    ConnectionFactory DEFAULT = new ConnectionFactory() {
-      public HttpURLConnection create(URL url) throws IOException {
-        return (HttpURLConnection) url.openConnection();
-      }
-
-      public HttpURLConnection create(URL url, Proxy proxy) throws IOException {
-        return (HttpURLConnection) url.openConnection(proxy);
-      }
-    };
+    ConnectionFactory DEFAULT = new OkConnectionFactory();
   }
 
   private static ConnectionFactory CONNECTION_FACTORY = ConnectionFactory.DEFAULT;

@@ -11,45 +11,45 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class TLSSocketFactory extends SSLSocketFactory {
 
-    private SSLSocketFactory internalSSLSocketFactory;
+    private SSLSocketFactory delegate;
 
     public TLSSocketFactory(SSLContext context) {
-        internalSSLSocketFactory = context.getSocketFactory();
+        delegate = context.getSocketFactory();
     }
 
     @Override
     public String[] getDefaultCipherSuites() {
-        return internalSSLSocketFactory.getDefaultCipherSuites();
+        return delegate.getDefaultCipherSuites();
     }
 
     @Override
     public String[] getSupportedCipherSuites() {
-        return internalSSLSocketFactory.getSupportedCipherSuites();
+        return delegate.getSupportedCipherSuites();
     }
 
     @Override
     public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
-        return enableTLSOnSocket(internalSSLSocketFactory.createSocket(s, host, port, autoClose));
+        return enableTLSOnSocket(delegate.createSocket(s, host, port, autoClose));
     }
 
     @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-        return enableTLSOnSocket(internalSSLSocketFactory.createSocket(host, port));
+        return enableTLSOnSocket(delegate.createSocket(host, port));
     }
 
     @Override
     public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
-        return enableTLSOnSocket(internalSSLSocketFactory.createSocket(host, port, localHost, localPort));
+        return enableTLSOnSocket(delegate.createSocket(host, port, localHost, localPort));
     }
 
     @Override
     public Socket createSocket(InetAddress host, int port) throws IOException {
-        return enableTLSOnSocket(internalSSLSocketFactory.createSocket(host, port));
+        return enableTLSOnSocket(delegate.createSocket(host, port));
     }
 
     @Override
     public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
-        return enableTLSOnSocket(internalSSLSocketFactory.createSocket(address, port, localAddress, localPort));
+        return enableTLSOnSocket(delegate.createSocket(address, port, localAddress, localPort));
     }
 
     private Socket enableTLSOnSocket(Socket socket) {

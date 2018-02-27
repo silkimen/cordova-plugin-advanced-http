@@ -52,12 +52,7 @@ abstract class CordovaHttp {
     private CallbackContext callbackContext;
 
     public CordovaHttp(String urlString, Object params, JSONObject headers, int timeout, CallbackContext callbackContext) {
-        this.urlString = urlString;
-        this.params = params;
-        this.serializerName = "default";
-        this.headers = headers;
-        this.timeoutInMilliseconds = timeout;
-        this.callbackContext = callbackContext;
+        this(urlString, params, "default", headers, timeout, callbackContext);
     }
 
     public CordovaHttp(String urlString, Object params, String serializerName, JSONObject headers, int timeout, CallbackContext callbackContext) {
@@ -228,6 +223,7 @@ abstract class CordovaHttp {
     protected void prepareRequest(HttpRequest request) throws HttpRequestException, JSONException {
       this.setupRedirect(request);
       this.setupSecurity(request);
+
       request.readTimeout(this.getRequestTimeout());
       request.acceptCharset(ACCEPTED_CHARSETS);
       request.headers(this.getHeadersMap());
