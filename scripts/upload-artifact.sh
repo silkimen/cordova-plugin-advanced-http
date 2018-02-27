@@ -5,6 +5,11 @@ PLATFORM=$([[ "${@#--android}" = "$@" ]] && echo "ios" || echo "android")
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/..
 TEMP=$ROOT/temp
 
+if [ -z $SAUCE_USERNAME ] || [ -z $SAUCE_ACCESS_KEY ]; then
+  echo "Skipping uploading artifact, because Saucelabs credentials are not set.";
+  exit 0;
+fi
+
 if [ $PLATFORM = "android" ]; then
   curl -u $SAUCE_USERNAME:$SAUCE_ACCESS_KEY \
       -X POST \
