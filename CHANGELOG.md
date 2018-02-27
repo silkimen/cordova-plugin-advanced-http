@@ -5,6 +5,7 @@
 - Fixed #78: overriding header "Content-Type" not working on Android
 - Fixed #79: PATCH operation not working on Android API level 19 and older (thanks chax)
 - Fixed #83: App crashes on error during download operation on iOS (thanks troyanskiy)
+- Fixed #76: upload sequence is not respecting order of operations needed by some sites (thanks Johny101)
 
 ## 1.10.1
 
