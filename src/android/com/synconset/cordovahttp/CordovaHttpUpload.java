@@ -54,8 +54,6 @@ class CordovaHttpUpload extends CordovaHttp implements Runnable {
             MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
             String mimeType = mimeTypeMap.getMimeTypeFromExtension(ext);
 
-            request.part(this.name, filename, mimeType, new File(uri));
-
             Set<?> set = (Set<?>)this.getParamsMap().entrySet();
             Iterator<?> i = set.iterator();
 
@@ -72,6 +70,8 @@ class CordovaHttpUpload extends CordovaHttp implements Runnable {
                     return;
                 }
             }
+          
+            request.part(this.name, filename, mimeType, new File(uri));
 
             this.returnResponseObject(request);
         } catch (URISyntaxException e) {
