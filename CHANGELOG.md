@@ -7,6 +7,8 @@
 - Fixed #83: App crashes on error during download operation on iOS (thanks troyanskiy)
 - Fixed #76: upload sequence is not respecting order of operations needed by some sites (thanks Johny101)
 
+- :warning: **Deprecation**: AngularJS service is deprecated now and will be removed anytime soon
+
 ## 1.10.1
 
 - Fixed #71: does not encode query string in URL correctly on Android

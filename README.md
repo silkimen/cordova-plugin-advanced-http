@@ -32,11 +32,17 @@ cordova plugin add cordova-plugin-advanced-http
 
 ## Usage
 
-### Without AngularJS
+### Plain Cordova
 
 This plugin registers a global object located at `cordova.plugin.http`.
 
-### With AngularJS
+### With Ionic-native wrapper
+
+Check the [Ionic docs](https://ionicframework.com/docs/native/http/) for how to use this plugin with Ionic-native.
+
+### With AngularJS (Deprecated)
+
+:warning: *This feature is deprecated and will be removed anytime soon.* :warning:
 
 This plugin creates a cordovaHTTP service inside of a cordovaHTTP module.  You must load the module when you create your app's module.
 
