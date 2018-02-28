@@ -93,13 +93,6 @@ cordova.plugin.http.setHeader('www.example.com', 'Header', 'Value');
 cordova.plugin.http.setHeader('www.example.com:8080', 'Header', 'Value');
 ```
 
-### disableRedirect
-If set to `true`, it won't follow redirects automatically. This is a global setting.
-
-```js
-cordova.plugin.http.disableRedirect(true);
-```
-
 ### setDataSerializer<a name="setDataSerializer"></a>
 Set the data serializer which will be used for all future PATCH, POST and PUT requests. Takes a string representing the name of the serializer.
 
@@ -167,6 +160,17 @@ Accept all SSL certificates.  Or disable accepting all certificates.  This defau
 
 ```js
 cordova.plugin.http.acceptAllCerts(true, function() {
+  console.log('success!');
+}, function() {
+  console.log('error :(');
+});
+```
+
+### disableRedirect
+If set to `true`, it won't follow redirects automatically. This defaults to false.
+
+```js
+cordova.plugin.http.disableRedirect(true, function() {
   console.log('success!');
 }, function() {
   console.log('error :(');
