@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.0
+
+- Feature #77: allow overriding global settings for each single request
+
 ## 1.10.2
 
 - Fixed #78: overriding header "Content-Type" not working on Android
