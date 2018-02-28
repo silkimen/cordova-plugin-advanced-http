@@ -110,6 +110,24 @@ var publicInterface = {
     validateDomainName: function (validate, success, failure) {
         failure(messages.DEPRECATED_VDN);
     },
+    sendRequest: function (url, options, success, failure) {
+        helpers.handleMissingCallbacks(success, failure);
+
+        options = helpers.handleMissingOptions(options, internals);
+
+        var headers = helpers.getMergedHeaders(url, options.headers, internals.headers);
+        var onSuccess = helpers.injectCookieHandler(url, success);
+        var onFail = helpers.injectCookieHandler(url, failure);
+        var payload;
+
+        if ([ 'get', 'delete', 'head' ].indexOf(method) < 0) {
+          payload = helpers.getProcessedData(options.data, options.serializer);
+        } else {
+          payload = params;
+        }
+
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [ url, payload, options.serializer, headers, options.timeout ]);
+    },
     post: function (url, data, headers, success, failure) {
         helpers.handleMissingCallbacks(success, failure);
 
@@ -155,7 +173,6 @@ var publicInterface = {
 
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'put', [url, data, internals.dataSerializer, headers, internals.timeoutInSeconds]);
     },
-
     patch: function (url, data, headers, success, failure) {
         helpers.handleMissingCallbacks(success, failure);
 
@@ -171,7 +188,6 @@ var publicInterface = {
 
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'patch', [url, data, internals.dataSerializer, headers, internals.timeoutInSeconds]);
     },
-
     delete: function (url, params, headers, success, failure) {
         helpers.handleMissingCallbacks(success, failure);
 

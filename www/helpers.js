@@ -3,6 +3,7 @@ var cookieHandler = require(pluginId + '.cookie-handler');
 var messages = require(pluginId + '.messages');
 
 var validSerializers = [ 'urlencoded', 'json', 'utf8' ];
+var validHttpMethods = [ 'get', 'put', 'post', 'patch', 'head', 'delete'];
 
 module.exports = {
   b64EncodeUnicode: b64EncodeUnicode,
@@ -62,15 +63,60 @@ function onInvalidHeader(handler) {
   });
 }
 
-function checkSerializer(serializer) {
-  serializer = serializer || '';
-  serializer = serializer.trim().toLowerCase();
-
-  if (validSerializers.indexOf(serializer) > -1) {
-    return serializer;
+function checkForValidStringValue(list, value, onInvalidValueMessage) {
+  if (getTypeOf(value) !== 'String') {
+    throw new Error(onInvalidValueMessage + ' ' + list.join(', '));
   }
 
-  return serializer[0];
+  value = value.trim().toLowerCase();
+
+  if (list.indexOf(value) > -1) {
+    return value;
+  }
+
+  throw new Error(onInvalidValueMessage + ' ' + list.join(', '));
+}
+
+function checkKeyValuePairObject(obj, onInvalidValueMessage) {
+  if (getTypeOf(obj) !== 'Object') {
+    throw new Error(onInvalidValueMessage);
+  }
+
+  var keys = Object.keys(obj);
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+
+    if (getTypeOf(obj[key]) !== 'String') {
+      throw new Error(onInvalidValueMessage);
+    }
+  }
+
+  return obj;
+}
+
+function checkHttpMethod(method) {
+  return checkForValidStringValue(validHttpMethods, method, messages.INVALID_HTTP_METHOD);
+}
+
+function checkSerializer(serializer) {
+  return checkForValidStringValue(validSerializers, serializer, messages.INVALID_DATA_SERIALIZER);
+}
+
+function checkTimeoutValue(timeout) {
+  if (getTypeOf(timeout) !== 'Number' || timeout < 0) {
+    throw new Error(messages.INVALID_TIMEOUT_VALUE);
+  }
+
+  return timeout;
+}
+
+function checkHeadersObject(headers) {
+  checkKeyValuePairObject(headers, messages.INVALID_HEADERS_VALUE);
+}
+
+function checkParamsObject(params) {
+  checkKeyValuePairObject(params, messages.INVALID_PARAMS_VALUE);
 }
 
 function resolveCookieString(headers) {
@@ -193,4 +239,17 @@ function handleMissingCallbacks(successFn, failFn) {
   if (getTypeOf(failFn) !== 'Function') {
     throw new Error(messages.MANDATORY_FAIL);
   }
+}
+
+function handleMissingOptions(options, globals) {
+  options = options || {};
+
+  return {
+    method: checkHttpMethod(options.method || validHttpMethods[0]);
+    serializer: checkSerializer(options.serializer || globals.dataSerializer);
+    timeout: checkTimeoutValue(options.timeout || globals.timeoutInSeconds);
+    headers: checkHeadersObject(options.headers || {});
+    params: checkParamsObject(options.params || {});
+    data: options.data || null;
+  };
 }
