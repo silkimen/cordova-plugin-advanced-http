@@ -288,14 +288,14 @@ const tests = [
         .should.be.equal('http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
     }
   },{
-    description: 'should reject non-string values in local header object #54',
-    expected: 'rejected: {"status": 0, "error": "advanced-http: header values must be strings" ...',
+    description: 'should throw on non-string values in local header object #54',
+    expected: 'throwed: {"message": "advanced-http: header values must be strings"}',
     func: function(resolve, reject) {
       cordova.plugin.http.get('http://httpbin.org/get', {}, { myTestHeader: 1 }, resolve, reject);
     },
     validationFunc: function(driver, result) {
-      result.type.should.be.equal('rejected');
-      result.data.error.should.be.equal('advanced-http: header values must be strings');
+      result.type.should.be.equal('throwed');
+      result.message.should.be.equal('advanced-http: header values must be strings');
     }
   },{
     description: 'should throw an error while setting non-string value as global header #54',

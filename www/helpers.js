@@ -3,19 +3,20 @@ var cookieHandler = require(pluginId + '.cookie-handler');
 var messages = require(pluginId + '.messages');
 
 var validSerializers = [ 'urlencoded', 'json', 'utf8' ];
-var validHttpMethods = [ 'get', 'put', 'post', 'patch', 'head', 'delete'];
+var validHttpMethods = [ 'get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download' ];
 
 module.exports = {
   b64EncodeUnicode: b64EncodeUnicode,
   getTypeOf: getTypeOf,
-  checkHeaders: checkHeaders,
-  onInvalidHeader: onInvalidHeader,
   checkSerializer: checkSerializer,
+  checkForBlacklistedHeaderKey: checkForBlacklistedHeaderKey,
+  checkForInvalidHeaderValue: checkForInvalidHeaderValue,
   injectCookieHandler: injectCookieHandler,
   injectFileEntryHandler: injectFileEntryHandler,
   getMergedHeaders: getMergedHeaders,
   getProcessedData: getProcessedData,
-  handleMissingCallbacks: handleMissingCallbacks
+  handleMissingCallbacks: handleMissingCallbacks,
+  handleMissingOptions: handleMissingOptions
 };
 
 // Thanks Mozilla: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
@@ -40,29 +41,6 @@ function mergeHeaders(globalHeaders, localHeaders) {
   return localHeaders;
 }
 
-function checkHeaders(headers) {
-  var keys = Object.keys(headers);
-  var key;
-
-  for (var i = 0; i < keys.length; i++) {
-    key = keys[i];
-
-    if (getTypeOf(headers[key]) !== 'String') {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function onInvalidHeader(handler) {
-  handler({
-    status: 0,
-    error: messages.HEADER_VALUE_MUST_BE_STRING,
-    headers: {}
-  });
-}
-
 function checkForValidStringValue(list, value, onInvalidValueMessage) {
   if (getTypeOf(value) !== 'String') {
     throw new Error(onInvalidValueMessage + ' ' + list.join(', '));
@@ -70,14 +48,14 @@ function checkForValidStringValue(list, value, onInvalidValueMessage) {
 
   value = value.trim().toLowerCase();
 
-  if (list.indexOf(value) > -1) {
-    return value;
+  if (list.indexOf(value) === -1) {
+    throw new Error(onInvalidValueMessage + ' ' + list.join(', '));
   }
 
-  throw new Error(onInvalidValueMessage + ' ' + list.join(', '));
+  return value;
 }
 
-function checkKeyValuePairObject(obj, onInvalidValueMessage) {
+function checkKeyValuePairObject(obj, allowedChildren, onInvalidValueMessage) {
   if (getTypeOf(obj) !== 'Object') {
     throw new Error(onInvalidValueMessage);
   }
@@ -85,9 +63,7 @@ function checkKeyValuePairObject(obj, onInvalidValueMessage) {
   var keys = Object.keys(obj);
 
   for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-
-    if (getTypeOf(obj[key]) !== 'String') {
+    if (allowedChildren.indexOf(getTypeOf(obj[keys[i]])) === -1) {
       throw new Error(onInvalidValueMessage);
     }
   }
@@ -103,6 +79,22 @@ function checkSerializer(serializer) {
   return checkForValidStringValue(validSerializers, serializer, messages.INVALID_DATA_SERIALIZER);
 }
 
+function checkForBlacklistedHeaderKey(key) {
+  if (key.toLowerCase() === 'cookie') {
+    throw new Error(messages.ADDING_COOKIES_NOT_SUPPORTED);
+  }
+
+  return key;
+}
+
+function checkForInvalidHeaderValue(value) {
+  if (getTypeOf(value) !== 'String') {
+    throw new Error(messages.INVALID_HEADERS_VALUE);
+  }
+
+  return value;
+}
+
 function checkTimeoutValue(timeout) {
   if (getTypeOf(timeout) !== 'Number' || timeout < 0) {
     throw new Error(messages.INVALID_TIMEOUT_VALUE);
@@ -112,11 +104,11 @@ function checkTimeoutValue(timeout) {
 }
 
 function checkHeadersObject(headers) {
-  checkKeyValuePairObject(headers, messages.INVALID_HEADERS_VALUE);
+  return checkKeyValuePairObject(headers, [ 'String' ], messages.INVALID_HEADERS_VALUE);
 }
 
 function checkParamsObject(params) {
-  checkKeyValuePairObject(params, messages.INVALID_PARAMS_VALUE);
+  return checkKeyValuePairObject(params, [ 'String', 'Array' ], messages.INVALID_PARAMS_VALUE);
 }
 
 function resolveCookieString(headers) {
@@ -245,11 +237,13 @@ function handleMissingOptions(options, globals) {
   options = options || {};
 
   return {
-    method: checkHttpMethod(options.method || validHttpMethods[0]);
-    serializer: checkSerializer(options.serializer || globals.dataSerializer);
-    timeout: checkTimeoutValue(options.timeout || globals.timeoutInSeconds);
-    headers: checkHeadersObject(options.headers || {});
-    params: checkParamsObject(options.params || {});
-    data: options.data || null;
+    method: checkHttpMethod(options.method || validHttpMethods[0]),
+    serializer: checkSerializer(options.serializer || globals.serializer),
+    timeout: checkTimeoutValue(options.timeout || globals.timeout),
+    headers: checkHeadersObject(options.headers || {}),
+    params: checkParamsObject(options.params || {}),
+    data: options.data || null,
+    filePath: options.filePath || '',
+    name: options.name || ''
   };
 }

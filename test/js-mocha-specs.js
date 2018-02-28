@@ -27,7 +27,6 @@ describe('Advanced HTTP www interface', function() {
     mock('cordova/exec', noop);
     mock(`${PLUGIN_ID}.cookie-handler`, {});
     mock(`${HELPERS_ID}.cookie-handler`, {});
-    mock(`${PLUGIN_ID}.messages`, require('../www/messages'));
     mock(`${HELPERS_ID}.messages`, require('../www/messages'));
     mock(`${PLUGIN_ID}.angular-integration`, { registerService: noop });
 
