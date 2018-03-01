@@ -68,6 +68,6 @@
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPut.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPatch.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/synconset/cordovahttp"/>
-    <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.9.1"/>
+    <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.10.0"/>
   </platform>
 </plugin>
