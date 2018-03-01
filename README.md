@@ -6,7 +6,8 @@ Cordova Advanced HTTP
 [![Build Status](https://travis-ci.org/silkimen/cordova-plugin-advanced-http.svg?branch=master)](https://travis-ci.org/silkimen/cordova-plugin-advanced-http)
 
 
-Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and Android.
+Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS, Android and [Browser](#browserSupport).
+
 This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordova-HTTP).
 
 ## Advantages over Javascript requests
@@ -339,6 +340,18 @@ cordova.plugin.http.downloadFile("https://google.com/", {
 });
 ```
 
+## Browser support<a name="browserSupport"></a>
+
+This plugin supports a very restricted set of functions on the browser platform.
+It's meant for testing purposes, not for production grade usage.
+
+Following features are *not* supported:
+
+* Manipulating Cookies
+* Uploading and Downloading files
+* Pinning SSL certificate
+* Disabling SSL certificate check
+* Disabling transparently following redirects (HTTP codes 3xx)
 
 ## Libraries
 
