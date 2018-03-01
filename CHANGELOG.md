@@ -3,6 +3,7 @@
 ## 1.11.0
 
 - Feature #77: allow overriding global settings for each single request
+- Feature #11: add support for "browser" platform
 
 ## 1.10.2
 

@@ -70,4 +70,15 @@
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/synconset/cordovahttp"/>
     <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.10.0"/>
   </platform>
+  <platform name="browser">
+    <config-file target="config.xml" parent="/*">
+        <feature name="CordovaHttpPlugin">
+            <param name="browser-package" value="CordovaHttpPlugin" />
+        </feature>
+    </config-file>
+
+    <js-module src="src/browser/cordova-http-plugin.js" name="http-proxy">
+        <runs />
+    </js-module>
+</platform>
 </plugin>
