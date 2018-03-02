@@ -86,6 +86,7 @@ function sendRequest(method, withData, opts, success, failure) {
 
   switch (serializer) {
     case 'json':
+      xhr.setRequestHeader('Content-Type', 'application/json; charset=utf8');
       processedData = serializeJsonData(data);
 
       if (processedData === null) {
@@ -95,12 +96,12 @@ function sendRequest(method, withData, opts, success, failure) {
       break;
 
     case 'utf8':
-      xhr.setRequestHeader('Content-type', 'application/json; charset=utf8');
+      xhr.setRequestHeader('Content-Type', 'text/plain; charset=utf8');
       processedData = data.text;
       break;
 
     case 'urlencoded':
-      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       processedData = serializeParams(data);
       break;
   }
