@@ -100,22 +100,22 @@ var publicInterface = {
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [ url, options.params, headers, options.timeout ]);
     }
   },
-  post: function (url, data, headers, success, failure) {
+  post: function (url, data, headers={}, success, failure) {
     return publicInterface.sendRequest(url, { method: 'post', data: data, headers: headers }, success, failure);
   },
-  get: function (url, params, headers, success, failure) {
+  get: function (url, params={}, headers={}, success, failure) {
     return publicInterface.sendRequest(url, { method: 'get', params: params, headers: headers }, success, failure);
   },
-  put: function (url, data, headers, success, failure) {
+  put: function (url, data, headers={}, success, failure) {
     return publicInterface.sendRequest(url, { method: 'put', data: data, headers: headers }, success, failure);
   },
-  patch: function (url, data, headers, success, failure) {
+  patch: function (url, data, headers={}, success, failure) {
     return publicInterface.sendRequest(url, { method: 'patch', data: data, headers: headers }, success, failure);
   },
-  delete: function (url, params, headers, success, failure) {
+  delete: function (url, params, headers={}, success, failure) {
     return publicInterface.sendRequest(url, { method: 'delete', params: params, headers: headers }, success, failure);
   },
-  head: function (url, params, headers, success, failure) {
+  head: function (url, params, headers={}, success, failure) {
     return publicInterface.sendRequest(url, { method: 'head', params: params, headers: headers }, success, failure);
   },
   uploadFile: function (url, params, headers, filePath, name, success, failure) {
