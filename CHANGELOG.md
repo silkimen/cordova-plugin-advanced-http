@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.1
+
+- Fixed #92: headers not deserialized on platform "browser"
+
 ## 1.11.0
 
 - Feature #77: allow overriding global settings for each single request

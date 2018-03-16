@@ -37,12 +37,27 @@ function serializeParams(params) {
   }).join('&');
 }
 
+function deserializeResponseHeaders(headers) {
+  var headerMap = {};
+  var arr = headers.trim().split(/[\r\n]+/);
+
+  arr.forEach(function (line) {
+    var parts = line.split(': ');
+    var header = parts.shift().toLowerCase();
+    var value = parts.join(': ');
+
+    headerMap[header] = value;
+  });
+
+  return headerMap;
+}
+
 function createXhrSuccessObject(xhr) {
   return {
     url: xhr.responseURL,
     status: xhr.status,
     data: helpers.getTypeOf(xhr.responseText) === 'String' ? xhr.responseText : xhr.response,
-    headers: xhr.getAllResponseHeaders()
+    headers: deserializeResponseHeaders(xhr.getAllResponseHeaders())
   };
 }
 
@@ -136,7 +151,7 @@ var browserInterface = {
   put: function (success, failure, opts) {
     return sendRequest('put', true, opts, success, failure);
   },
-  patch: function (success, failure, opts) {
+  patch: function (success, failure, opts) {
     return sendRequest('patch', true, opts, success, failure);
   },
   delete: function (success, failure, opts) {
