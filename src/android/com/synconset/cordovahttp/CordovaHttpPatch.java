@@ -25,8 +25,9 @@ class CordovaHttpPatch extends CordovaHttp implements Runnable {
         try {
             HttpRequest request = HttpRequest.patch(this.getUrlString());
 
-            this.prepareRequest(request);
             this.setupDataSerializer(request);
+            this.prepareRequest(request);
+            this.prepareRequestBody(request);
             this.returnResponseObject(request);
         } catch (HttpRequestException e) {
             this.handleHttpRequestException(e);

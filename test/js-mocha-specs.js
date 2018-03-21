@@ -3,12 +3,18 @@ const mock = require('mock-require');
 const path = require('path');
 
 const should = chai.should();
+
+const HELPERS_ID = path.resolve(__dirname, '..', 'www', 'helpers');
 const PLUGIN_ID = path.resolve(__dirname, '..', 'www', 'advanced-http');
 
 describe('Advanced HTTP www interface', function() {
   let http = {};
+  let helpers = {};
+
   const noop = () => { /* intentionally doing nothing */ };
+
   const loadHttp = () => {
+    mock(`${PLUGIN_ID}.helpers`, mock.reRequire('../www/helpers'));
     http = mock.reRequire('../www/advanced-http');
   };
 
@@ -19,28 +25,31 @@ describe('Advanced HTTP www interface', function() {
     global.btoa = decoded => new Buffer(decoded).toString('base64');
 
     mock('cordova/exec', noop);
-    mock(`${PLUGIN_ID}.angular-integration`, { registerService: noop });
     mock(`${PLUGIN_ID}.cookie-handler`, {});
+    mock(`${HELPERS_ID}.cookie-handler`, {});
+    mock(`${HELPERS_ID}.messages`, require('../www/messages'));
+    mock(`${PLUGIN_ID}.angular-integration`, { registerService: noop });
+
     loadHttp();
   });
 
   it('sets global headers correctly with two args (old interface)', () => {
     http.setHeader('myKey', 'myValue');
-    http.headers['*'].myKey.should.equal('myValue');
+    http.getHeaders('*').myKey.should.equal('myValue');
   });
 
   it('sets global headers correctly with three args (new interface) #24', () => {
     http.setHeader('*', 'myKey', 'myValue');
-    http.headers['*'].myKey.should.equal('myValue');
+    http.getHeaders('*').myKey.should.equal('myValue');
   });
 
   it('sets host headers correctly #24', () => {
     http.setHeader('www.google.de', 'myKey', 'myValue');
-    http.headers['www.google.de'].myKey.should.equal('myValue');
+    http.getHeaders('www.google.de').myKey.should.equal('myValue');
   });
 
   it('resolves global headers correctly #24', () => {
-    mock(`${PLUGIN_ID}.cookie-handler`, {
+    mock(`${HELPERS_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
 
@@ -59,7 +68,7 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('resolves host headers correctly (set without port number) #37', () => {
-    mock(`${PLUGIN_ID}.cookie-handler`, {
+    mock(`${HELPERS_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
 
@@ -78,7 +87,7 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('resolves host headers correctly (set with port number) #37', () => {
-    mock(`${PLUGIN_ID}.cookie-handler`, {
+    mock(`${HELPERS_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
 
@@ -97,7 +106,7 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('resolves request headers correctly', () => {
-    mock(`${PLUGIN_ID}.cookie-handler`, {
+    mock(`${HELPERS_ID}.cookie-handler`, {
       getCookieString: () => 'fakeCookieString'
     });
 
@@ -116,7 +125,7 @@ describe('Advanced HTTP www interface', function() {
 
   it('sets basic authentication header correctly #36', () => {
     http.useBasicAuth('name', 'pass');
-    http.headers['*'].Authorization.should.equal('Basic bmFtZTpwYXNz');
+    http.getHeaders('*').Authorization.should.equal('Basic bmFtZTpwYXNz');
   });
 
   it('throws an Error when you try to add a cookie by using "setHeader" #46', () => {

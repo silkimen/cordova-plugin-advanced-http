@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.11.1
+
+- Fixed #92: headers not deserialized on platform "browser"
+
+## 1.11.0
+
+- Feature #77: allow overriding global settings for each single request
+- Feature #11: add support for "browser" platform
+
+## 1.10.2
+
+- Fixed #78: overriding header "Content-Type" not working on Android
+- Fixed #79: PATCH operation not working on Android API level 19 and older (thanks chax)
+- Fixed #83: App crashes on error during download operation on iOS (thanks troyanskiy)
+- Fixed #76: upload sequence is not respecting order of operations needed by some sites (thanks Johny101)
+
+- :warning: **Deprecation**: AngularJS service is deprecated now and will be removed anytime soon
+
+## 1.10.1
+
+- Fixed #71: does not encode query string in URL correctly on Android
+- Fixed #72: app crashes if response encoding is not UTF-8 (thanks jkfb)
+
+## 1.10.0
+
+- Feature #34: add new serializer "utf8" sending utf-8 encoded plain text (thanks robertocapuano)
+
 ## 1.9.1
 
 - Fixed #45: does not encode arrays correctly as HTTP GET parameter on Android

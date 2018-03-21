@@ -6,7 +6,8 @@ Cordova Advanced HTTP
 [![Build Status](https://travis-ci.org/silkimen/cordova-plugin-advanced-http.svg?branch=master)](https://travis-ci.org/silkimen/cordova-plugin-advanced-http)
 
 
-Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS and Android.
+Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS, Android and [Browser](#browserSupport).
+
 This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordova-HTTP).
 
 ## Advantages over Javascript requests
@@ -32,11 +33,17 @@ cordova plugin add cordova-plugin-advanced-http
 
 ## Usage
 
-### Without AngularJS
+### Plain Cordova
 
 This plugin registers a global object located at `cordova.plugin.http`.
 
-### With AngularJS
+### With Ionic-native wrapper
+
+Check the [Ionic docs](https://ionicframework.com/docs/native/http/) for how to use this plugin with Ionic-native.
+
+### With AngularJS (Deprecated)
+
+:warning: *This feature is deprecated and will be removed anytime soon.* :warning:
 
 This plugin creates a cordovaHTTP service inside of a cordovaHTTP module.  You must load the module when you create your app's module.
 
@@ -63,7 +70,7 @@ This sets up all future requests to use Basic HTTP authentication with the given
 cordova.plugin.http.useBasicAuth('user', 'password');
 ```
 
-### setHeader
+### setHeader<a name="setHeader"></a>
 Set a header for all future requests to a specified host. Takes a hostname, a header and a value (must be a string value).
 
 ```js
@@ -87,25 +94,21 @@ cordova.plugin.http.setHeader('www.example.com', 'Header', 'Value');
 cordova.plugin.http.setHeader('www.example.com:8080', 'Header', 'Value');
 ```
 
-### disableRedirect
-If set to `true`, it won't follow redirects automatically. This is a global setting.
-
-```js
-cordova.plugin.http.disableRedirect(true);
-```
-
-### setDataSerializer
+### setDataSerializer<a name="setDataSerializer"></a>
 Set the data serializer which will be used for all future PATCH, POST and PUT requests. Takes a string representing the name of the serializer.
 
 ```js
 cordova.plugin.http.setDataSerializer('urlencoded');
 ```
 
-You can choose one of these two:
+You can choose one of these:
 * `urlencoded`: send data as url encoded content in body (content type "application/x-www-form-urlencoded")
 * `json`: send data as JSON encoded content in body (content type "application/json")
+* `utf8`: send data as plain UTF8 encoded string in body (content type "plain/text")
 
-Caution: `urlencoded` does not support serializing deep structures whereas `json` does.
+You can also override the default content type headers by specifying your own headers (see [setHeader](#setHeader)).
+
+__Caution__: `urlencoded` does not support serializing deep structures whereas `json` does.
 
 ### setRequestTimeout
 Set how long to wait for a request to respond, in seconds.
@@ -164,6 +167,17 @@ cordova.plugin.http.acceptAllCerts(true, function() {
 });
 ```
 
+### disableRedirect
+If set to `true`, it won't follow redirects automatically. This defaults to false.
+
+```js
+cordova.plugin.http.disableRedirect(true, function() {
+  console.log('success!');
+}, function() {
+  console.log('error :(');
+});
+```
+
 ### validateDomainName
 This function was removed in v1.6.2. Domain name validation is disabled automatically when you enable "acceptAllCerts".
 
@@ -191,6 +205,42 @@ cordova.plugin.http.resetX509AuthClientCredentials(function() {
 console.log('success!');
 }, function() {
 console.log('error :(');
+});
+```
+
+### sendRequest
+Execute a HTTP request.  Takes a URL and an options object. This is the internally used implementation of the following shorthand functions ([post](#post), [get](#get), [put](#put), [patch](#patch), [delete](#delete), [head](#head), [uploadFile](#uploadFile) and [downloadFile](#downloadFile)). You can use this function, if you want to override global settings for each single request.
+
+The options object contains following keys:
+
+* `method`: HTTP method to be used, defaults to `get`, needs to be one of the following values:
+  * `get`, `post`, `put`, `patch`, `head`, `delete`, `upload`, `download`
+* `data`: payload to be send to the server (only applicable on `post`, `put` or `patch` methods)
+* `params`: query params to be appended to the URL (only applicable on `get`, `head`, `delete`, `upload` or `download` methods)
+* `serializer`: data serializer to be used (only applicable on `post`, `put` or `patch` methods), defaults to global serializer value, see [setDataSerializer](#setDataSerializer) for supported values
+* `timeout`: timeout value for the request in seconds, defaults to global timeout value
+* `headers`: headers object (key value pair), will be merged with global values
+* `filePath`: filePath to be used during upload and download see [uploadFile](#uploadFile) and [downloadFile](#downloadFile) for detailed information
+* `name`: name to be used during upload see [uploadFile](#uploadFile) for detailed information
+
+Here's a quick example:
+
+```js
+const options = {
+  method: 'post',
+  data: { id: 12, message: 'test' },
+  headers: { Authorization: 'OAuth2: token' }
+};
+
+cordova.plugin.http.sendRequest('https://google.com/', options, function(response) {
+  // prints 200
+  console.log(response.status);
+}, function(response) {
+  // prints 403
+  console.log(response.status);
+
+  //prints Permission denied
+  console.log(response.error);
 });
 ```
 
@@ -252,7 +302,7 @@ Here's a quick example:
 }
 ```
 
-### get
+### get<a name="get"></a>
 Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ```js
@@ -266,19 +316,19 @@ cordova.plugin.http.get('https://google.com/', {
 });
 ```
 
-### put
+### put<a name="put"></a>
 Execute a PUT request.  Takes a URL, data, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-### patch
+### patch<a name="patch"></a>
 Execute a PATCH request.  Takes a URL, data, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-### delete
+### delete<a name="delete"></a>
 Execute a DELETE request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-### head
+### head<a name="head"></a>
 Execute a HEAD request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-### uploadFile
+### uploadFile<a name="uploadFile"></a>
 Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ```js
@@ -292,7 +342,7 @@ cordova.plugin.http.uploadFile("https://google.com/", {
 });
 ```
 
-### downloadFile
+### downloadFile<a name="downloadFile"></a>
 Downloads a file and saves it to the device.  Takes a URL, parameters, headers, and a filePath.  See [post](#post) documentation for details on what is returned on failure.  On success this function returns a cordova [FileEntry object](http://cordova.apache.org/docs/en/3.3.0/cordova_file_file.md.html#FileEntry).
 
 ```js
@@ -310,6 +360,18 @@ cordova.plugin.http.downloadFile("https://google.com/", {
 });
 ```
 
+## Browser support<a name="browserSupport"></a>
+
+This plugin supports a very restricted set of functions on the browser platform.
+It's meant for testing purposes, not for production grade usage.
+
+Following features are *not* supported:
+
+* Manipulating Cookies
+* Uploading and Downloading files
+* Pinning SSL certificate
+* Disabling SSL certificate check
+* Disabling transparently following redirects (HTTP codes 3xx)
 
 ## Libraries
 

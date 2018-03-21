@@ -1,4 +1,4 @@
-var pluginId = module.id.slice(0, module.id.indexOf('.'));
+var pluginId = module.id.slice(0, module.id.lastIndexOf('.'));
 var ToughCookie = require(pluginId + '.tough-cookie');
 var WebStorageCookieStore = require(pluginId + '.local-storage-store');
 

@@ -94,6 +94,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import android.text.TextUtils;
+
 /**
  * A fluid interface for making HTTP requests using an underlying
  * {@link HttpURLConnection} (or sub-class).
@@ -107,6 +109,11 @@ public class HttpRequest {
    * 'UTF-8' charset name
    */
   public static final String CHARSET_UTF8 = "UTF-8";
+
+  /**
+   * 'ISO-8859-1' charset name
+   */
+  public static final String CHARSET_LATIN1 = "ISO-8859-1";
 
   /**
    * 'application/x-www-form-urlencoded' content type header value
@@ -365,26 +372,35 @@ public class HttpRequest {
   }
 
   private static StringBuilder addParam(final Object key, Object value,
-      final StringBuilder result) {
+      final StringBuilder result) throws HttpRequestException {
+    return addParam(key, value, result, CHARSET_UTF8);
+  }
+
+  private static StringBuilder addParam(final Object key, Object value,
+      final StringBuilder result, String charset) throws HttpRequestException {
     if (value != null && value.getClass().isArray())
       value = arrayToList(value);
 
-    if (value instanceof Iterable<?>) {
-      Iterator<?> iterator = ((Iterable<?>) value).iterator();
-      while (iterator.hasNext()) {
-        result.append(key);
-        result.append("[]=");
-        Object element = iterator.next();
-        if (element != null)
-          result.append(element);
-        if (iterator.hasNext())
-          result.append("&");
+    try {
+      if (value instanceof Iterable<?>) {
+        Iterator<?> iterator = ((Iterable<?>) value).iterator();
+        while (iterator.hasNext()) {
+          result.append(URLEncoder.encode(key.toString(), charset));
+          result.append("[]=");
+          Object element = iterator.next();
+          if (element != null)
+            result.append(URLEncoder.encode(element.toString(), charset));
+          if (iterator.hasNext())
+            result.append("&");
+        }
+      } else {
+        result.append(URLEncoder.encode(key.toString(), charset));
+        result.append("=");
+        if (value != null)
+          result.append(URLEncoder.encode(value.toString(), charset));
       }
-    } else {
-      result.append(key);
-      result.append("=");
-      if (value != null)
-        result.append(value);
+    } catch (UnsupportedEncodingException e) {
+      throw new HttpRequestException(e);
     }
 
     return result;
@@ -414,15 +430,7 @@ public class HttpRequest {
      * A {@link ConnectionFactory} which uses the built-in
      * {@link URL#openConnection()}
      */
-    ConnectionFactory DEFAULT = new ConnectionFactory() {
-      public HttpURLConnection create(URL url) throws IOException {
-        return (HttpURLConnection) url.openConnection();
-      }
-
-      public HttpURLConnection create(URL url, Proxy proxy) throws IOException {
-        return (HttpURLConnection) url.openConnection(proxy);
-      }
-    };
+    ConnectionFactory DEFAULT = new OkConnectionFactory();
   }
 
   private static ConnectionFactory CONNECTION_FACTORY = ConnectionFactory.DEFAULT;
@@ -1990,16 +1998,24 @@ public class HttpRequest {
   }
 
   /**
-   * Get the response body as a {@link String} and set it as the value of the
+   * Get the response body as ByteBuffer and set it as the value of the
    * given reference.
    *
    * @param output
    * @return this request
    * @throws HttpRequestException
    */
-  public HttpRequest body(final AtomicReference<String> output) throws HttpRequestException {
-    output.set(body());
-    return this;
+  public HttpRequest body(final AtomicReference<ByteBuffer> output) throws HttpRequestException {
+    final ByteArrayOutputStream outputStream = byteStream();
+
+    try {
+      copy(buffer(), outputStream);
+      output.set(ByteBuffer.wrap(outputStream.toByteArray()));
+
+      return this;
+    } catch (IOException e) {
+      throw new HttpRequestException(e);
+    }
   }
 
   /**
@@ -2015,7 +2031,6 @@ public class HttpRequest {
     output.set(body(charset));
     return this;
   }
-
 
   /**
    * Is the response body empty?
@@ -2588,6 +2603,16 @@ public class HttpRequest {
    */
   public HttpRequest acceptCharset(final String acceptCharset) {
     return header(HEADER_ACCEPT_CHARSET, acceptCharset);
+  }
+
+  /**
+   * Set the 'Accept-Charset' header to given values
+   *
+   * @param acceptCharsets
+   * @return this request
+   */
+  public HttpRequest acceptCharset(final String[] acceptCharsets) {
+    return header(HEADER_ACCEPT_CHARSET, TextUtils.join(", ", acceptCharsets));
   }
 
   /**

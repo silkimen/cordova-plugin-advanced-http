@@ -1,13 +1,17 @@
 const hooks = {
   onBeforeEachTest: function(done) {
     cordova.plugin.http.clearCookies();
-    cordova.plugin.http.acceptAllCerts(false, done, done);
+    cordova.plugin.http.acceptAllCerts(false, function() {
+      cordova.plugin.http.enableSSLPinning(false, done, done);
+    }, done);
   }
 };
 
 const helpers = {
   acceptAllCerts: function(done) { cordova.plugin.http.acceptAllCerts(true, done, done); },
+  enableSSLPinning: function(done) { cordova.plugin.http.enableSSLPinning(true, done, done); },
   setJsonSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('json')); },
+  setUtf8StringSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('utf8')); },
   setUrlEncodedSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('urlencoded')); },
   getWithXhr: function(done, url) {
     var xhr = new XMLHttpRequest();
@@ -284,14 +288,14 @@ const tests = [
         .should.be.equal('http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
     }
   },{
-    description: 'should reject non-string values in local header object #54',
-    expected: 'rejected: {"status": 0, "error": "advanced-http: header values must be strings" ...',
+    description: 'should throw on non-string values in local header object #54',
+    expected: 'throwed: {"message": "advanced-http: header values must be strings"}',
     func: function(resolve, reject) {
       cordova.plugin.http.get('http://httpbin.org/get', {}, { myTestHeader: 1 }, resolve, reject);
     },
     validationFunc: function(driver, result) {
-      result.type.should.be.equal('rejected');
-      result.data.error.should.be.equal('advanced-http: header values must be strings');
+      result.type.should.be.equal('throwed');
+      result.message.should.be.equal('advanced-http: header values must be strings');
     }
   },{
     description: 'should throw an error while setting non-string value as global header #54',
@@ -381,6 +385,84 @@ const tests = [
 
       cookies.myCookie.should.be.equal('myValue');
       cookies.mySecondCookie.should.be.equal('mySecondValue');
+    }
+  },{
+    description: 'should send UTF-8 encoded raw string correctly (POST) #34',
+    expected: 'resolved: {"status": 200, "data": "{\\"data\\": \\"this is a test string\\"...',
+    before: helpers.setUtf8StringSerializer,
+    func: function(resolve, reject) {
+      cordova.plugin.http.post('http://httpbin.org/anything', 'this is a test string', {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).data.should.be.equal('this is a test string');
+    }
+  },{
+    description: 'should encode spaces in query string (params object) correctly (GET) #71',
+    expected: 'resolved: {"status": 200, "data": "{\\"args\\": \\"query param\\": \\"and value with spaces\\"...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://httpbin.org/get', { 'query param': 'and value with spaces' }, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).args['query param'].should.be.equal('and value with spaces');
+    }
+  },{
+    description: 'should decode latin1 (iso-8859-1) encoded body correctly (GET) #72',
+    expected: 'resolved: {"status": 200, "data": "<!DOCTYPE HTML PUBLIC \\"-//W3C//DTD HTML 4.01 Transitional//EN\\"> ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://www.columbia.edu/kermit/latin1.html', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.include('[¡]  161  10/01  241  A1  INVERTED EXCLAMATION MARK\n[¢]  162  10/02  242  A2  CENT SIGN');
+    }
+  },{
+    description: 'should return empty body string correctly (GET)',
+    expected: 'resolved: {"status": 200, "data": "" ...',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('http://httpbin.org/stream/0', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.equal('');
+    }
+  },{
+    description: 'should pin SSL cert correctly (GET)',
+    expected: 'resolved: {"status": 200 ...',
+    before: helpers.enableSSLPinning,
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('https://httpbin.org', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+    }
+  },{
+    description: 'should send deeply structured JSON object correctly (POST) #65',
+    expected: 'resolved: {"status": 200, "data": "{\\"data\\": \\"{\\\\"outerObj\\\\":{\\\\"innerStr\\\\":\\\\"testString\\\\",\\\\"innerArr\\\\":[1,2,3]}}\\" ...',
+    before: helpers.setJsonSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', { outerObj: { innerStr: 'testString', innerArr: [1, 2, 3] }}, {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).json.should.eql({ outerObj: { innerStr: 'testString', innerArr: [1, 2, 3] }});
+    }
+  },{
+    description: 'should override header "content-type" correctly (POST) #78',
+    expected: 'resolved: {"status": 200, "headers": "{\\"Content-Type\\": \\"text/plain\\" ...',
+    before: helpers.setJsonSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', {}, { 'Content-Type': 'text/plain' }, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).headers['Content-Type'].should.be.equal('text/plain');
+    }
+  },{
+    description: 'should handle error during file download correctly (DOWNLOAD) #83',
+    expected: 'rejected: {"status": 403, "error": "There was an error downloading the file" ...',
+    func: function(resolve, reject) { cordova.plugin.http.downloadFile('http://httpbin.org/status/403', {}, {}, cordova.file.tempDirectory + 'testfile.txt', resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.status.should.be.equal(403);
+      result.data.error.should.be.equal('There was an error downloading the file');
     }
   }
 ];
