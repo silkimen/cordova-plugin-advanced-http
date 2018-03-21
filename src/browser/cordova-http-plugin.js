@@ -174,6 +174,12 @@ var browserInterface = {
   },
   disableRedirect: function (success, failure, opts) {
     return failure('advanced-http: function "disableRedirect" not supported on browser platform');
+  },
+  setX509AuthClientCredentials: function (pkcs10Container, password, success, failure){
+    return failure('advanced-http: function "setX509AuthClientCredentials" not supported on browser platform');
+  },
+  resetX509AuthClientCredentials: function (success, failure){
+    return failure('advanced-http: function "resetX509AuthClientCredentials" not supported on browser platform');
   }
 };
 

@@ -129,7 +129,7 @@ var publicInterface = {
   },
   resetX509AuthClientCredentials: function (success, failure){
     return exec(success, failure, "CordovaHttpPlugin", "resetX509AuthClientCredentials", []);
-  },
+  }
 };
 
 // angular service is deprecated and will be removed anytime soon
