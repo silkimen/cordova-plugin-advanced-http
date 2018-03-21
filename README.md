@@ -228,7 +228,7 @@ cordova.plugin.http.sendRequest('https://google.com/', options, function(respons
 Execute a POST request.  Takes a URL, data, and headers.
 
 #### success
-The success function receives a response object with 3 properties: status, data, and headers.  **status** is the HTTP response code as numeric value. **data** is the response from the server as a string. **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
+The success function receives a response object with 4 properties: status, data, url, and headers.  **status** is the HTTP response code as numeric value. **data** is the response from the server as a string. **url** is the final URL obtained after any redirects as a string. **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
 
 Here's a quick example:
 
@@ -236,6 +236,7 @@ Here's a quick example:
 {
   status: 200,
   data: '{"id": 12, "message": "test"}',
+  url: 'http://example.net/rest'
   headers: {
     'content-length': '247'
   }
@@ -268,7 +269,7 @@ cordova.plugin.http.post('https://google.com/', {
 ```
 
 #### failure
-The error function receives a response object with 3 properties: status, error and headers.  **status** is the HTTP response code as numeric value. **error** is the error response from the server as a string.  **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
+The error function receives a response object with 4 properties: status, error, url, and headers (url and headers being optional).  **status** is the HTTP response code as numeric value. **error** is the error response from the server as a string. **url** is the final URL obtained after any redirects as a string. **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
 
 Here's a quick example:
 
@@ -276,6 +277,7 @@ Here's a quick example:
 {
   status: 403,
   error: 'Permission denied',
+  url: 'http://example.net/noperm'
   headers: {
     'content-length': '247'
   }
