@@ -4,6 +4,7 @@ const hooks = {
     cordova.plugin.http.acceptAllCerts(false, function() {
       cordova.plugin.http.enableSSLPinning(false, done, done);
     }, done);
+    cordova.plugin.http.resetX509ClientAuthCredentials();
   }
 };
 
@@ -35,7 +36,19 @@ const helpers = {
         }, done);
       }, done);
     }, done);
-  }
+  },
+  readFromFile : function (resultCallback, errorCallback, fileName) {
+    window.resolveLocalFileSystemURL(cordova.file.applicationDirectory + fileName, function (fileEntry) {
+      fileEntry.file(function (file) {
+        var fileReader = new FileReader();
+        fileReader.onload = function() {
+          resultCallback(this.result);
+        };
+        fileReader.readAsArrayBuffer(file);
+      },errorCallback);
+    },errorCallback);
+  },
+  resetX509ClientAuthCredentials : function(done) { cordova.plugin.http.resetX509ClientAuthCredentials(done, done);  }
 };
 
 const tests = [
@@ -463,6 +476,44 @@ const tests = [
       result.type.should.be.equal('rejected');
       result.data.status.should.be.equal(403);
       result.data.error.should.be.equal('There was an error downloading the file');
+    }
+  },{
+    description: 'should fail because X509 Cert is missing',
+    expected: 'reject',
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('https://client-cert-missing.badssl.com/', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('rejected');
+    }
+  },{
+    description: 'should reject X509 Client Authentication with invalid Cert',
+    expected: 'reject',
+    before: function(done) {
+      helpers.readFromFile(function(arraybuffer) {
+        cordova.plugin.http.setX509AuthClientCredentials(arraybuffer, 'test', done, done);
+      }, done, "www/credentials/test.p12");
+     },
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('https://client.badssl.com/', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('rejected');
+    }
+  },{
+    description: 'should Authenticate with X509 Certificate',
+    expected: 'resolve: {"status: 200"}',
+    before: function(done) {
+      helpers.readFromFile(function(arraybuffer) {
+        cordova.plugin.http.setX509AuthClientCredentials(arraybuffer, 'badssl.com', done, done);
+      }, done, "www/credentials/badssl.com-client.p12");
+     },
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('https://client.badssl.com/', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.status.should.be.equal(200);
     }
   }
 ];
