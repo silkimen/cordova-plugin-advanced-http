@@ -289,7 +289,7 @@ Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#p
 
 ```js
 cordova.plugin.http.get('https://google.com/', {
-  id: 12,
+  id: '12',
   message: 'test'
 }, { Authorization: 'OAuth2: token' }, function(response) {
   console.log(response.status);
@@ -315,7 +315,7 @@ Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath,
 
 ```js
 cordova.plugin.http.uploadFile("https://google.com/", {
-    id: 12,
+    id: '12',
     message: 'test'
 }, { Authorization: 'OAuth2: token' }, 'file:///somepicture.jpg', 'picture', function(response) {
     console.log(response.status);
@@ -329,7 +329,7 @@ Downloads a file and saves it to the device.  Takes a URL, parameters, headers, 
 
 ```js
 cordova.plugin.http.downloadFile("https://google.com/", {
-  id: 12,
+  id: '12',
   message: 'test'
 }, { Authorization: 'OAuth2: token' }, 'file:///somepicture.jpg', function(entry) {
   // prints the filename
