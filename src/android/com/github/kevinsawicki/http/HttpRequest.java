@@ -263,6 +263,12 @@ public class HttpRequest {
    */
   public static final String PARAM_CHARSET = "charset";
 
+  public static final String CERT_MODE_DEFAULT = "default";
+
+  public static final String CERT_MODE_PINNED = "pinned";
+
+  public static final String CERT_MODE_TRUSTALL = "trustall";
+
   private static final String BOUNDARY = "00content0boundary00";
 
   private static final String CONTENT_TYPE_MULTIPART = "multipart/form-data; boundary="
@@ -272,13 +278,13 @@ public class HttpRequest {
 
   private static final String[] EMPTY_STRINGS = new String[0];
 
-  private static SSLSocketFactory PINNED_FACTORY;
+  private static SSLSocketFactory SOCKET_FACTORY;
 
-  private static SSLSocketFactory TRUSTED_FACTORY;
+  private static String CURRENT_CERT_MODE = CERT_MODE_DEFAULT;
 
   private static ArrayList<Certificate> PINNED_CERTS;
 
-  private static HostnameVerifier TRUSTED_VERIFIER;
+  private static HostnameVerifier HOSTNAME_VERIFIER;
 
   private static String getValidCharset(final String charset) {
     if (charset != null && charset.length() > 0)
@@ -287,63 +293,107 @@ public class HttpRequest {
       return CHARSET_UTF8;
   }
 
-  private static SSLSocketFactory getPinnedFactory()
-      throws HttpRequestException {
-    if (PINNED_FACTORY != null) {
-        return PINNED_FACTORY;
-    } else {
-        IOException e = new IOException("You must add at least 1 certificate in order to pin to certificates");
-        throw new HttpRequestException(e);
+  /**
+   * Configure SSL cert handling for all future HTTPS connections
+   *
+   * @param mode
+   */
+  public static void setSSLCertMode(String mode) {
+    try {
+      if (mode == CERT_MODE_TRUSTALL) {
+        SOCKET_FACTORY = createSocketFactory(getNoopTrustManagers());
+      } else if (mode == CERT_MODE_PINNED) {
+        SOCKET_FACTORY = createSocketFactory(getPinnedTrustManagers());
+      } else {
+        SOCKET_FACTORY = null;
+      }
+
+      CURRENT_CERT_MODE = mode;
+    } catch(IOException e) {
+      throw new HttpRequestException(e);
     }
   }
 
-  private static SSLSocketFactory getTrustedFactory()
-      throws HttpRequestException {
-    if (TRUSTED_FACTORY == null) {
-      final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+  /**
+   * Configure host name verification for all future HTTPS connections
+   *
+   * @param enabled
+   */
+  public static void setHostnameVerification(boolean enabled) {
+    if (enabled) {
+      HOSTNAME_VERIFIER = null;
+    } else {
+      HOSTNAME_VERIFIER = getTrustedVerifier();
+    }
+  }
 
-        public X509Certificate[] getAcceptedIssuers() {
-          return new X509Certificate[0];
-        }
-
-        public void checkClientTrusted(X509Certificate[] chain, String authType) {
-          // Intentionally left blank
-        }
-
-        public void checkServerTrusted(X509Certificate[] chain, String authType) {
-          // Intentionally left blank
-        }
-      } };
-      try {
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, trustAllCerts, new SecureRandom());
-
-        if (android.os.Build.VERSION.SDK_INT < 20) {
-          TRUSTED_FACTORY = new TLSSocketFactory(context);
-        } else {
-          TRUSTED_FACTORY = context.getSocketFactory();
-        }
-      } catch (GeneralSecurityException e) {
-        IOException ioException = new IOException(
-            "Security exception configuring SSL context");
-        ioException.initCause(e);
-        throw new HttpRequestException(ioException);
-      }
+  private static TrustManager[] getPinnedTrustManagers() throws IOException {
+    if (PINNED_CERTS == null) {
+      throw new IOException("You must add at least 1 certificate in order to pin to certificates");
     }
 
-    return TRUSTED_FACTORY;
+    try {
+      String keyStoreType = KeyStore.getDefaultType();
+      KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+      keyStore.load(null, null);
+
+      for (int i = 0; i < PINNED_CERTS.size(); i++) {
+        keyStore.setCertificateEntry("CA" + i, PINNED_CERTS.get(i));
+      }
+
+      // Create a TrustManager that trusts the CAs in our KeyStore
+      String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+      TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+      tmf.init(keyStore);
+
+      return tmf.getTrustManagers();
+    } catch (GeneralSecurityException e) {
+      IOException ioException = new IOException("Security exception configuring SSL trust managers");
+      ioException.initCause(e);
+      throw new HttpRequestException(ioException);
+    }
+  }
+
+  private static TrustManager[] getNoopTrustManagers() {
+    return new TrustManager[] { new X509TrustManager() {
+      public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
+      }
+
+      public void checkClientTrusted(X509Certificate[] chain, String authType) {
+        // Intentionally left blank
+      }
+
+      public void checkServerTrusted(X509Certificate[] chain, String authType) {
+        // Intentionally left blank
+      }
+    }};
+  }
+
+  private static SSLSocketFactory createSocketFactory(TrustManager[] trustManagers)
+      throws HttpRequestException {
+    try {
+      SSLContext context = SSLContext.getInstance("TLS");
+      context.init(null, trustManagers, new SecureRandom());
+
+      if (android.os.Build.VERSION.SDK_INT < 20) {
+        return new TLSSocketFactory(context);
+      } else {
+        return context.getSocketFactory();
+      }
+    } catch (GeneralSecurityException e) {
+      IOException ioException = new IOException("Security exception configuring SSL context");
+      ioException.initCause(e);
+      throw new HttpRequestException(ioException);
+    }
   }
 
   private static HostnameVerifier getTrustedVerifier() {
-    if (TRUSTED_VERIFIER == null)
-      TRUSTED_VERIFIER = new HostnameVerifier() {
-
-        public boolean verify(String hostname, SSLSession session) {
-          return true;
-        }
-      };
-
-    return TRUSTED_VERIFIER;
+    return new HostnameVerifier() {
+      public boolean verify(String hostname, SSLSession session) {
+        return true;
+      }
+    };
   }
 
   private static StringBuilder addPathSeparator(final String baseUrl,
@@ -453,32 +503,15 @@ public class HttpRequest {
   * @throws IOException
   */
   public static void addCert(Certificate ca) throws GeneralSecurityException, IOException  {
-      if (PINNED_CERTS == null) {
-        PINNED_CERTS = new ArrayList<Certificate>();
-      }
-      PINNED_CERTS.add(ca);
-      String keyStoreType = KeyStore.getDefaultType();
-      KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-      keyStore.load(null, null);
+    if (PINNED_CERTS == null) {
+      PINNED_CERTS = new ArrayList<Certificate>();
+    }
 
-      for (int i = 0; i < PINNED_CERTS.size(); i++) {
-        keyStore.setCertificateEntry("CA" + i, PINNED_CERTS.get(i));
-      }
+    PINNED_CERTS.add(ca);
 
-      // Create a TrustManager that trusts the CAs in our KeyStore
-      String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-      TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-      tmf.init(keyStore);
-
-      // Create an SSLContext that uses our TrustManager
-      SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(null, tmf.getTrustManagers(), null);
-
-      if (android.os.Build.VERSION.SDK_INT < 20) {
-        PINNED_FACTORY = new TLSSocketFactory(sslContext);
-      } else {
-        PINNED_FACTORY = sslContext.getSocketFactory();
-      }
+    if (CURRENT_CERT_MODE == CERT_MODE_PINNED) {
+      SOCKET_FACTORY = createSocketFactory(getPinnedTrustManagers());
+    }
   }
 
   /**
@@ -1632,6 +1665,7 @@ public class HttpRequest {
       throw new HttpRequestException(e);
     }
     this.requestMethod = method;
+    this.setupSecurity();
   }
 
   /**
@@ -1645,6 +1679,23 @@ public class HttpRequest {
       throws HttpRequestException {
     this.url = url;
     this.requestMethod = method;
+    this.setupSecurity();
+  }
+
+  private void setupSecurity() {
+    final HttpURLConnection connection = getConnection();
+
+    if (!(connection instanceof HttpsURLConnection)) {
+      return;
+    }
+
+    if (SOCKET_FACTORY != null) {
+      ((HttpsURLConnection) connection).setSSLSocketFactory(SOCKET_FACTORY);
+    }
+
+    if (HOSTNAME_VERIFIER != null) {
+      ((HttpsURLConnection) connection).setHostnameVerifier(HOSTNAME_VERIFIER);
+    }
   }
 
   private Proxy createProxy() {
@@ -3348,58 +3399,6 @@ public class HttpRequest {
     if (!values.isEmpty())
       for (Entry<?, ?> entry : values.entrySet())
         form(entry, charset);
-    return this;
-  }
-
-  /**
-   * Configure HTTPS connection to trust only certain certificates
-   * <p>
-   * This method throws an exception if the current request is not a HTTPS request
-   *
-   * @return this request
-   * @throws HttpRequestException
-   */
-  public HttpRequest pinToCerts() throws HttpRequestException {
-    final HttpURLConnection connection = getConnection();
-    if (connection instanceof HttpsURLConnection) {
-        ((HttpsURLConnection) connection).setSSLSocketFactory(getPinnedFactory());
-    } else {
-        IOException e = new IOException("You must use a https url to use ssl pinning");
-        throw new HttpRequestException(e);
-    }
-    return this;
-  }
-
-  /**
-   * Configure HTTPS connection to trust all certificates
-   * <p>
-   * This method does nothing if the current request is not a HTTPS request
-   *
-   * @return this request
-   * @throws HttpRequestException
-   */
-  public HttpRequest trustAllCerts() throws HttpRequestException {
-    final HttpURLConnection connection = getConnection();
-    if (connection instanceof HttpsURLConnection)
-      ((HttpsURLConnection) connection)
-          .setSSLSocketFactory(getTrustedFactory());
-    return this;
-  }
-
-  /**
-   * Configure HTTPS connection to trust all hosts using a custom
-   * {@link HostnameVerifier} that always returns <code>true</code> for each
-   * host verified
-   * <p>
-   * This method does nothing if the current request is not a HTTPS request
-   *
-   * @return this request
-   */
-  public HttpRequest trustAllHosts() {
-    final HttpURLConnection connection = getConnection();
-    if (connection instanceof HttpsURLConnection)
-      ((HttpsURLConnection) connection)
-          .setHostnameVerifier(getTrustedVerifier());
     return this;
   }
 

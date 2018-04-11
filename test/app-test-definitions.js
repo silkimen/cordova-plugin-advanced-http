@@ -438,6 +438,17 @@ const tests = [
       result.type.should.be.equal('resolved');
     }
   },{
+    description: 'should reject when pinned cert does not match received server cert (GET)',
+    expected: 'rejected: {"status": -1 ...',
+    before: helpers.enableSSLPinning,
+    func: function(resolve, reject) {
+      cordova.plugin.http.get('https://sha512.badssl.com/', {}, {}, resolve, reject);
+    },
+    validationFunc: function(driver, result, targetInfo) {
+      result.type.should.be.equal('rejected');
+      result.data.should.be.eql({ status: -1, error: targetInfo.isAndroid ? 'SSL handshake failed' : 'cancelled' });
+    }
+  },{
     description: 'should send deeply structured JSON object correctly (POST) #65',
     expected: 'resolved: {"status": 200, "data": "{\\"data\\": \\"{\\\\"outerObj\\\\":{\\\\"innerStr\\\\":\\\\"testString\\\\",\\\\"innerArr\\\\":[1,2,3]}}\\" ...',
     before: helpers.setJsonSerializer,

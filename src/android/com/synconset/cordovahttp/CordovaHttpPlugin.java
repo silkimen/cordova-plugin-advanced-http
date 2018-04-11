@@ -98,8 +98,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         } else if (action.equals("acceptAllCerts")) {
             boolean accept = args.getBoolean(0);
 
-            CordovaHttp.acceptAllCerts(accept);
-            CordovaHttp.validateDomainName(!accept);
+            if (accept) {
+              HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_TRUSTALL);
+              HttpRequest.setHostnameVerification(false);
+            } else {
+              HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
+              HttpRequest.setHostnameVerification(true);
+            }
+
             callbackContext.success();
         } else if (action.equals("uploadFile")) {
             String urlString = args.getString(0);
@@ -161,9 +167,12 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                 InputStream caInput = new BufferedInputStream(in);
                 HttpRequest.addCert(caInput);
             }
-            CordovaHttp.enableSSLPinning(true);
+
+            HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
+            HttpRequest.setHostnameVerification(true);
         } else {
-            CordovaHttp.enableSSLPinning(false);
+            HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
+            HttpRequest.setHostnameVerification(true);
         }
     }
 }

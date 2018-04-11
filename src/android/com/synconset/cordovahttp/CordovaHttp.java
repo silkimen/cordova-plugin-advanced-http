@@ -38,10 +38,6 @@ import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
     protected static final String[] ACCEPTED_CHARSETS = new String[] { HttpRequest.CHARSET_UTF8, HttpRequest.CHARSET_LATIN1 };
-
-    private static AtomicBoolean sslPinning = new AtomicBoolean(false);
-    private static AtomicBoolean acceptAllCerts = new AtomicBoolean(false);
-    private static AtomicBoolean validateDomainName = new AtomicBoolean(true);
     private static AtomicBoolean disableRedirect = new AtomicBoolean(false);
 
     private String urlString;
@@ -62,24 +58,6 @@ abstract class CordovaHttp {
         this.headers = headers;
         this.timeoutInMilliseconds = timeout;
         this.callbackContext = callbackContext;
-    }
-
-    public static void enableSSLPinning(boolean enable) {
-        sslPinning.set(enable);
-        if (enable) {
-            acceptAllCerts.set(false);
-        }
-    }
-
-    public static void acceptAllCerts(boolean accept) {
-        acceptAllCerts.set(accept);
-        if (accept) {
-            sslPinning.set(false);
-        }
-    }
-
-    public static void validateDomainName(boolean accept) {
-        validateDomainName.set(accept);
     }
 
     public static void disableRedirect(boolean disable) {
@@ -120,20 +98,6 @@ abstract class CordovaHttp {
 
     protected CallbackContext getCallbackContext() {
         return this.callbackContext;
-    }
-
-    protected HttpRequest setupSecurity(HttpRequest request) {
-        if (acceptAllCerts.get()) {
-            request.trustAllCerts();
-        }
-        if (!validateDomainName.get()) {
-            request.trustAllHosts();
-        }
-        if (sslPinning.get()) {
-            request.pinToCerts();
-        }
-
-        return request;
     }
 
     protected HttpRequest setupRedirect(HttpRequest request) {
@@ -222,7 +186,6 @@ abstract class CordovaHttp {
 
     protected void prepareRequest(HttpRequest request) throws HttpRequestException, JSONException {
       this.setupRedirect(request);
-      this.setupSecurity(request);
 
       request.readTimeout(this.getRequestTimeout());
       request.acceptCharset(ACCEPTED_CHARSETS);
