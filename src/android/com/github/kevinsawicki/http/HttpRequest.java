@@ -302,28 +302,18 @@ public class HttpRequest {
     try {
       if (mode == CERT_MODE_TRUSTALL) {
         SOCKET_FACTORY = createSocketFactory(getNoopTrustManagers());
+        HOSTNAME_VERIFIER = getTrustedVerifier();
       } else if (mode == CERT_MODE_PINNED) {
         SOCKET_FACTORY = createSocketFactory(getPinnedTrustManagers());
+        HOSTNAME_VERIFIER = null;
       } else {
         SOCKET_FACTORY = null;
+        HOSTNAME_VERIFIER = null;
       }
 
       CURRENT_CERT_MODE = mode;
     } catch(IOException e) {
       throw new HttpRequestException(e);
-    }
-  }
-
-  /**
-   * Configure host name verification for all future HTTPS connections
-   *
-   * @param enabled
-   */
-  public static void setHostnameVerification(boolean enabled) {
-    if (enabled) {
-      HOSTNAME_VERIFIER = null;
-    } else {
-      HOSTNAME_VERIFIER = getTrustedVerifier();
     }
   }
 

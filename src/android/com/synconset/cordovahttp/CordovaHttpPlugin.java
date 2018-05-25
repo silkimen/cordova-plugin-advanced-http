@@ -100,10 +100,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
             if (accept) {
               HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_TRUSTALL);
-              HttpRequest.setHostnameVerification(false);
             } else {
               HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
-              HttpRequest.setHostnameVerification(true);
             }
 
             callbackContext.success();
@@ -169,10 +167,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             }
 
             HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
-            HttpRequest.setHostnameVerification(true);
         } else {
             HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
-            HttpRequest.setHostnameVerification(true);
         }
     }
 }
