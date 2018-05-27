@@ -3,6 +3,7 @@
 #import "TextResponseSerializer.h"
 #import "TextRequestSerializer.h"
 #import "AFHTTPSessionManager.h"
+#import "SDNetworkActivityIndicator.h"
 
 @interface CordovaHttpPlugin()
 
@@ -175,6 +176,7 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
         [manager POST:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
@@ -183,15 +185,18 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
     }
     @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }
 }
@@ -213,6 +218,7 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
         [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
@@ -221,15 +227,18 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
     }
     @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }
 }
@@ -251,6 +260,7 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
         [manager PUT:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
@@ -259,15 +269,18 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
     }
     @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }
 }
@@ -289,6 +302,7 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
         [manager PATCH:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
@@ -297,15 +311,18 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
     }
     @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }
 }
@@ -326,6 +343,7 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
         [manager DELETE:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
@@ -334,15 +352,18 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
     }
     @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }
 }
@@ -361,6 +382,7 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
         [manager HEAD:url parameters:parameters success:^(NSURLSessionTask *task) {
@@ -370,15 +392,18 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
     }
     @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }
 }
@@ -402,6 +427,7 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
         [manager POST:url parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
@@ -413,6 +439,7 @@
                 [dictionary setObject:@"Could not add file to post body." forKey:@"error"];
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
                 [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
                 return;
             }
         } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
@@ -421,15 +448,18 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
     }
     @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }
 }
@@ -455,6 +485,7 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
         [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
@@ -495,6 +526,7 @@
                 }
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
                 [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
                 return;
             }
             NSData *data = (NSData *)responseObject;
@@ -504,6 +536,7 @@
                 [dictionary setObject:@"Could not write the data to the given filePath." forKey:@"error"];
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
                 [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
                 return;
             }
 
@@ -514,6 +547,7 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
@@ -521,9 +555,11 @@
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
     }
     @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }
 }
