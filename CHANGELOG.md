@@ -4,7 +4,8 @@
 
 - Feature #103: implement HTTP SSL cert modes
 
-- :warning: **Breaking Change**: Removed "enableSSLPinning" and "acceptAllCerts", use "setSSLCertMode" instead.
+- :warning: **Breaking Change**: Removed AngularJS (v1) integration service
+- :warning: **Breaking Change**: Removed "enableSSLPinning" and "acceptAllCerts", use "setSSLCertMode" instead
 
 ## 1.11.1
 

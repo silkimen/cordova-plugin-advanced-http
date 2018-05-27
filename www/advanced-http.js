@@ -5,7 +5,6 @@
 var pluginId = module.id.slice(0, module.id.lastIndexOf('.'));
 
 var exec = require('cordova/exec');
-var angularIntegration = require(pluginId +'.angular-integration');
 var cookieHandler = require(pluginId + '.cookie-handler');
 var helpers = require(pluginId + '.helpers');
 
@@ -123,6 +122,4 @@ var publicInterface = {
   }
 };
 
-// angular service is deprecated and will be removed anytime soon
-angularIntegration.registerService(publicInterface);
 module.exports = publicInterface;

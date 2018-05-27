@@ -13,7 +13,6 @@
   <js-module src="www/messages.js" name="messages"/>
   <js-module src="www/local-storage-store.js" name="local-storage-store"/>
   <js-module src="www/cookie-handler.js" name="cookie-handler"/>
-  <js-module src="www/angular-integration.js" name="angular-integration"/>
   <js-module src="www/helpers.js" name="helpers"/>
   <js-module src="www/advanced-http.js" name="http">
     <clobbers target="cordova.plugin.http"/>
