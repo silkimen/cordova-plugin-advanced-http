@@ -141,31 +141,45 @@ cordova.plugin.http.clearCookies();
 ## Asynchronous Functions
 These functions all take success and error callbacks as their last 2 arguments.
 
-### enableSSLPinning
-Enable or disable SSL pinning.  This defaults to false.
+### setSSLCertMode<a name="setSSLCertMode"></a>
+Set SSL Cert handling mode, being one of the following values:
+
+* `default`: default SSL cert handling using system's CA certs
+* `nocheck`: disable SSL cert checking, trusting all certs (meant to be used only for testing purposes)
+* `pinned`: trust only provided certs
 
 To use SSL pinning you must include at least one .cer SSL certificate in your app project.  You can pin to your server certificate or to one of the issuing CA certificates. For ios include your certificate in the root level of your bundle (just add the .cer file to your project/target at the root level).  For android include your certificate in your project's platforms/android/assets folder.  In both cases all .cer files found will be loaded automatically.  If you only have a .pem certificate see this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729).  You want to convert it to a DER encoded certificate with a .cer extension.
 
 As an alternative, you can store your .cer files in the www/certificates folder.
 
 ```js
-cordova.plugin.http.enableSSLPinning(true, function() {
+// enable SSL pinning
+cordova.plugin.http.setSSLCertMode('pinned', function() {
+  console.log('success!');
+}, function() {
+  console.log('error :(');
+});
+
+// use system's default CA certs
+cordova.plugin.http.setSSLCertMode('default', function() {
+  console.log('success!');
+}, function() {
+  console.log('error :(');
+});
+
+// disable SSL cert checking, only meant for testing purposes, do NOT use in production!
+cordova.plugin.http.setSSLCertMode('nocheck', function() {
   console.log('success!');
 }, function() {
   console.log('error :(');
 });
 ```
+
+### enableSSLPinning
+This function was removed in 2.0.0. Use ["setSSLCertMode"](#setSSLCertMode) to enable SSL pinning (mode "pinned").
 
 ### acceptAllCerts
-Accept all SSL certificates.  Or disable accepting all certificates.  This defaults to false.
-
-```js
-cordova.plugin.http.acceptAllCerts(true, function() {
-  console.log('success!');
-}, function() {
-  console.log('error :(');
-});
-```
+This function was removed in 2.0.0. Use ["setSSLCertMode"](#setSSLCertMode) to disable checking certs (mode "nocheck").
 
 ### disableRedirect
 If set to `true`, it won't follow redirects automatically. This defaults to false.

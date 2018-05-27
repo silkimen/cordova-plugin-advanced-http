@@ -67,14 +67,11 @@ var publicInterface = {
   setRequestTimeout: function (timeout) {
     globalConfigs.timeout = timeout;
   },
-  enableSSLPinning: function (enable, success, failure) {
-    return exec(success, failure, 'CordovaHttpPlugin', 'enableSSLPinning', [ enable ]);
-  },
-  acceptAllCerts: function (allow, success, failure) {
-    return exec(success, failure, 'CordovaHttpPlugin', 'acceptAllCerts', [ allow ]);
+  setSSLCertMode: function (mode, success, failure) {
+    return exec(success, failure, 'CordovaHttpPlugin', 'setSSLCertMode', [ helpers.checkSSLCertMode(mode) ]);
   },
   disableRedirect: function (disable, success, failure) {
-    return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [ disable ]);
+    return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [ !!disable ]);
   },
   sendRequest: function (url, options, success, failure) {
     helpers.handleMissingCallbacks(success, failure);

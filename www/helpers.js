@@ -3,12 +3,14 @@ var cookieHandler = require(pluginId + '.cookie-handler');
 var messages = require(pluginId + '.messages');
 
 var validSerializers = [ 'urlencoded', 'json', 'utf8' ];
+var validCertModes = [ 'default', 'nocheck', 'pinned' ];
 var validHttpMethods = [ 'get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download' ];
 
 module.exports = {
   b64EncodeUnicode: b64EncodeUnicode,
   getTypeOf: getTypeOf,
   checkSerializer: checkSerializer,
+  checkSSLCertMode: checkSSLCertMode,
   checkForBlacklistedHeaderKey: checkForBlacklistedHeaderKey,
   checkForInvalidHeaderValue: checkForInvalidHeaderValue,
   injectCookieHandler: injectCookieHandler,
@@ -77,6 +79,10 @@ function checkHttpMethod(method) {
 
 function checkSerializer(serializer) {
   return checkForValidStringValue(validSerializers, serializer, messages.INVALID_DATA_SERIALIZER);
+}
+
+function checkSSLCertMode(mode) {
+  return checkForValidStringValue(validCertModes, mode, messages.INVALID_SSL_CERT_MODE);
 }
 
 function checkForBlacklistedHeaderKey(key) {
