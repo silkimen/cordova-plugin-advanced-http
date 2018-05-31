@@ -28,7 +28,6 @@ describe('Advanced HTTP www interface', function() {
     mock(`${PLUGIN_ID}.cookie-handler`, {});
     mock(`${HELPERS_ID}.cookie-handler`, {});
     mock(`${HELPERS_ID}.messages`, require('../www/messages'));
-    mock(`${PLUGIN_ID}.angular-integration`, { registerService: noop });
 
     loadHttp();
   });

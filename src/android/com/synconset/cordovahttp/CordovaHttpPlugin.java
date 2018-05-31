@@ -86,25 +86,25 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             CordovaHttpHead head = new CordovaHttpHead(urlString, params, headers, timeoutInMilliseconds, callbackContext);
 
             cordova.getThreadPool().execute(head);
-        } else if (action.equals("enableSSLPinning")) {
-            try {
-                boolean enable = args.getBoolean(0);
-                this.enableSSLPinning(enable);
+        } else if (action.equals("setSSLCertMode")) {
+            String mode = args.getString(0);
+
+            if (mode.equals("default")) {
+                HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
                 callbackContext.success();
-            } catch(Exception e) {
-                e.printStackTrace();
-                callbackContext.error("There was an error setting up ssl pinning");
+            } else if (mode.equals("nocheck")) {
+                HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_TRUSTALL);
+                callbackContext.success();
+            } else if (mode.equals("pinned")) {
+                try {
+                    this.loadSSLCerts();
+                    HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
+                    callbackContext.success();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    callbackContext.error("There was an error setting up ssl pinning");
+                }
             }
-        } else if (action.equals("acceptAllCerts")) {
-            boolean accept = args.getBoolean(0);
-
-            if (accept) {
-              HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_TRUSTALL);
-            } else {
-              HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
-            }
-
-            callbackContext.success();
         } else if (action.equals("uploadFile")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
@@ -125,50 +125,44 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
             cordova.getThreadPool().execute(download);
         } else if (action.equals("disableRedirect")) {
-           boolean disable = args.getBoolean(0);
-           CordovaHttp.disableRedirect(disable);
-           callbackContext.success();
+            boolean disable = args.getBoolean(0);
+            CordovaHttp.disableRedirect(disable);
+            callbackContext.success();
         } else {
             return false;
         }
         return true;
     }
 
-    private void enableSSLPinning(boolean enable) throws GeneralSecurityException, IOException {
-        if (enable) {
-            AssetManager assetManager = cordova.getActivity().getAssets();
-            String[] files = assetManager.list("");
-            int index;
-            ArrayList<String> cerFiles = new ArrayList<String>();
-            for (int i = 0; i < files.length; i++) {
-                index = files[i].lastIndexOf('.');
-                if (index != -1) {
-                    if (files[i].substring(index).equals(".cer")) {
-                        cerFiles.add(files[i]);
-                    }
-                }
-            }
-
-            // scan the www/certificates folder for .cer files as well
-            files = assetManager.list("www/certificates");
-            for (int i = 0; i < files.length; i++) {
-              index = files[i].lastIndexOf('.');
-              if (index != -1) {
+    private void loadSSLCerts() throws GeneralSecurityException, IOException {
+        AssetManager assetManager = cordova.getActivity().getAssets();
+        String[] files = assetManager.list("");
+        int index;
+        ArrayList<String> cerFiles = new ArrayList<String>();
+        for (int i = 0; i < files.length; i++) {
+            index = files[i].lastIndexOf('.');
+            if (index != -1) {
                 if (files[i].substring(index).equals(".cer")) {
-                  cerFiles.add("www/certificates/" + files[i]);
+                    cerFiles.add(files[i]);
                 }
-              }
             }
+        }
 
-            for (int i = 0; i < cerFiles.size(); i++) {
-                InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
-                InputStream caInput = new BufferedInputStream(in);
-                HttpRequest.addCert(caInput);
+        // scan the www/certificates folder for .cer files as well
+        files = assetManager.list("www/certificates");
+        for (int i = 0; i < files.length; i++) {
+          index = files[i].lastIndexOf('.');
+          if (index != -1) {
+            if (files[i].substring(index).equals(".cer")) {
+              cerFiles.add("www/certificates/" + files[i]);
             }
+          }
+        }
 
-            HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
-        } else {
-            HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
+        for (int i = 0; i < cerFiles.size(); i++) {
+            InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
+            InputStream caInput = new BufferedInputStream(in);
+            HttpRequest.addCert(caInput);
         }
     }
 }

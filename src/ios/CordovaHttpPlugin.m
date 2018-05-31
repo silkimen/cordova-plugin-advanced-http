@@ -121,21 +121,29 @@
     return headerFieldsCopy;
 }
 
-- (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager {
-    [manager.requestSerializer setTimeoutInterval:timeout];
-}
+- (void)setSSLCertMode:(CDVInvokedUrlCommand*)command {
+    NSString *certMode = [command.arguments objectAtIndex:0];
 
-- (void)enableSSLPinning:(CDVInvokedUrlCommand*)command {
-    bool enable = [[command.arguments objectAtIndex:0] boolValue];
-
-    if (enable) {
-        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
-    } else {
+    if ([certMode isEqualToString: @"default"]) {
         securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+        securityPolicy.allowInvalidCertificates = NO;
+        securityPolicy.validatesDomainName = YES;
+    } else if ([certMode isEqualToString: @"nocheck"]) {
+        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+        securityPolicy.allowInvalidCertificates = YES;
+        securityPolicy.validatesDomainName = NO;
+    } else if ([certMode isEqualToString: @"pinned"]) {
+        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+        securityPolicy.allowInvalidCertificates = NO;
+        securityPolicy.validatesDomainName = YES;
     }
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager {
+    [manager.requestSerializer setTimeoutInterval:timeout];
 }
 
 - (void)disableRedirect:(CDVInvokedUrlCommand*)command {
@@ -143,17 +151,6 @@
     bool disable = [[command.arguments objectAtIndex:0] boolValue];
 
     redirect = !disable;
-
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)acceptAllCerts:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = nil;
-    bool allow = [[command.arguments objectAtIndex:0] boolValue];
-
-    securityPolicy.allowInvalidCertificates = allow;
-    securityPolicy.validatesDomainName = !allow;
 
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

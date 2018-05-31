@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0
+
+- Feature #103: implement HTTP SSL cert modes
+
+- :warning: **Breaking Change**: Removed AngularJS (v1) integration service
+- :warning: **Breaking Change**: Removed "enableSSLPinning" and "acceptAllCerts", use "setSSLCertMode" instead
+
 ## 1.11.1
 
 - Fixed #92: headers not deserialized on platform "browser"

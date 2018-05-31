@@ -41,19 +41,6 @@ This plugin registers a global object located at `cordova.plugin.http`.
 
 Check the [Ionic docs](https://ionicframework.com/docs/native/http/) for how to use this plugin with Ionic-native.
 
-### With AngularJS (Deprecated)
-
-:warning: *This feature is deprecated and will be removed anytime soon.* :warning:
-
-This plugin creates a cordovaHTTP service inside of a cordovaHTTP module.  You must load the module when you create your app's module.
-
-```js
-var app = angular.module('myApp', ['ngRoute', 'ngAnimate', 'cordovaHTTP']);
-```
-
-You can then inject the cordovaHTTP service into your controllers.  The functions can then be used identically to the examples shown below except that instead of accepting success and failure callback functions, each function returns a promise.  For more information on promises in AngularJS read the [AngularJS docs](http://docs.angularjs.org/api/ng/service/$q).  For more info on promises in general check out this article on [html5rocks](http://www.html5rocks.com/en/tutorials/es6/promises/).  Make sure that you load cordova.js or phonegap.js after AngularJS is loaded.
-
-
 ## Synchronous Functions
 
 ### getBasicAuthHeader
@@ -141,31 +128,45 @@ cordova.plugin.http.clearCookies();
 ## Asynchronous Functions
 These functions all take success and error callbacks as their last 2 arguments.
 
-### enableSSLPinning
-Enable or disable SSL pinning.  This defaults to false.
+### setSSLCertMode<a name="setSSLCertMode"></a>
+Set SSL Cert handling mode, being one of the following values:
+
+* `default`: default SSL cert handling using system's CA certs
+* `nocheck`: disable SSL cert checking, trusting all certs (meant to be used only for testing purposes)
+* `pinned`: trust only provided certs
 
 To use SSL pinning you must include at least one .cer SSL certificate in your app project.  You can pin to your server certificate or to one of the issuing CA certificates. For ios include your certificate in the root level of your bundle (just add the .cer file to your project/target at the root level).  For android include your certificate in your project's platforms/android/assets folder.  In both cases all .cer files found will be loaded automatically.  If you only have a .pem certificate see this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729).  You want to convert it to a DER encoded certificate with a .cer extension.
 
 As an alternative, you can store your .cer files in the www/certificates folder.
 
 ```js
-cordova.plugin.http.enableSSLPinning(true, function() {
+// enable SSL pinning
+cordova.plugin.http.setSSLCertMode('pinned', function() {
+  console.log('success!');
+}, function() {
+  console.log('error :(');
+});
+
+// use system's default CA certs
+cordova.plugin.http.setSSLCertMode('default', function() {
+  console.log('success!');
+}, function() {
+  console.log('error :(');
+});
+
+// disable SSL cert checking, only meant for testing purposes, do NOT use in production!
+cordova.plugin.http.setSSLCertMode('nocheck', function() {
   console.log('success!');
 }, function() {
   console.log('error :(');
 });
 ```
 
-### acceptAllCerts
-Accept all SSL certificates.  Or disable accepting all certificates.  This defaults to false.
+### enableSSLPinning (obsolete)
+This function was removed in 2.0.0. Use ["setSSLCertMode"](#setSSLCertMode) to enable SSL pinning (mode "pinned").
 
-```js
-cordova.plugin.http.acceptAllCerts(true, function() {
-  console.log('success!');
-}, function() {
-  console.log('error :(');
-});
-```
+### acceptAllCerts (obsolete)
+This function was removed in 2.0.0. Use ["setSSLCertMode"](#setSSLCertMode) to disable checking certs (mode "nocheck").
 
 ### disableRedirect
 If set to `true`, it won't follow redirects automatically. This defaults to false.
@@ -178,8 +179,8 @@ cordova.plugin.http.disableRedirect(true, function() {
 });
 ```
 
-### validateDomainName
-This function was removed in v1.6.2. Domain name validation is disabled automatically when you enable "acceptAllCerts".
+### validateDomainName (obsolete)
+This function was removed in v1.6.2. Domain name validation is disabled automatically when you set SSL cert mode to "nocheck".
 
 ### removeCookies
 Remove all cookies associated with a given URL.
