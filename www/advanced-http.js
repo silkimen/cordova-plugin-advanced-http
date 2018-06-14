@@ -87,8 +87,9 @@ var publicInterface = {
       case 'patch':
         var data = helpers.getProcessedData(options.data, options.serializer);
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [ url, data, options.serializer, headers, options.timeout ]);
-      case 'upload':
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [ url, options.params, headers, options.filePath, options.name, options.timeout ]);
+      case 'post_multipart':
+        var data = helpers.getProcessedData(options.data, options.serializer);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'post_multipart', [ url, data, options.serializer, headers, options.filePaths, options.filesParamName, options.timeout ]);
       case 'download':
         var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));
         return exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [ url, options.params, headers, options.filePath, options.timeout ]);
@@ -98,6 +99,11 @@ var publicInterface = {
   },
   post: function (url, data, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'post', data: data, headers: headers }, success, failure);
+  },
+  postMultipart: function (url, data, headers, filePaths, name, success, failure) {
+      console.log("------------> headers: " + typeof headers);
+      console.log("------------> filePaths: " + filePaths);
+    return publicInterface.sendRequest(url, { method: 'post_multipart', data: data, headers: headers, filePaths: filePaths, name: name }, success, failure);
   },
   get: function (url, params, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'get', params: params, headers: headers }, success, failure);
@@ -114,9 +120,9 @@ var publicInterface = {
   head: function (url, params, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'head', params: params, headers: headers }, success, failure);
   },
-  uploadFile: function (url, params, headers, filePath, name, success, failure) {
+  /*uploadFile: function (url, params, headers, filePath, name, success, failure) {
     return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name }, success, failure);
-  },
+  },*/
   downloadFile: function (url, params, headers, filePath, success, failure) {
     return publicInterface.sendRequest(url, { method: 'download', params: params, headers: headers, filePath: filePath }, success, failure);
   }

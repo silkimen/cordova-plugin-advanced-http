@@ -4,7 +4,7 @@ var messages = require(pluginId + '.messages');
 
 var validSerializers = [ 'urlencoded', 'json', 'utf8' ];
 var validCertModes = [ 'default', 'nocheck', 'pinned' ];
-var validHttpMethods = [ 'get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download' ];
+var validHttpMethods = [ 'get', 'put', 'post', 'post_multipart', 'patch', 'head', 'delete', 'download' ];
 
 module.exports = {
   b64EncodeUnicode: b64EncodeUnicode,
@@ -241,7 +241,8 @@ function handleMissingCallbacks(successFn, failFn) {
 
 function handleMissingOptions(options, globals) {
   options = options || {};
-
+    console.log("------------> options: ", options);
+    console.log("------------> options.method: " + options.method);
   return {
     method: checkHttpMethod(options.method || validHttpMethods[0]),
     serializer: checkSerializer(options.serializer || globals.serializer),
@@ -249,7 +250,7 @@ function handleMissingOptions(options, globals) {
     headers: checkHeadersObject(options.headers || {}),
     params: checkParamsObject(options.params || {}),
     data: options.data || null,
-    filePath: options.filePath || '',
+    filePaths: options.filePaths || [],
     name: options.name || ''
   };
 }
