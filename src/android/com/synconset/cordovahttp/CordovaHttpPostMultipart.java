@@ -34,8 +34,8 @@ class CordovaHttpPostMultipart extends CordovaHttp implements Runnable {
     private String name;
     private Context context;
 
-    public CordovaHttpPostMultipart(String urlString, Object params, JSONObject headers, JSONArray filePaths, String name, int timeout, CallbackContext callbackContext, Context context) {
-        super(urlString, params, headers, timeout, callbackContext);
+    public CordovaHttpPostMultipart(String urlString, Object params, String serializerName, JSONObject headers, JSONArray filePaths, String name, int timeout, CallbackContext callbackContext, Context context) {
+        super(urlString, params, serializerName, headers, timeout, callbackContext);
         this.filePaths = filePaths;
         this.name = name;
         this.context = context;

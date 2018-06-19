@@ -46,14 +46,15 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         } else if (action.equals("post_multipart")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
-            JSONObject headers = args.getJSONObject(2);
-            JSONArray filePaths = args.getJSONArray(3);
-            String name = args.getString(4);
-            int timeoutInMilliseconds = args.getInt(5) * 1000;
-            CordovaHttpPostMultipart upload = new CordovaHttpPostMultipart(urlString, params, headers, filePaths, name, timeoutInMilliseconds, callbackContext,
+            String serializerName = args.getString(2);
+            JSONObject headers = args.getJSONObject(3);
+            JSONArray filePaths = new JSONArray(args.getString(4));
+            String name = args.getString(5);
+            int timeoutInMilliseconds = args.getInt(6) * 1000;
+            CordovaHttpPostMultipart post = new CordovaHttpPostMultipart(urlString, params, serializerName, headers, filePaths, name, timeoutInMilliseconds, callbackContext,
                     this.cordova.getActivity().getApplicationContext());
 
-            cordova.getThreadPool().execute(upload);
+            cordova.getThreadPool().execute(post);
         } else if (action.equals("get")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
