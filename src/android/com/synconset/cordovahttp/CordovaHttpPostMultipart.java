@@ -92,8 +92,7 @@ class CordovaHttpPostMultipart extends CordovaHttp implements Runnable {
         }
     }
 
-    public FileDetail getFileDetailFromUri(final Context context, final Uri uri) {
-        ContentResolver contentResolver = context.getContentResolver();
+    private FileDetail getFileDetailFromUri(final Context context, final Uri uri) {
         FileDetail fileDetail = null;
         if (uri != null) {
             fileDetail = new FileDetail();
@@ -101,7 +100,6 @@ class CordovaHttpPostMultipart extends CordovaHttp implements Runnable {
             if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
                 File file = new File(uri.getPath());
                 fileDetail.fileName = file.getName();
-                fileDetail.mimeType = contentResolver.getType(uri);
             }
             // Content Scheme
             else if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
@@ -111,11 +109,21 @@ class CordovaHttpPostMultipart extends CordovaHttp implements Runnable {
                     fileDetail.fileName = returnCursor.getString(nameIndex);
                     returnCursor.close();
                 }
-                String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-                fileDetail.mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
             }
+            fileDetail.mimeType = getMimeTypeFromFileName(fileDetail.fileName);
         }
         return fileDetail;
+    }
+
+    private String getMimeTypeFromFileName(String fileName) {
+        String mimeType = null;
+        if (fileName != null && fileName.contains(".")) {
+            MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+            int index = fileName.trim().lastIndexOf('.') + 1;
+            String extension = fileName.trim().substring(index).toLowerCase();
+            mimeType = mimeTypeMap.getMimeTypeFromExtension(extension);
+        }
+        return mimeType;
     }
 
     private class FileDetail {
