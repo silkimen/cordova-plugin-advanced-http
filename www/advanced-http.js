@@ -101,8 +101,6 @@ var publicInterface = {
     return publicInterface.sendRequest(url, { method: 'post', data: data, headers: headers }, success, failure);
   },
   postMultipart: function (url, data, headers, filePaths, name, success, failure) {
-      console.log("------------> headers: " + typeof headers);
-      console.log("------------> filePaths: " + filePaths);
     return publicInterface.sendRequest(url, { method: 'post_multipart', data: data, headers: headers, filePaths: filePaths, name: name }, success, failure);
   },
   get: function (url, params, headers, success, failure) {
@@ -120,9 +118,6 @@ var publicInterface = {
   head: function (url, params, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'head', params: params, headers: headers }, success, failure);
   },
-  /*uploadFile: function (url, params, headers, filePath, name, success, failure) {
-    return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name }, success, failure);
-  },*/
   downloadFile: function (url, params, headers, filePath, success, failure) {
     return publicInterface.sendRequest(url, { method: 'download', params: params, headers: headers, filePath: filePath }, success, failure);
   }

@@ -145,6 +145,9 @@ var browserInterface = {
   post: function (success, failure, opts) {
     return sendRequest('post', true, opts, success, failure);
   },
+  postMultipart: function (success, failure, opts) {
+    return failure('advanced-http: function "postMultipart" not supported on browser platform');
+  },
   get: function (success, failure, opts) {
     return sendRequest('get', false, opts, success, failure);
   },
@@ -159,9 +162,6 @@ var browserInterface = {
   },
   head: function (success, failure, opts) {
     return sendRequest('head', false, opts, success, failure);
-  },
-  uploadFile: function (success, failure, opts) {
-    return failure('advanced-http: function "uploadFile" not supported on browser platform');
   },
   downloadFile: function (success, failure, opts) {
     return failure('advanced-http: function "downloadFile" not supported on browser platform');
