@@ -124,3 +124,11 @@ var publicInterface = {
 };
 
 module.exports = publicInterface;
+
+if (!cordova.plugins) {
+    cordova.plugins = {};
+}
+
+if (!cordova.plugins.nativeHttp) {
+    cordova.plugins.nativeHttp = publicInterface;
+}

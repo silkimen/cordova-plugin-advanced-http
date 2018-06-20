@@ -241,8 +241,6 @@ function handleMissingCallbacks(successFn, failFn) {
 
 function handleMissingOptions(options, globals) {
   options = options || {};
-    console.log("------------> options: ", options);
-    console.log("------------> options.method: " + options.method);
   return {
     method: checkHttpMethod(options.method || validHttpMethods[0]),
     serializer: checkSerializer(options.serializer || globals.serializer),
