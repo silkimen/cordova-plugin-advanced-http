@@ -89,7 +89,7 @@ var publicInterface = {
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [ url, data, options.serializer, headers, options.timeout ]);
       case 'post_multipart':
         var data = helpers.getProcessedData(options.data, options.serializer);
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'post_multipart', [ url, data, options.serializer, headers, options.filePaths, options.name, options.timeout ]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'postMultipart', [ url, data, options.serializer, headers, options.filePaths, options.name, options.timeout ]);
       case 'download':
         var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));
         return exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [ url, options.params, headers, options.filePath, options.timeout ]);

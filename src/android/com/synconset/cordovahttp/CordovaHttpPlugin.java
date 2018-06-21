@@ -43,7 +43,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             CordovaHttpPost post = new CordovaHttpPost(urlString, params, serializerName, headers, timeoutInMilliseconds, callbackContext);
 
             cordova.getThreadPool().execute(post);
-        } else if (action.equals("post_multipart")) {
+        } else if (action.equals("postMultipart")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
             String serializerName = args.getString(2);
