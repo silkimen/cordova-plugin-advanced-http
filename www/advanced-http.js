@@ -78,6 +78,7 @@ var publicInterface = {
     options = helpers.handleMissingOptions(options, globalConfigs);
 
     var headers = helpers.getMergedHeaders(url, options.headers, globalConfigs.headers);
+    var data = helpers.getProcessedData(options.data, options.serializer);
     var onSuccess = helpers.injectCookieHandler(url, success);
     var onFail = helpers.injectCookieHandler(url, failure);
 
@@ -85,11 +86,9 @@ var publicInterface = {
       case 'post':
       case 'put':
       case 'patch':
-        var data = helpers.getProcessedData(options.data, options.serializer);
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [ url, data, options.serializer, headers, options.timeout ]);
-      case 'post_multipart':
-        var data = helpers.getProcessedData(options.data, options.serializer);
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'postMultipart', [ url, data, options.serializer, headers, options.filePaths, options.name, options.timeout ]);
+      case 'upload':
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [ url, data, options.serializer, headers, options.filePaths, options.name, options.timeout ]);
       case 'download':
         var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));
         return exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [ url, options.params, headers, options.filePath, options.timeout ]);
@@ -99,9 +98,6 @@ var publicInterface = {
   },
   post: function (url, data, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'post', data: data, headers: headers }, success, failure);
-  },
-  postMultipart: function (url, data, headers, filePaths, name, success, failure) {
-    return publicInterface.sendRequest(url, { method: 'post_multipart', data: data, headers: headers, filePaths: filePaths, name: name }, success, failure);
   },
   get: function (url, params, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'get', params: params, headers: headers }, success, failure);
@@ -117,6 +113,9 @@ var publicInterface = {
   },
   head: function (url, params, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'head', params: params, headers: headers }, success, failure);
+  },
+  uploadFiles: function (url, data, headers, filePaths, name, success, failure) {
+    return publicInterface.sendRequest(url, { method: 'upload', data: data, headers: headers, filePaths: filePaths, name: name }, success, failure);
   },
   downloadFile: function (url, params, headers, filePath, success, failure) {
     return publicInterface.sendRequest(url, { method: 'download', params: params, headers: headers, filePath: filePath }, success, failure);

@@ -43,18 +43,6 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             CordovaHttpPost post = new CordovaHttpPost(urlString, params, serializerName, headers, timeoutInMilliseconds, callbackContext);
 
             cordova.getThreadPool().execute(post);
-        } else if (action.equals("postMultipart")) {
-            String urlString = args.getString(0);
-            Object params = args.get(1);
-            String serializerName = args.getString(2);
-            JSONObject headers = args.getJSONObject(3);
-            JSONArray filePaths = new JSONArray(args.getString(4));
-            String name = args.getString(5);
-            int timeoutInMilliseconds = args.getInt(6) * 1000;
-            CordovaHttpPostMultipart post = new CordovaHttpPostMultipart(urlString, params, serializerName, headers, filePaths, name, timeoutInMilliseconds, callbackContext,
-                    this.cordova.getActivity().getApplicationContext());
-
-            cordova.getThreadPool().execute(post);
         } else if (action.equals("get")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
@@ -116,6 +104,18 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                     callbackContext.error("There was an error setting up ssl pinning");
                 }
             }
+        } else if (action.equals("uploadFiles")) {
+            String urlString = args.getString(0);
+            Object params = args.get(1);
+            String serializerName = args.getString(2);
+            JSONObject headers = args.getJSONObject(3);
+            JSONArray filePaths = new JSONArray(args.getString(4));
+            String name = args.getString(5);
+            int timeoutInMilliseconds = args.getInt(6) * 1000;
+            CordovaHttpUpload post = new CordovaHttpUpload(urlString, params, serializerName, headers, filePaths, name, timeoutInMilliseconds, callbackContext,
+                    this.cordova.getActivity().getApplicationContext());
+
+            cordova.getThreadPool().execute(post);
         } else if (action.equals("downloadFile")) {
             String urlString = args.getString(0);
             Object params = args.get(1);

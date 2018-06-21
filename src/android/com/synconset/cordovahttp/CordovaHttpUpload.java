@@ -29,12 +29,12 @@ import android.webkit.MimeTypeMap;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
 
-class CordovaHttpPostMultipart extends CordovaHttp implements Runnable {
+class CordovaHttpUpload extends CordovaHttp implements Runnable {
     private JSONArray filePaths;
     private String name;
     private Context context;
 
-    public CordovaHttpPostMultipart(String urlString, Object params, String serializerName, JSONObject headers, JSONArray filePaths, String name, int timeout, CallbackContext callbackContext, Context context) {
+    public CordovaHttpUpload(String urlString, Object params, String serializerName, JSONObject headers, JSONArray filePaths, String name, int timeout, CallbackContext callbackContext, Context context) {
         super(urlString, params, serializerName, headers, timeout, callbackContext);
         this.filePaths = filePaths;
         this.name = name;

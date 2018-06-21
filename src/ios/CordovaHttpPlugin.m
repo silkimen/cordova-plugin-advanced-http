@@ -381,7 +381,7 @@
 }
 
 
-- (void)postMultipart:(CDVInvokedUrlCommand*)command {
+- (void)uploadFiles:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
