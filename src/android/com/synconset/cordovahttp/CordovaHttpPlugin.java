@@ -112,10 +112,10 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             JSONArray filePaths = new JSONArray(args.getString(4));
             String name = args.getString(5);
             int timeoutInMilliseconds = args.getInt(6) * 1000;
-            CordovaHttpUpload post = new CordovaHttpUpload(urlString, params, serializerName, headers, filePaths, name, timeoutInMilliseconds, callbackContext,
+            CordovaHttpUpload upload = new CordovaHttpUpload(urlString, params, serializerName, headers, filePaths, name, timeoutInMilliseconds, callbackContext,
                     this.cordova.getActivity().getApplicationContext());
 
-            cordova.getThreadPool().execute(post);
+            cordova.getThreadPool().execute(upload);
         } else if (action.equals("downloadFile")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
