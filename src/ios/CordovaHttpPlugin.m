@@ -380,19 +380,20 @@
     }
 }
 
-- (void)uploadFile:(CDVInvokedUrlCommand*)command {
+
+- (void)uploadFiles:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
-    NSDictionary *headers = [command.arguments objectAtIndex:2];
-    NSString *filePath = [command.arguments objectAtIndex: 3];
-    NSString *name = [command.arguments objectAtIndex: 4];
-    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:5] doubleValue];
+    NSString *serializerName = [command.arguments objectAtIndex:2];
+    NSDictionary *headers = [command.arguments objectAtIndex:3];
+    NSArray *filePaths = [command.arguments objectAtIndex: 4];
+    NSString *name = [command.arguments objectAtIndex: 5];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:6] doubleValue];
 
-    NSURL *fileURL = [NSURL URLWithString: filePath];
-
+    [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect: manager];
@@ -403,7 +404,12 @@
     @try {
         [manager POST:url parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
             NSError *error;
-            [formData appendPartWithFileURL:fileURL name:name error:&error];
+            for (int i = 0; i < [filePaths count]; i++) {
+                id obj = [filePaths objectAtIndex:i];
+                NSString *filePath = (NSString *) obj;
+                NSURL *fileURL = [NSURL URLWithString: filePath];
+                [formData appendPartWithFileURL:fileURL name:name error:&error];
+            }
             if (error) {
                 NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
                 [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
