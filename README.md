@@ -190,7 +190,7 @@ cordova.plugin.http.removeCookies(url, callback);
 ```
 
 ### sendRequest
-Execute a HTTP request.  Takes a URL and an options object. This is the internally used implementation of the following shorthand functions ([post](#post), [get](#get), [put](#put), [patch](#patch), [delete](#delete), [head](#head), [uploadFile](#uploadFile) and [downloadFile](#downloadFile)). You can use this function, if you want to override global settings for each single request.
+Execute a HTTP request.  Takes a URL and an options object. This is the internally used implementation of the following shorthand functions ([post](#post), [get](#get), [put](#put), [patch](#patch), [delete](#delete), [head](#head), [uploadFiles](#uploadFiles) and [downloadFile](#downloadFile)). You can use this function, if you want to override global settings for each single request.
 
 The options object contains following keys:
 
@@ -201,8 +201,8 @@ The options object contains following keys:
 * `serializer`: data serializer to be used (only applicable on `post`, `put` or `patch` methods), defaults to global serializer value, see [setDataSerializer](#setDataSerializer) for supported values
 * `timeout`: timeout value for the request in seconds, defaults to global timeout value
 * `headers`: headers object (key value pair), will be merged with global values
-* `filePath`: filePath to be used during upload and download see [uploadFile](#uploadFile) and [downloadFile](#downloadFile) for detailed information
-* `name`: name to be used during upload see [uploadFile](#uploadFile) for detailed information
+* `filePath` | `filePaths`: filePath to be used for download a file or filePaths for uploading files. See [downloadFile](#downloadFile) and [uploadFiles](#uploadFiles) for detailed information
+* `name`: name to be used during upload see [uploadFiles](#uploadFiles) for detailed information
 
 Here's a quick example:
 
@@ -311,14 +311,14 @@ Execute a DELETE request.  Takes a URL, parameters, and headers.  See the [post]
 ### head<a name="head"></a>
 Execute a HEAD request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
-### uploadFile<a name="uploadFile"></a>
-Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
+### uploadFiles<a name="uploadFiles"></a>
+Uploads files saved on the device.  Takes a URL, parameters, headers, filePaths, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ```js
-cordova.plugin.http.uploadFile("https://google.com/", {
+cordova.plugin.http.uploadFiles("https://google.com/", {
     id: '12',
     message: 'test'
-}, { Authorization: 'OAuth2: token' }, 'file:///somepicture.jpg', 'picture', function(response) {
+}, { Authorization: 'OAuth2: token' }, ['file:///firstpicture.jpg', 'file:///secondpicture.png'], 'picture', function(response) {
     console.log(response.status);
 }, function(response) {
     console.error(response.error);
