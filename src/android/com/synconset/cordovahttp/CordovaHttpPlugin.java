@@ -69,8 +69,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             CordovaHttpPatch patch = new CordovaHttpPatch(urlString, params, serializerName, headers, timeoutInMilliseconds, callbackContext);
 
             cordova.getThreadPool().execute(patch);
-        }
-         else if (action.equals("delete")) {
+        } else if (action.equals("delete")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
             JSONObject headers = args.getJSONObject(2);
@@ -105,14 +104,16 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                     callbackContext.error("There was an error setting up ssl pinning");
                 }
             }
-        } else if (action.equals("uploadFile")) {
+        } else if (action.equals("uploadFiles")) {
             String urlString = args.getString(0);
             Object params = args.get(1);
-            JSONObject headers = args.getJSONObject(2);
-            String filePath = args.getString(3);
-            String name = args.getString(4);
-            int timeoutInMilliseconds = args.getInt(5) * 1000;
-            CordovaHttpUpload upload = new CordovaHttpUpload(urlString, params, headers, filePath, name, timeoutInMilliseconds, callbackContext);
+            String serializerName = args.getString(2);
+            JSONObject headers = args.getJSONObject(3);
+            JSONArray filePaths = new JSONArray(args.getString(4));
+            String name = args.getString(5);
+            int timeoutInMilliseconds = args.getInt(6) * 1000;
+            CordovaHttpUpload upload = new CordovaHttpUpload(urlString, params, serializerName, headers, filePaths, name, timeoutInMilliseconds, callbackContext,
+                    this.cordova.getActivity().getApplicationContext());
 
             cordova.getThreadPool().execute(upload);
         } else if (action.equals("downloadFile")) {
@@ -151,12 +152,12 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         // scan the www/certificates folder for .cer files as well
         files = assetManager.list("www/certificates");
         for (int i = 0; i < files.length; i++) {
-          index = files[i].lastIndexOf('.');
-          if (index != -1) {
-            if (files[i].substring(index).equals(".cer")) {
-              cerFiles.add("www/certificates/" + files[i]);
+            index = files[i].lastIndexOf('.');
+            if (index != -1) {
+                if (files[i].substring(index).equals(".cer")) {
+                    cerFiles.add("www/certificates/" + files[i]);
+                }
             }
-          }
         }
 
         for (int i = 0; i < cerFiles.size(); i++) {
