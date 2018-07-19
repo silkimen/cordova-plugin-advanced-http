@@ -134,6 +134,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         return true;
     }
 
+    // Public interface type for request interceptors
+    public interface IHttpRequestInterceptor extends CordovaHttp.IHttpRequestInterceptor {};
+
+    // Add a request interceptor to the list of request interceptors
+    public static final void addRequestInterceptor(IHttpRequestInterceptor requestInteceptor) {
+        CordovaHttp.addRequestInterceptor(requestInteceptor);
+    };
+
     private void loadSSLCerts() throws GeneralSecurityException, IOException {
         AssetManager assetManager = cordova.getActivity().getAssets();
         String[] files = assetManager.list("");

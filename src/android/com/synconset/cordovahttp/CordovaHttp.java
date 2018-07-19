@@ -23,7 +23,9 @@ import java.nio.charset.MalformedInputException;
 import javax.net.ssl.SSLHandshakeException;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,6 +41,8 @@ abstract class CordovaHttp {
     protected static final String TAG = "CordovaHTTP";
     protected static final String[] ACCEPTED_CHARSETS = new String[] { HttpRequest.CHARSET_UTF8, HttpRequest.CHARSET_LATIN1 };
     private static AtomicBoolean disableRedirect = new AtomicBoolean(false);
+    // List of request interceptors
+    private static Deque<IHttpRequestInterceptor> requestInterceptors = new LinkedList<IHttpRequestInterceptor>();
 
     private String urlString;
     private Object params;
@@ -58,6 +62,26 @@ abstract class CordovaHttp {
         this.headers = headers;
         this.timeoutInMilliseconds = timeout;
         this.callbackContext = callbackContext;
+    }
+
+    // Interface type for request interceptors
+    public interface IHttpRequestInterceptor {
+        public void accept(HttpRequest request);
+    }
+
+    // Add a request interceptor to the list of request interceptors
+    public static synchronized void addRequestInterceptor(IHttpRequestInterceptor requestInterceptor) {
+        if (requestInterceptor == null) {
+            throw new NullPointerException("Request interceptor must not be null");
+        }
+        CordovaHttp.requestInterceptors.addFirst(requestInterceptor);
+    }
+
+    // Apply all request interceptors
+    public static synchronized void applyRequestInterceptors(HttpRequest request) {
+        for (IHttpRequestInterceptor requestInterceptor : requestInterceptors) {
+            requestInterceptor.accept(request);
+        }
     }
 
     public static void disableRedirect(boolean disable) {
@@ -191,6 +215,9 @@ abstract class CordovaHttp {
       request.acceptCharset(ACCEPTED_CHARSETS);
       request.headers(this.getHeadersMap());
       request.uncompress(true);
+      
+      // Call interceptors to allow "last-minute" changes before performing the request
+      this.applyRequestInterceptors(request);
     }
 
     protected void prepareRequestBody(HttpRequest request) throws JSONException, Exception {

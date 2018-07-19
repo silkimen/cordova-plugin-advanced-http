@@ -14,6 +14,10 @@
 - (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager;
 - (void)setRedirect:(AFHTTPSessionManager*)manager;
 
+// Types for request and failure interceptors
+typedef void (^RequestFailureInterceptor)(NSURLSessionTask *task, NSError *error);
+typedef void (^RequestInterceptor)(AFHTTPSessionManager *manager, NSString *urlString);
+
 @end
 
 @implementation CordovaHttpPlugin {
@@ -21,9 +25,59 @@
     bool redirect;
 }
 
+// Lists of request and failure interceptors
+static NSMutableArray<RequestInterceptor>* requestInterceptors = nil;
+static NSMutableArray<RequestFailureInterceptor>* failureInterceptors = nil;
+
 - (void)pluginInitialize {
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     redirect = true;
+}
+
+// Ensure request interceptor and failure interceptor lists exist before the first call to any functions that use them
++ (void)initialize {
+    if (requestInterceptors == nil) {
+        requestInterceptors = [NSMutableArray<RequestInterceptor> array];
+    }
+    if (failureInterceptors == nil) {
+        failureInterceptors = [NSMutableArray<RequestFailureInterceptor> array];
+    }
+}
+
+// Add a request interceptor to the list of request interceptors
++ (void)addRequestInterceptor:(RequestInterceptor)requestInterceptor {
+    if (requestInterceptor != nil) {
+        @synchronized(requestInterceptors) {
+            [requestInterceptors insertObject:requestInterceptor atIndex:0];
+        }
+    }
+}
+
+// Apply all request interceptors
+- (void)applyRequestInterceptorsToManager:(AFHTTPSessionManager*)manager URL:(NSString*)urlString {
+    @synchronized(requestInterceptors) {
+        for (RequestInterceptor requestInterceptor in requestInterceptors) {
+            requestInterceptor(manager, urlString);
+        }
+    }
+}
+
+// Add a request failure interceptor to the list of request failure interceptors
++ (void)addRequestFailureInterceptor:(RequestFailureInterceptor)requestFailureInterceptor {
+    if (requestFailureInterceptor != nil) {
+        @synchronized(failureInterceptors) {
+            [failureInterceptors insertObject:requestFailureInterceptor atIndex:0];
+        }
+    }
+}
+
+// Apply all request failure interceptors
+- (void)applyRequestFailureInterceptorsToTask:(NSURLSessionTask*)task error:(NSError*)error {
+    @synchronized(failureInterceptors) {
+        for (RequestFailureInterceptor requestFailureInterceptor in failureInterceptors) {
+            requestFailureInterceptor(task, error);
+        }
+    }
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
@@ -173,24 +227,32 @@
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
 
-    @try {
-        [manager POST:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+    // Run in background as the request interceptors that are called below may be blocking
+    [self.commandDelegate runInBackground:^{
+        // Call interceptors to allow "last-minute" changes before performing the request
+        [self applyRequestInterceptorsToManager:manager URL:url];
+        @try {
+            [manager POST:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } failure:^(NSURLSessionTask *task, NSError *error) {
+                // Call interceptors to allow custom error handling
+                [self applyRequestFailureInterceptorsToTask:task error:error];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }
-    @catch (NSException *exception) {
-        [self handleException:exception withCommand:command];
-    }
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            }];
+        }
+        @catch (NSException *exception) {
+            [self handleException:exception withCommand:command];
+        }
+    }];
 }
 
 - (void)get:(CDVInvokedUrlCommand*)command {
@@ -211,24 +273,32 @@
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
 
-    @try {
-        [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+    // Run in background as the request interceptors that are called below may be blocking
+    [self.commandDelegate runInBackground:^{
+        // Call interceptors to allow "last-minute" changes before performing the request
+        [self applyRequestInterceptorsToManager:manager URL:url];
+        @try {
+            [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } failure:^(NSURLSessionTask *task, NSError *error) {
+                // Call interceptors to allow custom error handling
+                [self applyRequestFailureInterceptorsToTask:task error:error];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }
-    @catch (NSException *exception) {
-        [self handleException:exception withCommand:command];
-    }
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            }];
+        }
+        @catch (NSException *exception) {
+            [self handleException:exception withCommand:command];
+        }
+    }];
 }
 
 - (void)put:(CDVInvokedUrlCommand*)command {
@@ -249,24 +319,32 @@
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
 
-    @try {
-        [manager PUT:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+    // Run in background as the request interceptors that are called below may be blocking
+    [self.commandDelegate runInBackground:^{
+        // Call interceptors to allow "last-minute" changes before performing the request
+        [self applyRequestInterceptorsToManager:manager URL:url];
+        @try {
+            [manager PUT:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } failure:^(NSURLSessionTask *task, NSError *error) {
+                // Call interceptors to allow custom error handling
+                [self applyRequestFailureInterceptorsToTask:task error:error];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }
-    @catch (NSException *exception) {
-        [self handleException:exception withCommand:command];
-    }
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            }];
+        }
+        @catch (NSException *exception) {
+            [self handleException:exception withCommand:command];
+        }
+    }];
 }
 
 - (void)patch:(CDVInvokedUrlCommand*)command {
@@ -287,24 +365,32 @@
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
 
-    @try {
-        [manager PATCH:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+    // Run in background as the request interceptors that are called below may be blocking
+    [self.commandDelegate runInBackground:^{
+        // Call interceptors to allow "last-minute" changes before performing the request
+        [self applyRequestInterceptorsToManager:manager URL:url];
+        @try {
+            [manager PATCH:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } failure:^(NSURLSessionTask *task, NSError *error) {
+                // Call interceptors to allow custom error handling
+                [self applyRequestFailureInterceptorsToTask:task error:error];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }
-    @catch (NSException *exception) {
-        [self handleException:exception withCommand:command];
-    }
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            }];
+        }
+        @catch (NSException *exception) {
+            [self handleException:exception withCommand:command];
+        }
+    }];
 }
 
 - (void)delete:(CDVInvokedUrlCommand*)command {
@@ -324,24 +410,32 @@
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
 
-    @try {
-        [manager DELETE:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+    // Run in background as the request interceptors that are called below may be blocking
+    [self.commandDelegate runInBackground:^{
+        // Call interceptors to allow "last-minute" changes before performing the request
+        [self applyRequestInterceptorsToManager:manager URL:url];
+        @try {
+            [manager DELETE:url parameters:parameters success:^(NSURLSessionTask *task, id responseObject) {
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } failure:^(NSURLSessionTask *task, NSError *error) {
+                // Call interceptors to allow custom error handling
+                [self applyRequestFailureInterceptorsToTask:task error:error];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }
-    @catch (NSException *exception) {
-        [self handleException:exception withCommand:command];
-    }
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            }];
+        }
+        @catch (NSException *exception) {
+            [self handleException:exception withCommand:command];
+        }
+    }];
 }
 
 - (void)head:(CDVInvokedUrlCommand*)command {
@@ -359,25 +453,33 @@
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
 
-    @try {
-        [manager HEAD:url parameters:parameters success:^(NSURLSessionTask *task) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            // no 'body' for HEAD request, omitting 'data'
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
+    // Run in background as the request interceptors that are called below may be blocking
+    [self.commandDelegate runInBackground:^{
+        // Call interceptors to allow "last-minute" changes before performing the request
+        [self applyRequestInterceptorsToManager:manager URL:url];
+        @try {
+            [manager HEAD:url parameters:parameters success:^(NSURLSessionTask *task) {
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                // no 'body' for HEAD request, omitting 'data'
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } failure:^(NSURLSessionTask *task, NSError *error) {
+                // Call interceptors to allow custom error handling
+                [self applyRequestFailureInterceptorsToTask:task error:error];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }
-    @catch (NSException *exception) {
-        [self handleException:exception withCommand:command];
-    }
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            }];
+        }
+        @catch (NSException *exception) {
+            [self handleException:exception withCommand:command];
+        }
+    }];
 }
 
 - (void)uploadFile:(CDVInvokedUrlCommand*)command {
@@ -400,35 +502,43 @@
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
 
-    @try {
-        [manager POST:url parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
-            NSError *error;
-            [formData appendPartWithFileURL:fileURL name:name error:&error];
-            if (error) {
+    // Run in background as the request interceptors that are called below may be blocking
+    [self.commandDelegate runInBackground:^{
+        // Call interceptors to allow "last-minute" changes before performing the request
+        [self applyRequestInterceptorsToManager:manager URL:url];
+        @try {
+            [manager POST:url parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
+                NSError *error;
+                [formData appendPartWithFileURL:fileURL name:name error:&error];
+                if (error) {
+                    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                    [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
+                    [dictionary setObject:@"Could not add file to post body." forKey:@"error"];
+                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                    [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                    return;
+                }
+            } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
                 NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-                [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
-                [dictionary setObject:@"Could not add file to post body." forKey:@"error"];
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } failure:^(NSURLSessionTask *task, NSError *error) {
+                // Call interceptors to allow custom error handling
+                [self applyRequestFailureInterceptorsToTask:task error:error];
+
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
                 [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-                return;
-            }
-        } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
-
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
-
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }
-    @catch (NSException *exception) {
-        [self handleException:exception withCommand:command];
-    }
+            }];
+        }
+        @catch (NSException *exception) {
+            [self handleException:exception withCommand:command];
+        }
+    }];
 }
 
 
@@ -453,76 +563,84 @@
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
 
-    @try {
-        [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
-            /*
-             *
-             * Licensed to the Apache Software Foundation (ASF) under one
-             * or more contributor license agreements.  See the NOTICE file
-             * distributed with this work for additional information
-             * regarding copyright ownership.  The ASF licenses this file
-             * to you under the Apache License, Version 2.0 (the
-             * "License"); you may not use this file except in compliance
-             * with the License.  You may obtain a copy of the License at
-             *
-             *   http://www.apache.org/licenses/LICENSE-2.0
-             *
-             * Unless required by applicable law or agreed to in writing,
-             * software distributed under the License is distributed on an
-             * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-             * KIND, either express or implied.  See the License for the
-             * specific language governing permissions and limitations
-             * under the License.
-             *
-             * Modified by Andrew Stephan for Sync OnSet
-             *
-             */
-            // Download response is okay; begin streaming output to file
-            NSString* parentPath = [filePath stringByDeletingLastPathComponent];
+    // Run in background as the request interceptors that are called below may be blocking
+    [self.commandDelegate runInBackground:^{
+        // Call interceptors to allow "last-minute" changes before performing the request
+        [self applyRequestInterceptorsToManager:manager URL:url];
+        @try {
+            [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
+                /*
+                 *
+                 * Licensed to the Apache Software Foundation (ASF) under one
+                 * or more contributor license agreements.  See the NOTICE file
+                 * distributed with this work for additional information
+                 * regarding copyright ownership.  The ASF licenses this file
+                 * to you under the Apache License, Version 2.0 (the
+                 * "License"); you may not use this file except in compliance
+                 * with the License.  You may obtain a copy of the License at
+                 *
+                 *   http://www.apache.org/licenses/LICENSE-2.0
+                 *
+                 * Unless required by applicable law or agreed to in writing,
+                 * software distributed under the License is distributed on an
+                 * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+                 * KIND, either express or implied.  See the License for the
+                 * specific language governing permissions and limitations
+                 * under the License.
+                 *
+                 * Modified by Andrew Stephan for Sync OnSet
+                 *
+                 */
+                // Download response is okay; begin streaming output to file
+                NSString* parentPath = [filePath stringByDeletingLastPathComponent];
 
-            // create parent directories if needed
-            NSError *error;
-            if ([[NSFileManager defaultManager] createDirectoryAtPath:parentPath withIntermediateDirectories:YES attributes:nil error:&error] == NO) {
-                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-                [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
-                if (error) {
-                    [dictionary setObject:[NSString stringWithFormat:@"Could not create path to save downloaded file: %@", [error localizedDescription]] forKey:@"error"];
-                } else {
-                    [dictionary setObject:@"Could not create path to save downloaded file" forKey:@"error"];
+                // create parent directories if needed
+                NSError *error;
+                if ([[NSFileManager defaultManager] createDirectoryAtPath:parentPath withIntermediateDirectories:YES attributes:nil error:&error] == NO) {
+                    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                    [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
+                    if (error) {
+                        [dictionary setObject:[NSString stringWithFormat:@"Could not create path to save downloaded file: %@", [error localizedDescription]] forKey:@"error"];
+                    } else {
+                        [dictionary setObject:@"Could not create path to save downloaded file" forKey:@"error"];
+                    }
+                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                    [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                    return;
                 }
-                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-                return;
-            }
-            NSData *data = (NSData *)responseObject;
-            if (![data writeToFile:filePath atomically:YES]) {
+                NSData *data = (NSData *)responseObject;
+                if (![data writeToFile:filePath atomically:YES]) {
+                    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                    [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
+                    [dictionary setObject:@"Could not write the data to the given filePath." forKey:@"error"];
+                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                    [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                    return;
+                }
+
+                id filePlugin = [self.commandDelegate getCommandInstance:@"File"];
                 NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-                [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
-                [dictionary setObject:@"Could not write the data to the given filePath." forKey:@"error"];
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
+                [dictionary setObject:[filePlugin getDirectoryEntry:filePath isDirectory:NO] forKey:@"file"];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            } failure:^(NSURLSessionTask *task, NSError *error) {
+                // Call interceptors to allow custom error handling
+                [self applyRequestFailureInterceptorsToTask:task error:error];
+
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+                [dictionary setObject:@"There was an error downloading the file" forKey:@"error"];
+
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
                 [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-                return;
-            }
-
-            id filePlugin = [self.commandDelegate getCommandInstance:@"File"];
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
-            [dictionary setObject:[filePlugin getDirectoryEntry:filePath isDirectory:NO] forKey:@"file"];
-
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
-            [dictionary setObject:@"There was an error downloading the file" forKey:@"error"];
-
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }
-    @catch (NSException *exception) {
-        [self handleException:exception withCommand:command];
-    }
+            }];
+        }
+        @catch (NSException *exception) {
+            [self handleException:exception withCommand:command];
+        }
+    }];
 }
 
 @end
