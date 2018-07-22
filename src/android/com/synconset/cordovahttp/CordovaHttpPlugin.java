@@ -128,6 +128,12 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             boolean disable = args.getBoolean(0);
             CordovaHttp.disableRedirect(disable);
             callbackContext.success();
+        } else if (action.equals("setProxy")) {
+            String host = args.getString(0);
+            int port = args.getInt(1);
+            HttpRequest.proxyHost(host);
+            HttpRequest.proxyPort(port);
+            callbackContext.success();
         } else {
             return false;
         }
