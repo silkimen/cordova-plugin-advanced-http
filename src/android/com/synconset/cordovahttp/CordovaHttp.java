@@ -162,7 +162,14 @@ abstract class CordovaHttp {
       ArrayList<Object> list = new ArrayList<Object>();
 
       for (int i = 0; i < array.length(); i++) {
-          list.add(array.get(i));
+          Object item = array.get(i);
+          if (item instanceof JSONArray) {
+              list.add(getListFromJSONArray((JSONArray)item));
+          } else if (item instanceof JSONObject) {
+              list.add(getMapFromJSONObject((JSONObject)item));
+          } else {
+              list.add(item);
+          }
       }
       return list;
     }
@@ -177,6 +184,8 @@ abstract class CordovaHttp {
 
             if (value instanceof JSONArray) {
                 map.put(key, getListFromJSONArray((JSONArray)value));
+            } else if (value instanceof JSONObject) {
+                map.put(key, getMapFromJSONObject((JSONObject)value));
             } else {
                 map.put(key, object.get(key));
             }
