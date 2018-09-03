@@ -6,6 +6,7 @@
 
 - :warning: **Breaking Change**: Removed AngularJS (v1) integration service
 - :warning: **Breaking Change**: Removed "enableSSLPinning" and "acceptAllCerts", use "setSSLCertMode" instead
+- :warning: **Breaking Change**: Certificates must be placed in "www/certificates" folder
 
 ## 1.11.1
 

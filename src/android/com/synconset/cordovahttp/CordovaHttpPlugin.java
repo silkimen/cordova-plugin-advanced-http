@@ -136,22 +136,11 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
     private void loadSSLCerts() throws GeneralSecurityException, IOException {
         AssetManager assetManager = cordova.getActivity().getAssets();
-        String[] files = assetManager.list("");
-        int index;
+        String[] files = assetManager.list("www/certificates");
         ArrayList<String> cerFiles = new ArrayList<String>();
-        for (int i = 0; i < files.length; i++) {
-            index = files[i].lastIndexOf('.');
-            if (index != -1) {
-                if (files[i].substring(index).equals(".cer")) {
-                    cerFiles.add(files[i]);
-                }
-            }
-        }
 
-        // scan the www/certificates folder for .cer files as well
-        files = assetManager.list("www/certificates");
         for (int i = 0; i < files.length; i++) {
-          index = files[i].lastIndexOf('.');
+          int index = files[i].lastIndexOf('.');
           if (index != -1) {
             if (files[i].substring(index).equals(".cer")) {
               cerFiles.add("www/certificates/" + files[i]);
