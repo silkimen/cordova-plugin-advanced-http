@@ -83,10 +83,10 @@ describe('Advanced HTTP', function() {
     }));
 
   testDefinitions.tests.forEach((definition, index) => {
-    it(definition.description, function() {
+    it(index + ': ' + definition.description, function() {
       return clickNext()
         .then(() => validateTestIndex(index))
-        .then(() => validateTestTitle(this.test.title))
+        .then(() => validateTestTitle(definition.description))
         .then(() => waitToBeFinished(definition.timeout || 10000))
         .then(() => validateResult(definition))
       });
