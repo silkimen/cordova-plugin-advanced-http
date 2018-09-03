@@ -5,9 +5,9 @@
   "scripts": {
     "updatecert": "node ./scripts/update-test-cert.js",
     "buildbrowser": "./scripts/build-test-app.sh --browser",
-    "testandroid": "./scripts/build-test-app.sh --android --emulator && ./scripts/test-app.sh --android --emulator",
-    "testios": "./scripts/build-test-app.sh --ios --emulator && ./scripts/test-app.sh --ios --emulator",
-    "testapp": "npm run updatecert && npm run testandroid && npm run testios",
+    "testandroid": "npm run updatecert && ./scripts/build-test-app.sh --android --emulator && ./scripts/test-app.sh --android --emulator",
+    "testios": "npm run updatecert && ./scripts/build-test-app.sh --ios --emulator && ./scripts/test-app.sh --ios --emulator",
+    "testapp": "npm run testandroid && npm run testios",
     "testjs": "mocha ./test/js-mocha-specs.js",
     "test": "npm run testjs && npm run testapp",
     "release": "npm run test && ./scripts/release.sh"

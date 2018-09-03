@@ -435,6 +435,7 @@ const tests = [
     },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
+      result.data.status.should.be.equal(200);
     }
   },{
     description: 'should reject when pinned cert does not match received server cert (GET)',
@@ -473,6 +474,15 @@ const tests = [
       result.type.should.be.equal('rejected');
       result.data.status.should.be.equal(403);
       result.data.error.should.be.equal('There was an error downloading the file');
+    }
+  },{
+    description: 'should handle gzip encoded response correctly',
+    expected: 'resolved: {"status": 200, "headers": "{\\"Content-Encoding\\": \\"gzip\\" ...',
+    func: function(resolve, reject) { cordova.plugin.http.get('http://httpbin.org/gzip', {}, {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.status.should.be.equal(200);
+      JSON.parse(result.data.data).gzipped.should.be.equal(true);
     }
   }
 ];
