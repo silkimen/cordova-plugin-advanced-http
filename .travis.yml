@@ -30,6 +30,7 @@ install:
 
 script:
 - npm run testjs
+- npm run updatecert
 - travis_wait scripts/build-test-app.sh --$TARGET_PLATFORM --emulator &&
   scripts/upload-artifact.sh --$TARGET_PLATFORM &&
   scripts/test-app.sh --$TARGET_PLATFORM --emulator;
