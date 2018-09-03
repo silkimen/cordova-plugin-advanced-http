@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+- Fixed #136: Content-Type header non-overwritable on browser platform
+
 ## 2.0.0
 
 - Feature #103: implement HTTP SSL cert modes

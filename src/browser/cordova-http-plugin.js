@@ -74,9 +74,27 @@ function createXhrFailureObject(xhr) {
   return obj;
 }
 
+function getHeaderValue(headers, headerName) {
+  let result = null;
+
+  Object.keys(headers).forEach(function(key) {
+    if (key.toLowerCase() === headerName.toLowerCase()) {
+      result = headers[key];
+    }
+  });
+
+  return result;
+}
+
+function setDefaultContentType(headers, contentType) {
+  if (getHeaderValue(headers, 'Content-Type') === null) {
+    headers['Content-Type'] = contentType;
+  }
+}
+
 function setHeaders(xhr, headers) {
   Object.keys(headers).forEach(function(key) {
-    if (key === 'Cookie') return;
+    if (key.toLowerCase() === 'cookie') return;
 
     xhr.setRequestHeader(key, headers[key]);
   });
@@ -101,7 +119,7 @@ function sendRequest(method, withData, opts, success, failure) {
 
   switch (serializer) {
     case 'json':
-      xhr.setRequestHeader('Content-Type', 'application/json; charset=utf8');
+      setDefaultContentType(headers, 'application/json; charset=utf8');
       processedData = serializeJsonData(data);
 
       if (processedData === null) {
@@ -111,12 +129,12 @@ function sendRequest(method, withData, opts, success, failure) {
       break;
 
     case 'utf8':
-      xhr.setRequestHeader('Content-Type', 'text/plain; charset=utf8');
+      setDefaultContentType(headers, 'text/plain; charset=utf8');
       processedData = data.text;
       break;
 
     case 'urlencoded':
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      setDefaultContentType(headers, 'application/x-www-form-urlencoded');
       processedData = serializeParams(data);
       break;
   }
@@ -166,11 +184,8 @@ var browserInterface = {
   downloadFile: function (success, failure, opts) {
     return failure('advanced-http: function "downloadFile" not supported on browser platform');
   },
-  enableSSLPinning: function (success, failure, opts) {
-    return failure('advanced-http: function "enableSSLPinning" not supported on browser platform');
-  },
-  acceptAllCerts: function (success, failure, opts) {
-    return failure('advanced-http: function "acceptAllCerts" not supported on browser platform');
+  setSSLCertMode: function (success, failure, opts) {
+    return failure('advanced-http: function "setSSLCertMode" not supported on browser platform');
   },
   disableRedirect: function (success, failure, opts) {
     return failure('advanced-http: function "disableRedirect" not supported on browser platform');
