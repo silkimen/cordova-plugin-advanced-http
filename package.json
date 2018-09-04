@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-advanced-http",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Cordova / Phonegap plugin for communicating with HTTP servers using SSL pinning",
   "scripts": {
     "updatecert": "node ./scripts/update-test-cert.js",
@@ -63,7 +63,7 @@
     "mocha": "4.0.0",
     "mock-require": "2.0.2",
     "mz": "2.7.0",
-    "umd-tough-cookie": "2.3.2",
+    "umd-tough-cookie": "2.4.3",
     "wd": "1.4.1",
     "xml2js": "0.4.19"
   }

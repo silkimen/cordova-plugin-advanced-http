@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.2
+
+- Fixed #142: Plugin affected by REDoS Issue of tough-cookie
+
 ## 2.0.1
 
 - Fixed #136: Content-Type header non-overwritable on browser platform
