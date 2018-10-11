@@ -114,6 +114,9 @@ var publicInterface = {
   head: function (url, params, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'head', params: params, headers: headers }, success, failure);
   },
+  options: function (url, params, headers, success, failure) {
+    return publicInterface.sendRequest(url, { method: 'options', params: params, headers: headers }, success, failure);
+  },
   uploadFile: function (url, params, headers, filePath, name, success, failure) {
     return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name }, success, failure);
   },

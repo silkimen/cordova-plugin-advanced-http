@@ -86,6 +86,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             CordovaHttpHead head = new CordovaHttpHead(urlString, params, headers, timeoutInMilliseconds, callbackContext);
 
             cordova.getThreadPool().execute(head);
+        } else if (action.equals("options")) {
+            String urlString = args.getString(0);
+            Object params = args.get(1);
+            JSONObject headers = args.getJSONObject(2);
+            int timeoutInMilliseconds = args.getInt(3) * 1000;
+            CordovaHttpOptions options = new CordovaHttpOptions(urlString, params, headers, timeoutInMilliseconds, callbackContext);
+
+            cordova.getThreadPool().execute(options);
         } else if (action.equals("setSSLCertMode")) {
             String mode = args.getString(0);
 

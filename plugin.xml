@@ -64,6 +64,7 @@
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpDownload.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpGet.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpHead.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpOptions.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPlugin.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPost.java" target-dir="src/com/synconset/cordovahttp"/>
     <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPut.java" target-dir="src/com/synconset/cordovahttp"/>

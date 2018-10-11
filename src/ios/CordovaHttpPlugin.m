@@ -405,6 +405,46 @@
     }
 }
 
+- (void)options:(CDVInvokedUrlCommand*)command {
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    manager.securityPolicy = securityPolicy;
+    NSString *url = [command.arguments objectAtIndex:0];
+    NSDictionary *parameters = [command.arguments objectAtIndex:1];
+    NSDictionary *headers = [command.arguments objectAtIndex:2];
+    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
+
+    [self setRequestHeaders: headers forManager: manager];
+    [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setRedirect: manager];
+
+    CordovaHttpPlugin* __weak weakSelf = self;
+    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
+
+    @try {
+        [manager OPTIONS:url parameters:parameters success:^(NSURLSessionTask *task) {
+            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+            // no 'body' for OPTIONS request, omitting 'data'
+            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
+
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+        } failure:^(NSURLSessionTask *task, NSError *error) {
+            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+        }];
+    }
+    @catch (NSException *exception) {
+        [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+        [self handleException:exception withCommand:command];
+    }
+}
+
 - (void)uploadFile:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;

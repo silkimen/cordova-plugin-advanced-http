@@ -4,7 +4,7 @@ var messages = require(pluginId + '.messages');
 
 var validSerializers = [ 'urlencoded', 'json', 'utf8' ];
 var validCertModes = [ 'default', 'nocheck', 'pinned' ];
-var validHttpMethods = [ 'get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download' ];
+var validHttpMethods = [ 'get', 'put', 'post', 'patch', 'head', 'options', 'delete', 'upload', 'download' ];
 
 module.exports = {
   b64EncodeUnicode: b64EncodeUnicode,
