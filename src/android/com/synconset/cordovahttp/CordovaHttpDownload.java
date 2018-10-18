@@ -31,7 +31,7 @@ class CordovaHttpDownload extends CordovaHttp implements Runnable {
     @Override
     public void run() {
         try {
-            HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParamsMap(), true);
+            HttpRequest request = HttpRequest.get(this.getUrlString(), this.getParamsMap(), false);
 
             this.prepareRequest(request);
 
