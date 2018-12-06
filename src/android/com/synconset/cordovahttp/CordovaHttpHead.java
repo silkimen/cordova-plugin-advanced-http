@@ -23,7 +23,7 @@ class CordovaHttpHead extends CordovaHttp implements Runnable {
     @Override
     public void run() {
         try {
-            HttpRequest request = HttpRequest.head(this.getUrlString(), this.getParamsMap(), true);
+            HttpRequest request = HttpRequest.head(this.getUrlString(), this.getParamsMap(), false);
 
             this.prepareRequest(request);
             this.returnResponseObject(request);
