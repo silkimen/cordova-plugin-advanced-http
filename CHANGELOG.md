@@ -3,6 +3,8 @@
 ## 2.0.2
 
 - Fixed #142: Plugin affected by REDoS Issue of tough-cookie
+- Fixed #157: Arguments are double URL-encoded on "downloadFile" (thanks TheZopo)
+- Fixed #164: Arguments are double URL-encoded on "head" (thanks ath0mas)
 
 ## 2.0.1
 
