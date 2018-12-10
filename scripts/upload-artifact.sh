@@ -15,7 +15,7 @@ if [ $PLATFORM = "android" ]; then
       -X POST \
       -H "Content-Type: application/octet-stream" \
       https://saucelabs.com/rest/v1/storage/$SAUCE_USERNAME/HttpDemo.apk?overwrite=true \
-      --data-binary @$TEMP/platforms/android/build/outputs/apk/android-debug.apk
+      --data-binary @$TEMP/platforms/android/app/build/outputs/apk/debug/app-debug.apk
 else
   rm -rf $TEMP/HttpDemo.app.zip
   pushd $TEMP/platforms/ios/build/emulator
