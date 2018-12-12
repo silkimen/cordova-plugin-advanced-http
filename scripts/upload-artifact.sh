@@ -2,7 +2,7 @@
 set -e
 
 PLATFORM=$([[ "${@#--android}" = "$@" ]] && echo "ios" || echo "android")
-ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/..
+ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd ..; pwd )"
 TEMP=$ROOT/temp
 
 if [ -z $SAUCE_USERNAME ] || [ -z $SAUCE_ACCESS_KEY ]; then
