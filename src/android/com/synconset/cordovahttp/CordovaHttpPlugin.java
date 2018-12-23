@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -89,7 +92,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         } else if (action.equals("setSSLCertMode")) {
             String mode = args.getString(0);
 
-            if (mode.equals("default")) {
+            if (mode.equals("legacy")) {
                 HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
                 callbackContext.success();
             } else if (mode.equals("nocheck")) {
@@ -100,9 +103,18 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                     this.loadSSLCerts();
                     HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
                     callbackContext.success();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     callbackContext.error("There was an error setting up ssl pinning");
+                }
+            } else if (mode.equals("default")) {
+                try {
+                    this.loadUserStoreSSLCerts();
+                    HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
+                    callbackContext.success();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    callbackContext.error("There was an error loading system's CA certificates");
                 }
             }
         } else if (action.equals("uploadFile")) {
@@ -132,6 +144,16 @@ public class CordovaHttpPlugin extends CordovaPlugin {
             return false;
         }
         return true;
+    }
+
+    private void loadUserStoreSSLCerts() throws Exception {
+      KeyStore ks = KeyStore.getInstance("AndroidCAStore");
+      ks.load(null);
+      Enumeration<String> aliases = ks.aliases();
+
+      while (aliases.hasMoreElements()) {
+        String alias = aliases.nextElement();
+      }
     }
 
     private void loadSSLCerts() throws GeneralSecurityException, IOException {

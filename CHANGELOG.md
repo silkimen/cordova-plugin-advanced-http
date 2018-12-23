@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.3
+
+- Fixed #172: plugin does not respect user installed CA certs on Android
+
+#### Important information
+We've changed a default behavior on Android. User installed CA certs are respected now.
+If you don't want this for your needs, you can switch back to old behavior by setting SSL cert mode to `legacy`.
+
 ## 2.0.2
 
 - Fixed #142: Plugin affected by REDoS Issue of tough-cookie

@@ -124,7 +124,7 @@
 - (void)setSSLCertMode:(CDVInvokedUrlCommand*)command {
     NSString *certMode = [command.arguments objectAtIndex:0];
 
-    if ([certMode isEqualToString: @"default"]) {
+    if ([certMode isEqualToString: @"default"] || [certMode isEqualToString: @"legacy"]) {
         securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
         securityPolicy.allowInvalidCertificates = NO;
         securityPolicy.validatesDomainName = YES;

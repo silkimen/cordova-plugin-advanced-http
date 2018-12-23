@@ -3,7 +3,7 @@ var cookieHandler = require(pluginId + '.cookie-handler');
 var messages = require(pluginId + '.messages');
 
 var validSerializers = [ 'urlencoded', 'json', 'utf8' ];
-var validCertModes = [ 'default', 'nocheck', 'pinned' ];
+var validCertModes = [ 'default', 'nocheck', 'pinned', 'legacy' ];
 var validHttpMethods = [ 'get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download' ];
 
 module.exports = {
