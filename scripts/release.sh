@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/..
+ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd ..; pwd )"
 
 pushd $ROOT
 VERSION=$(node -e "console.log(require('./package.json').version)")

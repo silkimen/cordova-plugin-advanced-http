@@ -1,12 +1,6 @@
-sudo: false
-
-language: objective-c
-os: osx
-osx_image: xcode9.1
-
-env:
-  - TARGET_PLATFORM=android
-  - TARGET_PLATFORM=ios
+notifications:
+  slack:
+    secure: lXE+2AgsxZU5G5dI91LkMAIgo8MAWfdM7DB5UOtn5LpuNln+2FmJo1gOI7tkdmLOqpXTGYnpI2VyQN3H4nOF21YhuouzD1Sh8n2wtQg1iTm353kuQpqiVhSBX8ZJ7Be1e1G8OsnxoYOxbs4Zo9qI40EruwkvqLCBHWM5MRGyd4M7EFWwb9Z29VZN0y1Nt5g/c3bT76kdKmF+JCLur2OeEKxAity7sIKgZekSqeIMwEVLSxXnda6Dbjc/cg0MJ0iDArkD7iu6fz/Fcrrxgm/pUxjcgvqze7Gy5i31mjEfspnrglWV1cshMd48BTDKCJ2AMmxH8O3GPSWE2txjIvGRWUve7iViNylvmQCVz3Eyf99+4EuuVGa+5PSodQ/CqODx/65EwtcN3PE1tNz2puKOK8nrOJcFkcbG8KTHKUlQtHCkjitbykUnj/hvhLK5/oWlQYVOLWWrHwdGUh8FI8aFPVGjRjWbHbhdayjEIqxwr1ns+6mYrP1EFNXbaeZxnLNC59XpJl1ifuezqYAk7YEiU5j4rtC7YKgyQ3ueb7anOHTJoTMyDn8mpZXgwuyhoBaeEYytQVgRyMtL6Y5cP98Jn2kv0+vdne3rkk9/JEBTo32HOjvoij6rsqEvXC0LhUDJSNadOVdHht0jjoN6zBH37HIE5/3zysLlPcAcHAS83ow=
 
 cache:
   directories:
@@ -15,30 +9,51 @@ cache:
 addons:
   sauce_connect: true
 
-before_install:
-- export LANG=en_US.UTF-8
+matrix:
+  include:
+  - name: "iOS Build & Test"
+    language: objective-c
+    sudo: false
+    os: osx
+    osx_image: xcode10.1
 
-install:
-- npm install
-- if [ $TARGET_PLATFORM = "android" ]; then
-    brew update &&
-    brew install gradle &&
-    scripts/setup-android-sdk.sh &&
-    export ANDROID_HOME=$(pwd)/android-sdk-macosx &&
-    export PATH=${PATH}:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/23.0.2;
-  fi
+    before_install:
+    - export LANG=en_US.UTF-8
 
-script:
-- npm run testjs
-- npm run updatecert
-- travis_wait scripts/build-test-app.sh --$TARGET_PLATFORM --emulator &&
-  scripts/upload-artifact.sh --$TARGET_PLATFORM &&
-  scripts/test-app.sh --$TARGET_PLATFORM --emulator;
+    install:
+    - npm install
 
-after_success:
+    script:
+    - npm run testjs &&
+      npm run updatecert &&
+      scripts/build-test-app.sh --ios --emulator &&
+      scripts/upload-artifact.sh --ios &&
+      scripts/test-app.sh --ios --emulator;
 
-deploy:
+  - name: "Android Build & Test"
+    language: android
+    sudo : required
 
-notifications:
-  slack:
-    secure: lXE+2AgsxZU5G5dI91LkMAIgo8MAWfdM7DB5UOtn5LpuNln+2FmJo1gOI7tkdmLOqpXTGYnpI2VyQN3H4nOF21YhuouzD1Sh8n2wtQg1iTm353kuQpqiVhSBX8ZJ7Be1e1G8OsnxoYOxbs4Zo9qI40EruwkvqLCBHWM5MRGyd4M7EFWwb9Z29VZN0y1Nt5g/c3bT76kdKmF+JCLur2OeEKxAity7sIKgZekSqeIMwEVLSxXnda6Dbjc/cg0MJ0iDArkD7iu6fz/Fcrrxgm/pUxjcgvqze7Gy5i31mjEfspnrglWV1cshMd48BTDKCJ2AMmxH8O3GPSWE2txjIvGRWUve7iViNylvmQCVz3Eyf99+4EuuVGa+5PSodQ/CqODx/65EwtcN3PE1tNz2puKOK8nrOJcFkcbG8KTHKUlQtHCkjitbykUnj/hvhLK5/oWlQYVOLWWrHwdGUh8FI8aFPVGjRjWbHbhdayjEIqxwr1ns+6mYrP1EFNXbaeZxnLNC59XpJl1ifuezqYAk7YEiU5j4rtC7YKgyQ3ueb7anOHTJoTMyDn8mpZXgwuyhoBaeEYytQVgRyMtL6Y5cP98Jn2kv0+vdne3rkk9/JEBTo32HOjvoij6rsqEvXC0LhUDJSNadOVdHht0jjoN6zBH37HIE5/3zysLlPcAcHAS83ow=
+    android:
+      components:
+        - platform-tools
+        - build-tools-28.0.3
+        - android-27
+        - extra-android-support
+        - extra-android-m2repository
+        - extra-google-m2repository
+
+    before_install:
+    - export LANG=en_US.UTF-8 &&
+      curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - &&
+      sudo apt-get install -y nodejs
+
+    install:
+    - npm install
+
+    script:
+    - npm run testjs &&
+      npm run updatecert &&
+      scripts/build-test-app.sh --android --emulator &&
+      scripts/upload-artifact.sh --android &&
+      scripts/test-app.sh --android --emulator;

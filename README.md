@@ -132,12 +132,13 @@ These functions all take success and error callbacks as their last 2 arguments.
 Set SSL Cert handling mode, being one of the following values:
 
 * `default`: default SSL cert handling using system's CA certs
+* `legacy`: use legacy default behavior (< 2.0.3), excluding user installed CA certs (only for Android)
 * `nocheck`: disable SSL cert checking, trusting all certs (meant to be used only for testing purposes)
 * `pinned`: trust only provided certs
 
 To use SSL pinning you must include at least one `.cer` SSL certificate in your app project.  You can pin to your server certificate or to one of the issuing CA certificates. Include your certificate in the `www/certificates` folder. All `.cer` files found there will be loaded automatically.
 
-:warning: Your certificate must be DER encoded! If you only have a PEM enoceded certificate see this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729). You want to convert it to a DER encoded certificate with a .cer extension.
+:warning: Your certificate must be DER encoded! If you only have a PEM encoded certificate read this [stackoverflow answer](http://stackoverflow.com/a/16583429/3182729). You want to convert it to a DER encoded certificate with a .cer extension.
 
 ```js
 // enable SSL pinning

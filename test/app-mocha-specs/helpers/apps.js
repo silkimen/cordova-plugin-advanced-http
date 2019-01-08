@@ -6,5 +6,5 @@ if (process.env.SAUCE_USERNAME) {
 } else {
   // these paths are relative to working directory
   exports.iosTestApp = path.resolve('temp/platforms/ios/build/emulator/HttpDemo.app');
-  exports.androidTestApp = path.resolve('temp/platforms/android/build/outputs/apk/android-debug.apk');
+  exports.androidTestApp = path.resolve('temp/platforms/android/app/build/outputs/apk/debug/app-debug.apk');
 }
