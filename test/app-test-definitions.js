@@ -484,6 +484,15 @@ const tests = [
       result.data.status.should.be.equal(200);
       JSON.parse(result.data.data).gzipped.should.be.equal(true);
     }
+  },{
+    description: 'should send empty string correctly',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
+    before: helpers.setUtf8StringSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', '', {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      JSON.parse(result.data.data).data.should.be.equal('');
+    }
   }
 ];
 
