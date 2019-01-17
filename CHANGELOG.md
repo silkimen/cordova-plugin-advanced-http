@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.4
+
+- Fixed #179: sending empty string with utf8 serializer throws an exception
+
 ## 2.0.3
 
 - Fixed #172: plugin does not respect user installed CA certs on Android
