@@ -37,46 +37,51 @@ const helpers = {
   }
 };
 
+const messageFactory = {
+  sslTrustAnchor: function() { return 'SSL handshake failed: javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.' },
+  invalidCertificate: function(domain) { return 'The certificate for this server is invalid. You might be connecting to a server that is pretending to be “' + domain + '” which could put your confidential information at risk.' }
+}
+
 const tests = [
   {
     description: 'should reject self signed cert (GET)',
-    expected: 'rejected: {"status":-1,"error":"cancelled"}',
+    expected: 'rejected: {"status":-2, ...',
     func: function(resolve, reject) { cordova.plugin.http.get('https://self-signed.badssl.com/', {}, {}, resolve, reject); },
     validationFunc: function(driver, result, targetInfo) {
       result.type.should.be.equal('rejected');
-      result.data.should.be.eql({ status: -1, error: targetInfo.isAndroid ? 'SSL handshake failed' : 'cancelled' });
+      result.data.should.be.eql({ status: -2, error: targetInfo.isAndroid ? messageFactory.sslTrustAnchor() : messageFactory.invalidCertificate('self-signed.badssl.com') });
     }
   },{
     description: 'should reject self signed cert (PUT)',
-    expected: 'rejected: {"status":-1,"error":"cancelled"}',
+    expected: 'rejected: {"status":-2, ...',
     func: function(resolve, reject) { cordova.plugin.http.put('https://self-signed.badssl.com/', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result, targetInfo) {
       result.type.should.be.equal('rejected');
-      result.data.should.be.eql({ status: -1, error: targetInfo.isAndroid ? 'SSL handshake failed' : 'cancelled' });
+      result.data.should.be.eql({ status: -2, error: targetInfo.isAndroid ? messageFactory.sslTrustAnchor() : messageFactory.invalidCertificate('self-signed.badssl.com') });
     }
   },{
     description: 'should reject self signed cert (POST)',
-    expected: 'rejected: {"status":-1,"error":"cancelled"}',
+    expected: 'rejected: {"status":-2, ...',
     func: function(resolve, reject) { cordova.plugin.http.post('https://self-signed.badssl.com/', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result, targetInfo) {
       result.type.should.be.equal('rejected');
-      result.data.should.be.eql({ status: -1, error: targetInfo.isAndroid ? 'SSL handshake failed' : 'cancelled' });
+      result.data.should.be.eql({ status: -2, error: targetInfo.isAndroid ? messageFactory.sslTrustAnchor() : messageFactory.invalidCertificate('self-signed.badssl.com') });
     }
   },{
     description: 'should reject self signed cert (PATCH)',
-    expected: 'rejected: {"status":-1,"error":"cancelled"}',
+    expected: 'rejected: {"status":-2, ...',
     func: function(resolve, reject) { cordova.plugin.http.patch('https://self-signed.badssl.com/', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result, targetInfo) {
       result.type.should.be.equal('rejected');
-      result.data.should.be.eql({ status: -1, error: targetInfo.isAndroid ? 'SSL handshake failed' : 'cancelled' });
+      result.data.should.be.eql({ status: -2, error: targetInfo.isAndroid ? messageFactory.sslTrustAnchor() : messageFactory.invalidCertificate('self-signed.badssl.com') });
     }
   },{
     description: 'should reject self signed cert (DELETE)',
-    expected: 'rejected: {"status":-1,"error":"cancelled"}',
+    expected: 'rejected: {"status":-2, ...',
     func: function(resolve, reject) { cordova.plugin.http.delete('https://self-signed.badssl.com/', {}, {}, resolve, reject); },
     validationFunc: function(driver, result, targetInfo) {
       result.type.should.be.equal('rejected');
-      result.data.should.be.eql({ status: -1, error: targetInfo.isAndroid ? 'SSL handshake failed' : 'cancelled' });
+      result.data.should.be.eql({ status: -2, error: targetInfo.isAndroid ? messageFactory.sslTrustAnchor() : messageFactory.invalidCertificate('self-signed.badssl.com') });
     }
   },{
     description: 'should accept bad cert (GET)',
@@ -284,7 +289,7 @@ const tests = [
       JSON
         .parse(result.data.data)
         .url
-        .should.be.equal('http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
+        .should.include('httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
     }
   },{
     description: 'should throw on non-string values in local header object #54',
@@ -439,14 +444,14 @@ const tests = [
     }
   },{
     description: 'should reject when pinned cert does not match received server cert (GET)',
-    expected: 'rejected: {"status": -1 ...',
+    expected: 'rejected: {"status": -2 ...',
     before: helpers.setPinnedCertMode,
     func: function(resolve, reject) {
       cordova.plugin.http.get('https://sha512.badssl.com/', {}, {}, resolve, reject);
     },
     validationFunc: function(driver, result, targetInfo) {
       result.type.should.be.equal('rejected');
-      result.data.should.be.eql({ status: -1, error: targetInfo.isAndroid ? 'SSL handshake failed' : 'cancelled' });
+      result.data.should.be.eql({ status: -2, error: targetInfo.isAndroid ? messageFactory.sslTrustAnchor() : messageFactory.invalidCertificate('sha512.badssl.com') });
     }
   },{
     description: 'should send deeply structured JSON object correctly (POST) #65',

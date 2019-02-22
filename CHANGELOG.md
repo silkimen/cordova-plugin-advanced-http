@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.5
+
+- Fixed #185: need more detailed SSL error message
+
 ## 2.0.4
 
 - Fixed #179: sending empty string with utf8 serializer throws an exception

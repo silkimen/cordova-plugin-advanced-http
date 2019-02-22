@@ -104,6 +104,9 @@
         case -1009:
             // no connection
             return [NSNumber numberWithInt:3];
+        case -1202:
+            // untrusted SSL certificate
+            return [NSNumber numberWithInt:-2];
         default:
             return [NSNumber numberWithInt:-1];
     }
