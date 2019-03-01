@@ -524,6 +524,13 @@ public class HttpRequest {
   }
 
   /**
+   * Clear certs which were added to test against when using ssl pinning.
+   */
+  public static void clearCerts() {
+    PINNED_CERTS = null;
+  }
+
+  /**
    * Callback interface for reporting upload progress for a request.
    */
   public interface UploadProgress {

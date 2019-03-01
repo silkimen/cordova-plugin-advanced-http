@@ -18,6 +18,7 @@ const local = {
     platformVersion: '5.1',
     deviceName: 'Android Emulator',
     autoWebview: true,
+    fullReset: true,
     app: undefined // will be set later
   }
 };

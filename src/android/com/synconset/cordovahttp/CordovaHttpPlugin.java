@@ -9,6 +9,7 @@ import java.io.InputStream;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.Certificate;
 
 import java.util.ArrayList;
@@ -33,6 +34,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
+
+        try {
+          HttpRequest.clearCerts();
+          this.pinSSLCertsFromCAStore();
+        } catch (Exception e) {
+          e.printStackTrace();
+          System.err.println("There was an error loading system's CA certificates");
+        }
     }
 
     @Override
@@ -92,6 +101,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         } else if (action.equals("setSSLCertMode")) {
             String mode = args.getString(0);
 
+            HttpRequest.clearCerts();
+
             if (mode.equals("legacy")) {
                 HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
                 callbackContext.success();
@@ -100,7 +111,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                 callbackContext.success();
             } else if (mode.equals("pinned")) {
                 try {
-                    this.loadSSLCerts();
+                    this.loadSSLCertsFromBundle();
                     HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
                     callbackContext.success();
                 } catch (Exception e) {
@@ -109,8 +120,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                 }
             } else if (mode.equals("default")) {
                 try {
-                    this.loadUserStoreSSLCerts();
-                    HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
+                    this.pinSSLCertsFromCAStore();
                     callbackContext.success();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -146,17 +156,25 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         return true;
     }
 
-    private void loadUserStoreSSLCerts() throws Exception {
-      KeyStore ks = KeyStore.getInstance("AndroidCAStore");
+    private void pinSSLCertsFromCAStore() throws GeneralSecurityException, IOException {
+      this.loadSSLCertsFromKeyStore("AndroidCAStore");
+      HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
+    }
+
+    private void loadSSLCertsFromKeyStore(String storeType) throws GeneralSecurityException, IOException {
+      KeyStore ks = KeyStore.getInstance(storeType);
       ks.load(null);
       Enumeration<String> aliases = ks.aliases();
 
       while (aliases.hasMoreElements()) {
         String alias = aliases.nextElement();
+        TrustedCertificateEntry certEntry = (TrustedCertificateEntry) ks.getEntry(alias, null);
+        Certificate cert = certEntry.getTrustedCertificate();
+        HttpRequest.addCert(cert);
       }
     }
 
-    private void loadSSLCerts() throws GeneralSecurityException, IOException {
+    private void loadSSLCertsFromBundle() throws GeneralSecurityException, IOException {
         AssetManager assetManager = cordova.getActivity().getAssets();
         String[] files = assetManager.list("www/certificates");
         ArrayList<String> cerFiles = new ArrayList<String>();

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.6
+
+- Fixed #187: setSSLCertMode with "default" throws an error on Android
+
 ## 2.0.5
 
 - Fixed #185: need more detailed SSL error message
