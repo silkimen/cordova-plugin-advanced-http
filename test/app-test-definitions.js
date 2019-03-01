@@ -491,12 +491,22 @@ const tests = [
     }
   },{
     description: 'should send empty string correctly',
-    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"\\" ...',
     before: helpers.setUtf8StringSerializer,
     func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', '', {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
       JSON.parse(result.data.data).data.should.be.equal('');
+    }
+  },{
+    description: 'shouldn\'t escape forward slashes #184',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"/\\" ...',
+    before: helpers.setJsonSerializer,
+    func: function(resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', { testString: '/' }, {}, resolve, reject); },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      console.log(result.data.data);
+      JSON.parse(result.data.data).json.testString.should.be.equal('/');
     }
   }
 ];
