@@ -20,11 +20,13 @@
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
     bool redirect;
+    AFHTTPSessionManager *manager;
 }
 
 - (void)pluginInitialize {
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     redirect = true;
+    manager = [AFHTTPSessionManager manager];
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
@@ -160,7 +162,6 @@
 }
 
 - (void)post:(CDVInvokedUrlCommand*)command {
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
@@ -202,7 +203,6 @@
 }
 
 - (void)get:(CDVInvokedUrlCommand*)command {
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
@@ -244,7 +244,6 @@
 }
 
 - (void)put:(CDVInvokedUrlCommand*)command {
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
@@ -286,7 +285,6 @@
 }
 
 - (void)patch:(CDVInvokedUrlCommand*)command {
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
@@ -328,7 +326,6 @@
 }
 
 - (void)delete:(CDVInvokedUrlCommand*)command {
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
@@ -369,7 +366,6 @@
 }
 
 - (void)head:(CDVInvokedUrlCommand*)command {
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *parameters = [command.arguments objectAtIndex:1];
@@ -409,7 +405,6 @@
 }
 
 - (void)uploadFile:(CDVInvokedUrlCommand*)command {
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
@@ -466,7 +461,6 @@
 
 
 - (void)downloadFile:(CDVInvokedUrlCommand*)command {
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
