@@ -25,8 +25,8 @@
 
 - (void)pluginInitialize {
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-    redirect = true;
     manager = [AFHTTPSessionManager manager];
+    redirect = true;
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
