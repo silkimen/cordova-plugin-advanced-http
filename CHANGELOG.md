@@ -3,6 +3,7 @@
 ## 2.0.6
 
 - Fixed #187: setSSLCertMode with "default" throws an error on Android
+- Fixed #115: HTTP connections are not kept alive on iOS (thanks MorpheusDe97)
 
 ## 2.0.5
 
