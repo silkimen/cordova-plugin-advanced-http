@@ -72,6 +72,9 @@ var publicInterface = {
   disableRedirect: function (disable, success, failure) {
     return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [ !!disable ]);
   },
+  setProxy: function(host, port, success, failure) {
+    return exec(success, failure, 'CordovaHttpPlugin', 'setProxy', [ host, port ]);
+  },
   sendRequest: function (url, options, success, failure) {
     helpers.handleMissingCallbacks(success, failure);
 
