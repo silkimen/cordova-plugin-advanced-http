@@ -1,4 +1,4 @@
-package com.silkimen.http;
+package com.silkimen.cordovahttp;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,12 +10,14 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class HttpResponse {
+public class CordovaHttpResponse {
   private int status;
   private String url;
   private Map<String, List<String>> headers;
   private String body;
-  private boolean failed;
+  private JSONObject fileEntry;
+  private boolean hasFailed;
+  private boolean isFileOperation;
   private String error;
 
   public void setStatus(int status) {
@@ -34,13 +36,18 @@ public class HttpResponse {
     this.body = body;
   }
 
+  public void setFileEntry(JSONObject entry) {
+    this.isFileOperation = true;
+    this.fileEntry = entry;
+  }
+
   public void setErrorMessage(String message) {
-    this.failed = true;
+    this.hasFailed = true;
     this.error = message;
   }
 
   public boolean hasFailed() {
-    return this.failed;
+    return this.hasFailed;
   }
 
   public JSONObject toJSON() throws JSONException {
@@ -49,8 +56,11 @@ public class HttpResponse {
     json.put("status", this.status);
     json.put("url", this.url);
 
-    if (this.failed) {
+    if (this.hasFailed) {
       json.put("error", this.error);
+    } else if (this.isFileOperation) {
+      json.put("headers", new JSONObject(getFilteredHeaders()));
+      json.put("file", this.fileEntry);
     } else {
       json.put("headers", new JSONObject(getFilteredHeaders()));
       json.put("data", this.body);

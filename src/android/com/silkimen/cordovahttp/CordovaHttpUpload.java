@@ -1,8 +1,11 @@
 package com.silkimen.cordovahttp;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import java.nio.ByteBuffer;
@@ -19,39 +22,28 @@ import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.webkit.MimeTypeMap;
 import android.util.Log;
 
-public class CordovaHttpRequest implements Runnable {
+class CordovaHttpUpload implements Runnable {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
-  private String method;
   private String url;
-  private String serializer = "none";
-  private Object data;
   private JSONObject params;
   private JSONObject headers;
+  private String filePath;
+  private String uploadName;
   private int timeout;
   private CallbackContext callbackContext;
 
-  public CordovaHttpRequest(String method, String url, String serializer, Object data, JSONObject headers,
+  public CordovaHttpUpload(String url, JSONObject params, JSONObject headers, String filePath, String uploadName,
       int timeout, CallbackContext callbackContext) {
 
-    this.method = method;
-    this.url = url;
-    this.serializer = serializer;
-    this.data = data;
-    this.headers = headers;
-    this.timeout = timeout;
-    this.callbackContext = callbackContext;
-  }
-
-  public CordovaHttpRequest(String method, String url, JSONObject params, JSONObject headers, int timeout,
-      CallbackContext callbackContext) {
-
-    this.method = method;
     this.url = url;
     this.params = params;
     this.headers = headers;
+    this.filePath = filePath;
+    this.uploadName = uploadName;
     this.timeout = timeout;
     this.callbackContext = callbackContext;
   }
@@ -64,17 +56,23 @@ public class CordovaHttpRequest implements Runnable {
       String processedUrl = HttpRequest.encode(HttpRequest.append(this.url, JsonUtils.getObjectMap(this.params)));
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-      HttpRequest request = new HttpRequest(processedUrl, this.method)
-          .followRedirects(true /* @TODO */)
-          .readTimeout(this.timeout)
-          .acceptCharset("UTF-8")
-          .uncompress(true);
+      HttpRequest request = new HttpRequest(processedUrl, "POST")
+        .followRedirects(true /* @TODO */)
+        .readTimeout(this.timeout)
+        .acceptCharset("UTF-8")
+        .uncompress(true)
+        .headers(JsonUtils.getStringMap(this.headers));
 
-      // setup content type before applying headers, so user can override it
-      this.setContentType(request)
-          .headers(JsonUtils.getStringMap(this.headers));
+      int filenameIndex = filePath.lastIndexOf('/');
+      String filename = filePath.substring(filenameIndex + 1);
 
-      this.sendBody(request)
+      int extIndex = filePath.lastIndexOf('.');
+      String ext = filePath.substring(extIndex + 1);
+
+      MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+      String mimeType = mimeTypeMap.getMimeTypeFromExtension(ext);
+
+      request.part(this.uploadName, filename, mimeType, new File(new URI(this.filePath)))
           .receive(outputStream);
 
       ByteBuffer rawOutput = ByteBuffer.wrap(outputStream.toByteArray());
@@ -107,6 +105,10 @@ public class CordovaHttpRequest implements Runnable {
         response.setErrorMessage("There was an error with the request: " + e.getCause().getMessage());
         Log.w(TAG, "Generic request error", e);
       }
+    } catch (URISyntaxException e) {
+      response.setStatus(-1);
+      response.setErrorMessage("An error occured while loading file");
+      Log.e(TAG, "An error occured while loading file", e);
     } catch (Exception e) {
       response.setStatus(-1);
       response.setErrorMessage(e.getMessage());
@@ -122,35 +124,5 @@ public class CordovaHttpRequest implements Runnable {
     } catch (JSONException e) {
       Log.e(TAG, "An unexpected error occured while processing HTTP response", e);
     }
-  }
-
-  private HttpRequest setContentType(HttpRequest request) {
-    switch(this.serializer) {
-      case "json":
-        return request.contentType("application/json", "UTF-8");
-      case "utf8":
-        return request.contentType("text/plain", "UTF-8");
-      case "urlencoded":
-        // intentionally left blank, because content type is set in HttpRequest.form()
-    }
-
-    return request;
-  }
-
-  private HttpRequest sendBody(HttpRequest request) throws JSONException {
-    if (this.data == null) {
-      return request;
-    }
-
-    switch (this.serializer) {
-      case "json":
-        return request.send(this.data.toString());
-      case "utf8":
-        return request.send(((JSONObject) this.data).getString("text"));
-      case "urlencoded":
-        return request.form(JsonUtils.getObjectMap((JSONObject) this.data));
-    }
-
-    return request;
   }
 }

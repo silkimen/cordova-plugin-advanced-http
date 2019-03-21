@@ -50,7 +50,7 @@
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="CordovaHttpPlugin">
-        <param name="android-package" value="com.synconset.cordovahttp.CordovaHttpPlugin"/>
+        <param name="android-package" value="com.silkimen.cordovahttp.CordovaHttpPlugin"/>
       </feature>
     </config-file>
     <config-file target="AndroidManifest.xml" parent="/manifest">
@@ -61,17 +61,14 @@
     <source-file src="src/android/com/github/kevinsawicki/http/OkConnectionFactory.java" target-dir="src/com/github/kevinsawicki/http"/>
     <source-file src="src/android/com/github/kevinsawicki/http/TLSSocketFactory.java" target-dir="src/com/github/kevinsawicki/http"/>
     -->
-    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttp.java" target-dir="src/com/synconset/cordovahttp"/>
-    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpDownload.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpDownload.java" target-dir="src/com/silkimen/cordovahttp"/>
+    <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpPlugin.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpRequest.java" target-dir="src/com/silkimen/cordovahttp"/>
-    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPlugin.java" target-dir="src/com/synconset/cordovahttp"/>
-    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPost.java" target-dir="src/com/synconset/cordovahttp"/>
-    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPut.java" target-dir="src/com/synconset/cordovahttp"/>
-    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpPatch.java" target-dir="src/com/synconset/cordovahttp"/>
-    <source-file src="src/android/com/synconset/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/synconset/cordovahttp"/>
+    <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpResponse.java" target-dir="src/com/silkimen/cordovahttp"/>
+    <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/silkimen/cordovahttp"/>
+
     <source-file src="src/android/com/silkimen/http/HttpBodyDecoder.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/HttpRequest.java" target-dir="src/com/silkimen/http"/>
-    <source-file src="src/android/com/silkimen/http/HttpResponse.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/JsonUtils.java" target-dir="src/com/silkimen/http"/>
     <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.10.0"/>
   </platform>
