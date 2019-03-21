@@ -23,8 +23,8 @@ import javax.net.ssl.SSLHandshakeException;
 
 import android.webkit.MimeTypeMap;
 
-import com.github.kevinsawicki.http.HttpRequest;
-import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
+import com.silkimen.http.HttpRequest;
+import com.silkimen.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpUpload extends CordovaHttp implements Runnable {
     private String filePath;
@@ -70,7 +70,7 @@ class CordovaHttpUpload extends CordovaHttp implements Runnable {
                     return;
                 }
             }
-          
+
             request.part(this.name, filename, mimeType, new File(uri));
 
             this.returnResponseObject(request);

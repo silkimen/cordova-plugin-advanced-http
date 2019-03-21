@@ -12,8 +12,8 @@ import org.json.JSONObject;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import com.github.kevinsawicki.http.HttpRequest;
-import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
+import com.silkimen.http.HttpRequest;
+import com.silkimen.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpPost extends CordovaHttp implements Runnable {
     public CordovaHttpPost(String urlString, Object params, String serializerName, JSONObject headers, int timeout, CallbackContext callbackContext) {

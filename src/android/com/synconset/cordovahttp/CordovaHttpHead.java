@@ -12,8 +12,8 @@ import org.apache.cordova.CallbackContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.github.kevinsawicki.http.HttpRequest;
-import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
+import com.silkimen.http.HttpRequest;
+import com.silkimen.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpHead extends CordovaHttp implements Runnable {
     public CordovaHttpHead(String urlString, Object params, JSONObject headers, int timeout, CallbackContext callbackContext) {

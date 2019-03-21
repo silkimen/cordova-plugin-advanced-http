@@ -12,8 +12,8 @@ import org.json.JSONObject;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import com.github.kevinsawicki.http.HttpRequest;
-import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
+import com.silkimen.http.HttpRequest;
+import com.silkimen.http.HttpRequest.HttpRequestException;
 
 class CordovaHttpPatch extends CordovaHttp implements Runnable {
     public CordovaHttpPatch(String urlString, Object params, String serializerName, JSONObject headers, int timeout, CallbackContext callbackContext) {
@@ -23,7 +23,8 @@ class CordovaHttpPatch extends CordovaHttp implements Runnable {
     @Override
     public void run() {
         try {
-            HttpRequest request = HttpRequest.patch(this.getUrlString());
+          /* todo */
+            HttpRequest request = HttpRequest.get(this.getUrlString());
 
             this.setupDataSerializer(request);
             this.prepareRequest(request);

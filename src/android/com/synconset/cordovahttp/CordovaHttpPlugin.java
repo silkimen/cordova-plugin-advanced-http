@@ -26,7 +26,8 @@ import org.json.JSONObject;
 
 import android.content.res.AssetManager;
 
-import com.github.kevinsawicki.http.HttpRequest;
+import com.silkimen.http.HttpRequest;
+import com.silkimen.cordovahttp.CordovaHttpRequest;
 
 public class CordovaHttpPlugin extends CordovaPlugin {
     private static final String TAG = "CordovaHTTP";
@@ -36,7 +37,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         super.initialize(cordova, webView);
 
         try {
-          HttpRequest.clearCerts();
+          //HttpRequest.clearCerts();
           this.pinSSLCertsFromCAStore();
         } catch (Exception e) {
           e.printStackTrace();
@@ -47,72 +48,78 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     @Override
     public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("post")) {
-            String urlString = args.getString(0);
-            Object params = args.get(1);
-            String serializerName = args.getString(2);
+            String url = args.getString(0);
+            Object data = args.get(1);
+            String serializer = args.getString(2);
             JSONObject headers = args.getJSONObject(3);
-            int timeoutInMilliseconds = args.getInt(4) * 1000;
-            CordovaHttpPost post = new CordovaHttpPost(urlString, params, serializerName, headers, timeoutInMilliseconds, callbackContext);
+            int timeout = args.getInt(4) * 1000;
+
+            CordovaHttpRequest post = new CordovaHttpRequest("POST", url, serializer, data, headers, timeout, callbackContext);
 
             cordova.getThreadPool().execute(post);
         } else if (action.equals("get")) {
-            String urlString = args.getString(0);
-            Object params = args.get(1);
+            String url = args.getString(0);
+            JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
-            int timeoutInMilliseconds = args.getInt(3) * 1000;
-            CordovaHttpGet get = new CordovaHttpGet(urlString, params, headers, timeoutInMilliseconds, callbackContext);
+            int timeout = args.getInt(3) * 1000;
+
+            CordovaHttpRequest get = new CordovaHttpRequest("GET", url, params, headers, timeout, callbackContext);
 
             cordova.getThreadPool().execute(get);
         } else if (action.equals("put")) {
-            String urlString = args.getString(0);
-            Object params = args.get(1);
-            String serializerName = args.getString(2);
+            String url = args.getString(0);
+            Object data = args.get(1);
+            String serializer = args.getString(2);
             JSONObject headers = args.getJSONObject(3);
-            int timeoutInMilliseconds = args.getInt(4) * 1000;
-            CordovaHttpPut put = new CordovaHttpPut(urlString, params, serializerName, headers, timeoutInMilliseconds, callbackContext);
+            int timeout = args.getInt(4) * 1000;
+
+            CordovaHttpRequest put = new CordovaHttpRequest("PUT", url, serializer, data, headers, timeout, callbackContext);
 
             cordova.getThreadPool().execute(put);
         } else if (action.equals("patch")) {
-            String urlString = args.getString(0);
-            Object params = args.get(1);
-            String serializerName = args.getString(2);
+            String url = args.getString(0);
+            Object data = args.get(1);
+            String serializer = args.getString(2);
             JSONObject headers = args.getJSONObject(3);
-            int timeoutInMilliseconds = args.getInt(4) * 1000;
-            CordovaHttpPatch patch = new CordovaHttpPatch(urlString, params, serializerName, headers, timeoutInMilliseconds, callbackContext);
+            int timeout = args.getInt(4) * 1000;
+
+            CordovaHttpRequest patch = new CordovaHttpRequest("PATCH", url, serializer, data, headers, timeout, callbackContext);
 
             cordova.getThreadPool().execute(patch);
         }
          else if (action.equals("delete")) {
-            String urlString = args.getString(0);
-            Object params = args.get(1);
+            String url = args.getString(0);
+            JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
-            int timeoutInMilliseconds = args.getInt(3) * 1000;
-            CordovaHttpDelete delete = new CordovaHttpDelete(urlString, params, headers, timeoutInMilliseconds, callbackContext);
+            int timeout = args.getInt(3) * 1000;
+
+            CordovaHttpRequest delete = new CordovaHttpRequest("DELETE", url, params, headers, timeout, callbackContext);
 
             cordova.getThreadPool().execute(delete);
         } else if (action.equals("head")) {
-            String urlString = args.getString(0);
-            Object params = args.get(1);
+            String url = args.getString(0);
+            JSONObject params = args.getJSONObject(1);
             JSONObject headers = args.getJSONObject(2);
-            int timeoutInMilliseconds = args.getInt(3) * 1000;
-            CordovaHttpHead head = new CordovaHttpHead(urlString, params, headers, timeoutInMilliseconds, callbackContext);
+            int timeout = args.getInt(3) * 1000;
+
+            CordovaHttpRequest head = new CordovaHttpRequest("HEAD", url, params, headers, timeout, callbackContext);
 
             cordova.getThreadPool().execute(head);
         } else if (action.equals("setSSLCertMode")) {
             String mode = args.getString(0);
 
-            HttpRequest.clearCerts();
+            //HttpRequest.clearCerts();
 
             if (mode.equals("legacy")) {
-                HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
+                //HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
                 callbackContext.success();
             } else if (mode.equals("nocheck")) {
-                HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_TRUSTALL);
+                //HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_TRUSTALL);
                 callbackContext.success();
             } else if (mode.equals("pinned")) {
                 try {
                     this.loadSSLCertsFromBundle();
-                    HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
+                    //HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
                     callbackContext.success();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -128,22 +135,24 @@ public class CordovaHttpPlugin extends CordovaPlugin {
                 }
             }
         } else if (action.equals("uploadFile")) {
-            String urlString = args.getString(0);
+            String url = args.getString(0);
             Object params = args.get(1);
             JSONObject headers = args.getJSONObject(2);
             String filePath = args.getString(3);
             String name = args.getString(4);
-            int timeoutInMilliseconds = args.getInt(5) * 1000;
-            CordovaHttpUpload upload = new CordovaHttpUpload(urlString, params, headers, filePath, name, timeoutInMilliseconds, callbackContext);
+            int timeout = args.getInt(5) * 1000;
+
+            CordovaHttpUpload upload = new CordovaHttpUpload(url, params, headers, filePath, name, timeout, callbackContext);
 
             cordova.getThreadPool().execute(upload);
         } else if (action.equals("downloadFile")) {
-            String urlString = args.getString(0);
+            String url = args.getString(0);
             Object params = args.get(1);
             JSONObject headers = args.getJSONObject(2);
             String filePath = args.getString(3);
-            int timeoutInMilliseconds = args.getInt(4) * 1000;
-            CordovaHttpDownload download = new CordovaHttpDownload(urlString, params, headers, filePath, timeoutInMilliseconds, callbackContext);
+            int timeout = args.getInt(4) * 1000;
+
+            CordovaHttpDownload download = new CordovaHttpDownload(url, params, headers, filePath, timeout, callbackContext);
 
             cordova.getThreadPool().execute(download);
         } else if (action.equals("disableRedirect")) {
@@ -158,7 +167,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
     private void pinSSLCertsFromCAStore() throws GeneralSecurityException, IOException {
       this.loadSSLCertsFromKeyStore("AndroidCAStore");
-      HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
+      //HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
     }
 
     private void loadSSLCertsFromKeyStore(String storeType) throws GeneralSecurityException, IOException {
@@ -170,7 +179,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         String alias = aliases.nextElement();
         TrustedCertificateEntry certEntry = (TrustedCertificateEntry) ks.getEntry(alias, null);
         Certificate cert = certEntry.getTrustedCertificate();
-        HttpRequest.addCert(cert);
+        //HttpRequest.addCert(cert);
       }
     }
 
@@ -191,7 +200,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         for (int i = 0; i < cerFiles.size(); i++) {
             InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
             InputStream caInput = new BufferedInputStream(in);
-            HttpRequest.addCert(caInput);
+            //HttpRequest.addCert(caInput);
         }
     }
 }

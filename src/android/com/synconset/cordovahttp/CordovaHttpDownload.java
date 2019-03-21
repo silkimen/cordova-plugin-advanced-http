@@ -3,8 +3,8 @@
  */
 package com.synconset.cordovahttp;
 
-import com.github.kevinsawicki.http.HttpRequest;
-import com.github.kevinsawicki.http.HttpRequest.HttpRequestException;
+import com.silkimen.http.HttpRequest;
+import com.silkimen.http.HttpRequest.HttpRequestException;
 
 import java.io.File;
 import java.net.SocketTimeoutException;
