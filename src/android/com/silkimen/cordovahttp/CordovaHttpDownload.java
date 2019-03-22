@@ -3,6 +3,8 @@ package com.silkimen.cordovahttp;
 import java.io.File;
 import java.net.URI;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import com.silkimen.http.HttpRequest;
 
 import org.apache.cordova.CallbackContext;
@@ -13,9 +15,9 @@ class CordovaHttpDownload extends CordovaHttpBase {
   private String filePath;
 
   public CordovaHttpDownload(String url, JSONObject params, JSONObject headers, String filePath, int timeout,
-      boolean followRedirects, CallbackContext callbackContext) {
+      boolean followRedirects, SSLSocketFactory customSSLSocketFactory, CallbackContext callbackContext) {
 
-    super("GET", url, params, headers, timeout, followRedirects, callbackContext);
+    super("GET", url, params, headers, timeout, followRedirects, customSSLSocketFactory, callbackContext);
     this.filePath = filePath;
   }
 

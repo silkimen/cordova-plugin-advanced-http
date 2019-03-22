@@ -4,38 +4,50 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.security.cert.CertificateFactory;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+
+import com.silkimen.http.TLSSocketFactory;
+import com.silkimen.http.TrustManagersFactory;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
 import android.content.res.AssetManager;
+import android.util.Log;
 
 public class CordovaHttpPlugin extends CordovaPlugin {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
-  private static boolean followRedirects = true;
+  private boolean followRedirects = true;
+  private TrustManagersFactory trustManagersFactory;
+  private SSLSocketFactory customSSLSocketFactory;
 
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
     super.initialize(cordova, webView);
 
+    this.trustManagersFactory = new TrustManagersFactory();
+
     try {
-      // HttpRequest.clearCerts();
-      this.pinSSLCertsFromCAStore();
+      this.customSSLSocketFactory = this.createSocketFactory(
+          this.trustManagersFactory.getPinnedTrustManagers(this.getCertsFromKeyStore("AndroidCAStore")));
     } catch (Exception e) {
       Log.e(TAG, "An error occured while loading system's CA certificates", e);
     }
@@ -84,7 +96,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(3) * 1000;
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, params, headers, timeout,
-        followRedirects, callbackContext);
+        this.followRedirects, this.customSSLSocketFactory, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -101,7 +113,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(4) * 1000;
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
-        timeout, followRedirects, callbackContext);
+        timeout, this.followRedirects, this.customSSLSocketFactory, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -117,7 +129,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(5) * 1000;
 
     CordovaHttpUpload upload = new CordovaHttpUpload(url, params, headers, filePath, uploadName, timeout,
-        followRedirects, callbackContext);
+        this.followRedirects, this.customSSLSocketFactory, callbackContext);
 
     cordova.getThreadPool().execute(upload);
 
@@ -131,91 +143,101 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     String filePath = args.getString(3);
     int timeout = args.getInt(4) * 1000;
 
-    CordovaHttpDownload download = new CordovaHttpDownload(url, params, headers, filePath, timeout, followRedirects,
-        callbackContext);
+    CordovaHttpDownload download = new CordovaHttpDownload(url, params, headers, filePath, timeout,
+        this.followRedirects, this.customSSLSocketFactory, callbackContext);
 
     cordova.getThreadPool().execute(download);
 
     return true;
   }
 
-  private boolean setSSLCertMode(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    String mode = args.getString(0);
-
-    // HttpRequest.clearCerts();
-
-    if (mode.equals("legacy")) {
-      // HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_DEFAULT);
-      callbackContext.success();
-    } else if (mode.equals("nocheck")) {
-      // HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_TRUSTALL);
-      callbackContext.success();
-    } else if (mode.equals("pinned")) {
-      try {
-        this.loadSSLCertsFromBundle();
-        // HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
-        callbackContext.success();
-      } catch (Exception e) {
-        e.printStackTrace();
-        callbackContext.error("There was an error setting up ssl pinning");
+  private boolean setSSLCertMode(final JSONArray args, final CallbackContext callbackContext) {
+    try {
+      switch (args.getString(0)) {
+      case "legacy":
+        this.customSSLSocketFactory = null;
+        break;
+      case "nocheck":
+        /* @TODO host name verification */
+        this.customSSLSocketFactory = this.createSocketFactory(this.trustManagersFactory.getNoopTrustManagers());
+        break;
+      case "pinned":
+        this.customSSLSocketFactory = this.createSocketFactory(
+            this.trustManagersFactory.getPinnedTrustManagers(this.getCertsFromBundle("www/certificates/")));
+        break;
+      default:
+        this.customSSLSocketFactory = this.createSocketFactory(
+          this.trustManagersFactory.getPinnedTrustManagers(this.getCertsFromKeyStore("AndroidCAStore")));
+        break;
       }
-    } else if (mode.equals("default")) {
-      try {
-        this.pinSSLCertsFromCAStore();
-        callbackContext.success();
-      } catch (Exception e) {
-        e.printStackTrace();
-        callbackContext.error("There was an error loading system's CA certificates");
-      }
+
+      callbackContext.success();
+    } catch (Exception e) {
+      Log.e(TAG, "An error occured while configuring SSL cert mode", e);
+      callbackContext.error("An error occured while configuring SSL cert mode");
     }
 
     return true;
   }
 
   private boolean disableRedirect(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    followRedirects = !args.getBoolean(0);
+    this.followRedirects = !args.getBoolean(0);
 
     callbackContext.success();
 
     return true;
   }
 
-  private void pinSSLCertsFromCAStore() throws GeneralSecurityException, IOException {
-    this.loadSSLCertsFromKeyStore("AndroidCAStore");
-    // HttpRequest.setSSLCertMode(HttpRequest.CERT_MODE_PINNED);
-  }
+  private ArrayList<Certificate> getCertsFromKeyStore(String storeType) throws GeneralSecurityException, IOException {
+    ArrayList<Certificate> certList = new ArrayList<Certificate>();
+    KeyStore keyStore = KeyStore.getInstance(storeType);
+    keyStore.load(null);
 
-  private void loadSSLCertsFromKeyStore(String storeType) throws GeneralSecurityException, IOException {
-    KeyStore ks = KeyStore.getInstance(storeType);
-    ks.load(null);
-    Enumeration<String> aliases = ks.aliases();
+    Enumeration<String> aliases = keyStore.aliases();
 
     while (aliases.hasMoreElements()) {
       String alias = aliases.nextElement();
-      TrustedCertificateEntry certEntry = (TrustedCertificateEntry) ks.getEntry(alias, null);
+      TrustedCertificateEntry certEntry = (TrustedCertificateEntry) keyStore.getEntry(alias, null);
       Certificate cert = certEntry.getTrustedCertificate();
-      // HttpRequest.addCert(cert);
+      certList.add(cert);
     }
+
+    return certList;
   }
 
-  private void loadSSLCertsFromBundle() throws GeneralSecurityException, IOException {
+  private ArrayList<Certificate> getCertsFromBundle(String path) throws GeneralSecurityException, IOException {
     AssetManager assetManager = cordova.getActivity().getAssets();
-    String[] files = assetManager.list("www/certificates");
-    ArrayList<String> cerFiles = new ArrayList<String>();
+    String[] files = assetManager.list(path);
+    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+    ArrayList<Certificate> certList = new ArrayList<Certificate>();
 
     for (int i = 0; i < files.length; i++) {
       int index = files[i].lastIndexOf('.');
-      if (index != -1) {
-        if (files[i].substring(index).equals(".cer")) {
-          cerFiles.add("www/certificates/" + files[i]);
-        }
+
+      if (index == -1 || !files[i].substring(index).equals(".cer")) {
+        continue;
       }
+
+      certList.add(cf.generateCertificate(assetManager.open(path + files[i])));
     }
 
-    for (int i = 0; i < cerFiles.size(); i++) {
-      InputStream in = cordova.getActivity().getAssets().open(cerFiles.get(i));
-      InputStream caInput = new BufferedInputStream(in);
-      // HttpRequest.addCert(caInput);
+    return certList;
+  }
+
+  private SSLSocketFactory createSocketFactory(TrustManager[] trustManagers) throws IOException {
+    try {
+      SSLContext context = SSLContext.getInstance("TLS");
+      context.init(null, trustManagers, new SecureRandom());
+
+      if (android.os.Build.VERSION.SDK_INT < 20) {
+        return new TLSSocketFactory(context);
+      } else {
+        return context.getSocketFactory();
+      }
+    } catch (GeneralSecurityException e) {
+      IOException ioException = new IOException("Security exception occured while configuring SSL context");
+      ioException.initCause(e);
+      throw ioException;
     }
   }
 }

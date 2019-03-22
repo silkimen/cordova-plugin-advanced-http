@@ -7,6 +7,8 @@ import com.silkimen.http.HttpRequest;
 import java.io.File;
 import java.net.URI;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import org.apache.cordova.CallbackContext;
 import org.json.JSONObject;
 
@@ -15,9 +17,9 @@ class CordovaHttpUpload extends CordovaHttpBase {
   private String uploadName;
 
   public CordovaHttpUpload(String url, JSONObject params, JSONObject headers, String filePath, String uploadName,
-      int timeout, boolean followRedirects, CallbackContext callbackContext) {
+      int timeout, boolean followRedirects, SSLSocketFactory customSSLSocketFactory, CallbackContext callbackContext) {
 
-    super("POST", url, params, headers, timeout, followRedirects, callbackContext);
+    super("POST", url, params, headers, timeout, followRedirects, customSSLSocketFactory, callbackContext);
     this.filePath = filePath;
     this.uploadName = uploadName;
   }

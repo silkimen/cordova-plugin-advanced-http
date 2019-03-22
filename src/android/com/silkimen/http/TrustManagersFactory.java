@@ -1,9 +1,13 @@
 package com.silkimen.http;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
@@ -17,11 +21,11 @@ public class TrustManagersFactory {
       }
 
       public void checkClientTrusted(X509Certificate[] chain, String authType) {
-        // Intentionally left blank
+        // intentionally left blank
       }
 
       public void checkServerTrusted(X509Certificate[] chain, String authType) {
-        // Intentionally left blank
+        // intentionally left blank
       }
     } };
   }
@@ -53,7 +57,8 @@ public class TrustManagersFactory {
     } catch (GeneralSecurityException e) {
       IOException ioException = new IOException("Security exception configuring SSL trust managers");
       ioException.initCause(e);
-      throw new HttpRequestException(ioException);
+
+      throw ioException;
     }
   }
 }

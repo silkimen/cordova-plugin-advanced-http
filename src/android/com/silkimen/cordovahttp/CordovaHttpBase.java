@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLSocketFactory;
 
 import com.silkimen.http.HttpBodyDecoder;
 import com.silkimen.http.HttpRequest;
@@ -32,9 +33,10 @@ abstract class CordovaHttpBase implements Runnable {
   protected JSONObject headers;
   protected int timeout;
   protected boolean followRedirects;
+  protected SSLSocketFactory customSSLSocketFactory;
   protected CallbackContext callbackContext;
 
-  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout, boolean followRedirects,
+  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout, boolean followRedirects, SSLSocketFactory customSSLSocketFactory,
       CallbackContext callbackContext) {
 
     this.method = method;
@@ -44,10 +46,12 @@ abstract class CordovaHttpBase implements Runnable {
     this.headers = headers;
     this.timeout = timeout;
     this.followRedirects = followRedirects;
+    this.customSSLSocketFactory = customSSLSocketFactory;
     this.callbackContext = callbackContext;
   }
 
-  public CordovaHttpBase(String method, String url, JSONObject params, JSONObject headers, int timeout, boolean followRedirects,
+
+  public CordovaHttpBase(String method, String url, JSONObject params, JSONObject headers, int timeout, boolean followRedirects, SSLSocketFactory customSSLSocketFactory,
       CallbackContext callbackContext) {
 
     this.method = method;
@@ -56,6 +60,7 @@ abstract class CordovaHttpBase implements Runnable {
     this.headers = headers;
     this.timeout = timeout;
     this.followRedirects = followRedirects;
+    this.customSSLSocketFactory = customSSLSocketFactory;
     this.callbackContext = callbackContext;
   }
 
@@ -115,6 +120,10 @@ abstract class CordovaHttpBase implements Runnable {
     request.readTimeout(this.timeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
+
+    if (this.customSSLSocketFactory != null) {
+      request.setSSLSocketFactory(this.customSSLSocketFactory);
+    }
 
     // setup content type before applying headers, so user can override it
     this.setContentType(request);
