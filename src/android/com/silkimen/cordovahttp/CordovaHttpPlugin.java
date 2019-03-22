@@ -14,10 +14,12 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import com.silkimen.http.HostnameVerifierFactory;
 import com.silkimen.http.TLSSocketFactory;
 import com.silkimen.http.TrustManagersFactory;
 
@@ -35,15 +37,16 @@ import android.util.Log;
 public class CordovaHttpPlugin extends CordovaPlugin {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
+  private final TrustManagersFactory trustManagersFactory = new TrustManagersFactory();
+  private final HostnameVerifierFactory hostnameVerifierFactory = new HostnameVerifierFactory();
+
   private boolean followRedirects = true;
-  private TrustManagersFactory trustManagersFactory;
   private SSLSocketFactory customSSLSocketFactory;
+  private HostnameVerifier customHostnameVerifier;
 
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
     super.initialize(cordova, webView);
-
-    this.trustManagersFactory = new TrustManagersFactory();
 
     try {
       this.customSSLSocketFactory = this.createSocketFactory(
@@ -96,7 +99,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(3) * 1000;
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, params, headers, timeout,
-        this.followRedirects, this.customSSLSocketFactory, callbackContext);
+        this.followRedirects, this.customSSLSocketFactory, this.customHostnameVerifier, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -113,7 +116,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(4) * 1000;
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
-        timeout, this.followRedirects, this.customSSLSocketFactory, callbackContext);
+        timeout, this.followRedirects, this.customSSLSocketFactory, this.customHostnameVerifier, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -129,7 +132,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(5) * 1000;
 
     CordovaHttpUpload upload = new CordovaHttpUpload(url, params, headers, filePath, uploadName, timeout,
-        this.followRedirects, this.customSSLSocketFactory, callbackContext);
+        this.followRedirects, this.customSSLSocketFactory, this.customHostnameVerifier, callbackContext);
 
     cordova.getThreadPool().execute(upload);
 
@@ -144,7 +147,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(4) * 1000;
 
     CordovaHttpDownload download = new CordovaHttpDownload(url, params, headers, filePath, timeout,
-        this.followRedirects, this.customSSLSocketFactory, callbackContext);
+        this.followRedirects, this.customSSLSocketFactory, this.customHostnameVerifier, callbackContext);
 
     cordova.getThreadPool().execute(download);
 
@@ -155,19 +158,22 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     try {
       switch (args.getString(0)) {
       case "legacy":
+        this.customHostnameVerifier = null;
         this.customSSLSocketFactory = null;
         break;
       case "nocheck":
-        /* @TODO host name verification */
+        this.customHostnameVerifier = this.hostnameVerifierFactory.getNoOpVerifier();
         this.customSSLSocketFactory = this.createSocketFactory(this.trustManagersFactory.getNoopTrustManagers());
         break;
       case "pinned":
+        this.customHostnameVerifier = null;
         this.customSSLSocketFactory = this.createSocketFactory(
-            this.trustManagersFactory.getPinnedTrustManagers(this.getCertsFromBundle("www/certificates/")));
+            this.trustManagersFactory.getPinnedTrustManagers(this.getCertsFromBundle("www/certificates")));
         break;
       default:
+        this.customHostnameVerifier = null;
         this.customSSLSocketFactory = this.createSocketFactory(
-          this.trustManagersFactory.getPinnedTrustManagers(this.getCertsFromKeyStore("AndroidCAStore")));
+            this.trustManagersFactory.getPinnedTrustManagers(this.getCertsFromKeyStore("AndroidCAStore")));
         break;
       }
 
@@ -218,7 +224,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         continue;
       }
 
-      certList.add(cf.generateCertificate(assetManager.open(path + files[i])));
+      certList.add(cf.generateCertificate(assetManager.open(path + "/" + files[i])));
     }
 
     return certList;

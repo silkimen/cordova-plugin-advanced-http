@@ -1,12 +1,13 @@
 package com.silkimen.http;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 
-public class HostnameVerfifierFactory {
-  private final HostnameVerifier noOpVerififer;
+public class HostnameVerifierFactory {
+  private final HostnameVerifier noOpVerifier;
 
   public HostnameVerifierFactory() {
-    this.noOpVerififer = new HostnameVerifier() {
+    this.noOpVerifier = new HostnameVerifier() {
       public boolean verify(String hostname, SSLSession session) {
         return true;
       }
@@ -14,6 +15,6 @@ public class HostnameVerfifierFactory {
   }
 
   public HostnameVerifier getNoOpVerifier() {
-    return this.noOpVerififer;
+    return this.noOpVerifier;
   }
 }

@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 
 import java.nio.ByteBuffer;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -34,9 +35,11 @@ abstract class CordovaHttpBase implements Runnable {
   protected int timeout;
   protected boolean followRedirects;
   protected SSLSocketFactory customSSLSocketFactory;
+  protected HostnameVerifier customHostnameVerifier;
   protected CallbackContext callbackContext;
 
-  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout, boolean followRedirects, SSLSocketFactory customSSLSocketFactory,
+  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout,
+      boolean followRedirects, SSLSocketFactory customSSLSocketFactory, HostnameVerifier customHostnameVerifier,
       CallbackContext callbackContext) {
 
     this.method = method;
@@ -47,11 +50,12 @@ abstract class CordovaHttpBase implements Runnable {
     this.timeout = timeout;
     this.followRedirects = followRedirects;
     this.customSSLSocketFactory = customSSLSocketFactory;
+    this.customHostnameVerifier = customHostnameVerifier;
     this.callbackContext = callbackContext;
   }
 
-
-  public CordovaHttpBase(String method, String url, JSONObject params, JSONObject headers, int timeout, boolean followRedirects, SSLSocketFactory customSSLSocketFactory,
+  public CordovaHttpBase(String method, String url, JSONObject params, JSONObject headers, int timeout,
+      boolean followRedirects, SSLSocketFactory customSSLSocketFactory, HostnameVerifier customHostnameVerifier,
       CallbackContext callbackContext) {
 
     this.method = method;
@@ -61,6 +65,7 @@ abstract class CordovaHttpBase implements Runnable {
     this.timeout = timeout;
     this.followRedirects = followRedirects;
     this.customSSLSocketFactory = customSSLSocketFactory;
+    this.customHostnameVerifier = customHostnameVerifier;
     this.callbackContext = callbackContext;
   }
 
@@ -120,6 +125,10 @@ abstract class CordovaHttpBase implements Runnable {
     request.readTimeout(this.timeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
+
+    if (this.customHostnameVerifier != null) {
+      request.setHostnameVerifier(this.customHostnameVerifier);
+    }
 
     if (this.customSSLSocketFactory != null) {
       request.setSSLSocketFactory(this.customSSLSocketFactory);
