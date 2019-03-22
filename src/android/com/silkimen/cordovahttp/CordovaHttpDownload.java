@@ -13,9 +13,9 @@ class CordovaHttpDownload extends CordovaHttpBase {
   private String filePath;
 
   public CordovaHttpDownload(String url, JSONObject params, JSONObject headers, String filePath, int timeout,
-      CallbackContext callbackContext) {
+      boolean followRedirects, CallbackContext callbackContext) {
 
-    super("GET", url, params, headers, timeout, callbackContext);
+    super("GET", url, params, headers, timeout, followRedirects, callbackContext);
     this.filePath = filePath;
   }
 

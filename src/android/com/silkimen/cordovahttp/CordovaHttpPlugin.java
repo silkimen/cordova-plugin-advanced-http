@@ -84,7 +84,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(3) * 1000;
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, params, headers, timeout,
-        callbackContext);
+        followRedirects, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -100,8 +100,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     JSONObject headers = args.getJSONObject(3);
     int timeout = args.getInt(4) * 1000;
 
-    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers, timeout,
-        callbackContext);
+    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
+        timeout, followRedirects, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -116,8 +116,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     String uploadName = args.getString(4);
     int timeout = args.getInt(5) * 1000;
 
-    CordovaHttpUpload upload = new CordovaHttpUpload(url, params, headers,
-    filePath, uploadName, timeout, callbackContext);
+    CordovaHttpUpload upload = new CordovaHttpUpload(url, params, headers, filePath, uploadName, timeout,
+        followRedirects, callbackContext);
 
     cordova.getThreadPool().execute(upload);
 
@@ -131,7 +131,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     String filePath = args.getString(3);
     int timeout = args.getInt(4) * 1000;
 
-    CordovaHttpDownload download = new CordovaHttpDownload(url, params, headers, filePath, timeout, callbackContext);
+    CordovaHttpDownload download = new CordovaHttpDownload(url, params, headers, filePath, timeout, followRedirects,
+        callbackContext);
 
     cordova.getThreadPool().execute(download);
 

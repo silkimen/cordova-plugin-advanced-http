@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class CordovaHttpResponse {
+class CordovaHttpResponse {
   private int status;
   private String url;
   private Map<String, List<String>> headers;

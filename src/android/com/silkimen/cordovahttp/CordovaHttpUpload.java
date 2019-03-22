@@ -10,15 +10,14 @@ import java.net.URI;
 import org.apache.cordova.CallbackContext;
 import org.json.JSONObject;
 
-
 class CordovaHttpUpload extends CordovaHttpBase {
   private String filePath;
   private String uploadName;
 
   public CordovaHttpUpload(String url, JSONObject params, JSONObject headers, String filePath, String uploadName,
-      int timeout, CallbackContext callbackContext) {
+      int timeout, boolean followRedirects, CallbackContext callbackContext) {
 
-    super("POST", url, params, headers, timeout, callbackContext);
+    super("POST", url, params, headers, timeout, followRedirects, callbackContext);
     this.filePath = filePath;
     this.uploadName = uploadName;
   }

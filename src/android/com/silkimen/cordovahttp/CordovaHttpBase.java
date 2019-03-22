@@ -31,9 +31,10 @@ abstract class CordovaHttpBase implements Runnable {
   protected JSONObject params;
   protected JSONObject headers;
   protected int timeout;
+  protected boolean followRedirects;
   protected CallbackContext callbackContext;
 
-  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout,
+  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout, boolean followRedirects,
       CallbackContext callbackContext) {
 
     this.method = method;
@@ -42,10 +43,11 @@ abstract class CordovaHttpBase implements Runnable {
     this.data = data;
     this.headers = headers;
     this.timeout = timeout;
+    this.followRedirects = followRedirects;
     this.callbackContext = callbackContext;
   }
 
-  public CordovaHttpBase(String method, String url, JSONObject params, JSONObject headers, int timeout,
+  public CordovaHttpBase(String method, String url, JSONObject params, JSONObject headers, int timeout, boolean followRedirects,
       CallbackContext callbackContext) {
 
     this.method = method;
@@ -53,6 +55,7 @@ abstract class CordovaHttpBase implements Runnable {
     this.params = params;
     this.headers = headers;
     this.timeout = timeout;
+    this.followRedirects = followRedirects;
     this.callbackContext = callbackContext;
   }
 
@@ -108,7 +111,7 @@ abstract class CordovaHttpBase implements Runnable {
   }
 
   protected void prepareRequest(HttpRequest request) throws JSONException {
-    request.followRedirects(true /* @TODO */);
+    request.followRedirects(this.followRedirects);
     request.readTimeout(this.timeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
