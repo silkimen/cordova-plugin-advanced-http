@@ -83,10 +83,10 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     JSONObject headers = args.getJSONObject(2);
     int timeout = args.getInt(3) * 1000;
 
-    CordovaHttpRequest get = new CordovaHttpRequest(method.toUpperCase(), url, params, headers, timeout,
+    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, params, headers, timeout,
         callbackContext);
 
-    cordova.getThreadPool().execute(get);
+    cordova.getThreadPool().execute(request);
 
     return true;
   }
@@ -100,7 +100,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     JSONObject headers = args.getJSONObject(3);
     int timeout = args.getInt(4) * 1000;
 
-    CordovaHttpRequest request = new CordovaHttpRequest(method.toUpperCase(), url, serializer, data, headers, timeout,
+    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers, timeout,
         callbackContext);
 
     cordova.getThreadPool().execute(request);
