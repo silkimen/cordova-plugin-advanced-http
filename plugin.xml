@@ -66,6 +66,7 @@
     <source-file src="src/android/com/silkimen/http/HttpBodyDecoder.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/HttpRequest.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/JsonUtils.java" target-dir="src/com/silkimen/http"/>
+    <source-file src="src/android/com/silkimen/http/OkConnectionFactory.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/TLSSocketFactory.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/TrustManagersFactory.java" target-dir="src/com/silkimen/http"/>
     <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.10.0"/>

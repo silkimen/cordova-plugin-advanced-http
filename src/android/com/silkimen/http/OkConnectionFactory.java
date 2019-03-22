@@ -1,34 +1,26 @@
 package com.silkimen.http;
 
-import okhttp3.OkUrlFactory;
 import okhttp3.OkHttpClient;
+import okhttp3.OkUrlFactory;
 
-/**
- * A {@link HttpRequest.ConnectionFactory connection factory} which uses OkHttp.
- * <p/>
- * Call {@link HttpRequest#setConnectionFactory(HttpRequest.ConnectionFactory)}
- * with an instance of this class to enable.
- */
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLStreamHandler;
+import java.net.Proxy;
+
 public class OkConnectionFactory implements HttpRequest.ConnectionFactory {
-  private final OkHttpClient client;
+  private final OkHttpClient client = new OkHttpClient();
 
-  public OkConnectionFactory() {
-    this(new OkHttpClient());
+  public HttpURLConnection create(URL url) {
+    OkUrlFactory urlFactory = new OkUrlFactory(this.client);
+
+    return (HttpURLConnection) urlFactory.open(url);
   }
 
-  public OkConnectionFactory(OkHttpClient client) {
-    if (client == null) {
-      throw new NullPointerException("Client must not be null.");
-    }
-    this.client = client;
-  }
+  public HttpURLConnection create(URL url, Proxy proxy) {
+    OkHttpClient clientWithProxy = new OkHttpClient.Builder().proxy(proxy).build();
+    OkUrlFactory urlFactory = new OkUrlFactory(clientWithProxy);
 
-  public HttpURLConnection create(URL url) throws IOException {
-    return client.open(url);
-  }
-
-  public HttpURLConnection create(URL url, Proxy proxy) throws IOException {
-    throw new UnsupportedOperationException(
-        "Per-connection proxy is not supported. Use OkHttpClient's setProxy instead.");
+    return (HttpURLConnection) urlFactory.open(url);
   }
 }

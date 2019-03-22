@@ -233,6 +233,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
   private SSLSocketFactory createSocketFactory(TrustManager[] trustManagers) throws IOException {
     try {
       SSLContext context = SSLContext.getInstance("TLS");
+
+      /* @TODO implement custom KeyManager */
       context.init(null, trustManagers, new SecureRandom());
 
       if (android.os.Build.VERSION.SDK_INT < 20) {
