@@ -96,16 +96,16 @@
     switch ([error code]) {
         case -1001:
             // timeout
-            return [NSNumber numberWithInt:1];
+            return [NSNumber numberWithInt:-4];
         case -1002:
             // unsupported URL
-            return [NSNumber numberWithInt:2];
+            return [NSNumber numberWithInt:-5];
         case -1003:
             // server not found
-            return [NSNumber numberWithInt:0];
+            return [NSNumber numberWithInt:-3];
         case -1009:
             // no connection
-            return [NSNumber numberWithInt:3];
+            return [NSNumber numberWithInt:-6];
         case -1202:
             // untrusted SSL certificate
             return [NSNumber numberWithInt:-2];
