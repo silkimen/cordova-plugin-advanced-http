@@ -1,8 +1,8 @@
 module.exports = function init(helpers) {
   return {
     parseUrl: parseUrl,
-    serializeQueryParams: serializeQueryParams,
-    appendQueryParamsString: appendQueryParamsString
+    appendQueryParamsString: appendQueryParamsString,
+    serializeQueryParams: serializeQueryParams
   }
 
   function parseUrl(url) {
@@ -19,40 +19,6 @@ module.exports = function init(helpers) {
     }
   }
 
-  function serializeQueryParams(params, encode) {
-    return serializeObject(params, encode);
-  }
-
-  function serializeObject(object, encode) {
-    var fragments = [];
-
-    for (var key in object) {
-      if (!object.hasOwnProperty(key)) {
-        continue;
-      }
-
-      if (helpers.getTypeOf(object[key]) === 'Array') {
-        fragments.push(serializeArray(object[key], encode));
-        continue;
-      } else if (helpers.getTypeOf(object[key]) === 'Object') {
-        fragments.push(serializeObject(object[key], encode));
-        continue;
-      }
-
-      if (encode) {
-        fragments.push(encodeURIComponent(key) + '=' + encodeURIComponent(object[key]));
-      } else {
-        fragments.push(key + '=' + object[key]);
-      }
-    }
-
-    return fragments.join('&');
-  }
-
-  function serializeArray(array, encode) {
-
-  }
-
   function appendQueryParamsString(url, params) {
     if (!url.length || !params.length) {
       return url;
@@ -66,6 +32,72 @@ module.exports = function init(helpers) {
       + parsed.pathname
       + (parsed.search.length ? parsed.search + '&' + params : '?' + params)
       + parsed.hash;
+  }
+
+  function serializeQueryParams(params, encode) {
+    return serializeObject('', params, encode);
+  }
+
+  function serializeObject(parentKey, object, encode) {
+    var parts = [];
+
+    for (var key in object) {
+      if (!object.hasOwnProperty(key)) {
+        continue;
+      }
+
+      var identifier = parentKey.length ? parentKey + '[' + key + ']' : key;
+
+      if (helpers.getTypeOf(object[key]) === 'Array') {
+        parts.push(serializeArray(identifier, object[key], encode));
+        continue;
+      } else if (helpers.getTypeOf(object[key]) === 'Object') {
+        parts.push(serializeObject(identifier, object[key], encode));
+        continue;
+      }
+
+      parts.push(serializeIdentifier(parentKey, key, encode) + '=' + serializeValue(object[key], encode));
+    }
+
+    return parts.join('&');
+  }
+
+  function serializeArray(parentKey, array, encode) {
+    var parts = [];
+
+    for (var i = 0; i < array.length; ++i) {
+      if (helpers.getTypeOf(array[i]) === 'Array') {
+        parts.push(serializeArray(parentKey + '[]', array[i], encode));
+        continue;
+      } else if (helpers.getTypeOf(array[i]) === 'Object') {
+        parts.push(serializeObject(parentKey + '[]' + array[i], encode));
+        continue;
+      }
+
+      parts.push(serializeIdentifier(parentKey, '', encode) + '=' + serializeValue(array[i], encode));
+    }
+
+    return parts.join('&');
+  }
+
+  function serializeIdentifier(parentKey, key, encode) {
+    if (!parentKey.length) {
+      return key;
+    }
+
+    if (encode) {
+      return encodeURIComponent(parentKey) + '[' + encodeURIComponent(key) + ']';
+    } else {
+      return parentKey + '[' + key + ']';
+    }
+  }
+
+  function serializeValue(value, encode) {
+    if (encode) {
+      return encodeURIComponent(value);
+    } else {
+      return value;
+    }
   }
 };
 

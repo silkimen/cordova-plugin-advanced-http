@@ -24,8 +24,6 @@ describe('Advanced HTTP public interface', function () {
     http = require('../www/public-interface')(deps.exec, deps.cookieHandler, deps.urlUtil, deps.helpers, deps.globalConfigs);
   };
 
-  this.timeout(900000);
-
   beforeEach(() => {
     // mocked btoa function (base 64 encoding strings)
     global.btoa = decoded => new Buffer(decoded).toString('base64');
@@ -132,12 +130,12 @@ describe('Advanced HTTP public interface', function () {
   });
 });
 
-describe('URL handler', function () {
+describe('URL util', function () {
   const helpers = require('../www/helpers')(null, null);
-  const handler = require('../www/url-util')(helpers);
+  const util = require('../www/url-util')(helpers);
 
   it('parses URL with protocol, hostname and path correctly', () => {
-    handler.parseUrl('http://ilkimen.net/test').should.include({
+    util.parseUrl('http://ilkimen.net/test').should.include({
       protocol: 'http:',
       host: 'ilkimen.net',
       hostname: 'ilkimen.net',
@@ -149,7 +147,7 @@ describe('URL handler', function () {
   });
 
   it('parses URL with protocol, hostname, port and path correctly', () => {
-    handler.parseUrl('http://ilkimen.net:8080/test').should.include({
+    util.parseUrl('http://ilkimen.net:8080/test').should.include({
       protocol: 'http:',
       host: 'ilkimen.net:8080',
       hostname: 'ilkimen.net',
@@ -161,7 +159,7 @@ describe('URL handler', function () {
   });
 
   it('parses URL with protocol, hostname, port, path and query string correctly', () => {
-    handler.parseUrl('http://ilkimen.net:8080/test?param=value').should.include({
+    util.parseUrl('http://ilkimen.net:8080/test?param=value').should.include({
       protocol: 'http:',
       host: 'ilkimen.net:8080',
       hostname: 'ilkimen.net',
@@ -173,7 +171,7 @@ describe('URL handler', function () {
   });
 
   it('parses URL with protocol, hostname, port, path, query string and hash param correctly', () => {
-    handler.parseUrl('http://ilkimen.net:8080/test?param=value#myHash').should.include({
+    util.parseUrl('http://ilkimen.net:8080/test?param=value#myHash').should.include({
       protocol: 'http:',
       host: 'ilkimen.net:8080',
       hostname: 'ilkimen.net',
@@ -184,39 +182,52 @@ describe('URL handler', function () {
     });
   });
 
-  it('serializes query params correctly without URL encoding', () => {
-    handler.serializeQueryParams({
+  it('serializes query params correctly', () => {
+    util.serializeQueryParams({
       param1: 'value with spaces',
       param2: 'value with special character äöü%'
     }, false).should.equal('param1=value with spaces&param2=value with special character äöü%');
   });
 
-  it('serializes array of query params correctly without URL encoding', () => {
-    handler.serializeQueryParams({
-      myArray: ['val1', 'val2', 'val3'],
-      myString: 'testString'
-    }, false).should.equal('myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
-  });
-
   it('serializes query params correctly with URL encoding enabled', () => {
-    handler.serializeQueryParams({
+    util.serializeQueryParams({
       param1: 'value with spaces',
       param2: 'value with special character äöü%&'
     }, true).should.equal('param1=value%20with%20spaces&param2=value%20with%20special%20character%20%C3%A4%C3%B6%C3%BC%25%26');
   });
 
+  it('serializes array of query params correctly', () => {
+    util.serializeQueryParams({
+      myArray: ['val1', 'val2', 'val3'],
+      myString: 'testString'
+    }, false).should.equal('myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
+  });
+
+  it('serializes deeply structured array of query params correctly', () => {
+    util.serializeQueryParams({
+      myArray: [['val1.1', 'val1.2', 'val1.3'], 'val2', 'val3'],
+      myString: 'testString'
+    }, false).should.equal('myArray[][]=val1.1&myArray[][]=val1.2&myArray[][]=val1.3&myArray[]=val2&myArray[]=val3&myString=testString');
+  });
+
+  it('serializes deeply structured object of query params correctly', () => {
+    util.serializeQueryParams({
+      myObject: { obj1: { 'param1.1': 'val1.1', 'param1.2': 'val1.2' }, param2: 'val2' }
+    }, false).should.equal('myObject[obj1][param1.1]=val1.1&myObject[obj1][param1.2]=val1.2&myObject[param2]=val2');
+  });
+
   it('appends query params string correctly to given URL without query parameters', () => {
-    handler.appendQueryParamsString('http://ilkimen.net/', 'param1=value1')
+    util.appendQueryParamsString('http://ilkimen.net/', 'param1=value1')
       .should.equal('http://ilkimen.net/?param1=value1');
   });
 
   it('appends query params string correctly to given URL with existing query parameters', () => {
-    handler.appendQueryParamsString('http://ilkimen.net/?myParam=myValue', 'param1=value1')
+    util.appendQueryParamsString('http://ilkimen.net/?myParam=myValue', 'param1=value1')
       .should.equal('http://ilkimen.net/?myParam=myValue&param1=value1');
   });
 
   it('appends query params string correctly to given URL with existing query parameters and hash value', () => {
-    handler.appendQueryParamsString('http://ilkimen.net/?myParam=myValue#myHash', 'param1=value1')
+    util.appendQueryParamsString('http://ilkimen.net/?myParam=myValue#myHash', 'param1=value1')
       .should.equal('http://ilkimen.net/?myParam=myValue&param1=value1#myHash');
   });
 });
