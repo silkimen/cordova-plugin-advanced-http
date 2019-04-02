@@ -31,7 +31,6 @@ abstract class CordovaHttpBase implements Runnable {
   protected String url;
   protected String serializer = "none";
   protected Object data;
-  protected JSONObject params;
   protected JSONObject headers;
   protected int timeout;
   protected boolean followRedirects;
@@ -55,13 +54,12 @@ abstract class CordovaHttpBase implements Runnable {
     this.callbackContext = callbackContext;
   }
 
-  public CordovaHttpBase(String method, String url, JSONObject params, JSONObject headers, int timeout,
+  public CordovaHttpBase(String method, String url, JSONObject headers, int timeout,
       boolean followRedirects, SSLSocketFactory customSSLSocketFactory, HostnameVerifier customHostnameVerifier,
       CallbackContext callbackContext) {
 
     this.method = method;
     this.url = url;
-    this.params = params;
     this.headers = headers;
     this.timeout = timeout;
     this.followRedirects = followRedirects;
@@ -115,10 +113,7 @@ abstract class CordovaHttpBase implements Runnable {
   }
 
   protected HttpRequest createRequest() throws JSONException {
-    String processedUrl = HttpRequest.encode(HttpRequest.append(this.url, JsonUtils.getObjectMap(this.params)));
-    HttpRequest request = new HttpRequest(processedUrl, this.method);
-
-    return request;
+    return new HttpRequest(this.url, this.method);
   }
 
   protected void prepareRequest(HttpRequest request) throws JSONException {

@@ -15,11 +15,11 @@ class CordovaHttpOperation extends CordovaHttpBase {
         customHostnameVerifier, callbackContext);
   }
 
-  public CordovaHttpOperation(String method, String url, JSONObject params, JSONObject headers, int timeout,
-      boolean followRedirects, SSLSocketFactory customSSLSocketFactory, HostnameVerifier customHostnameVerifier,
+  public CordovaHttpOperation(String method, String url, JSONObject headers, int timeout, boolean followRedirects,
+      SSLSocketFactory customSSLSocketFactory, HostnameVerifier customHostnameVerifier,
       CallbackContext callbackContext) {
 
-    super(method, url, params, headers, timeout, followRedirects, customSSLSocketFactory, customHostnameVerifier,
+    super(method, url, headers, timeout, followRedirects, customSSLSocketFactory, customHostnameVerifier,
         callbackContext);
   }
 }

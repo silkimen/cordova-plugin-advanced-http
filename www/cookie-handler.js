@@ -1,73 +1,70 @@
-var pluginId = module.id.slice(0, module.id.lastIndexOf('.'));
-var ToughCookie = require(pluginId + '.tough-cookie');
-var WebStorageCookieStore = require(pluginId + '.local-storage-store');
+module.exports = function init(storage, ToughCookie, WebStorageCookieStore) {
+  var storeKey = '__advancedHttpCookieStore__';
 
-var storage = window.localStorage;
-var storeKey = '__advancedHttpCookieStore__';
+  var store = new WebStorageCookieStore(storage, storeKey);
+  var cookieJar = new ToughCookie.CookieJar(store);
 
-var store = new WebStorageCookieStore(storage, storeKey);
-var cookieJar = new ToughCookie.CookieJar(store);
-
-module.exports = {
+  return {
     setCookieFromString: setCookieFromString,
     setCookie: setCookie,
     getCookieString: getCookieString,
     clearCookies: clearCookies,
     removeCookies: removeCookies
-}
+  };
 
-function splitCookieString(cookieStr) {
+  function splitCookieString(cookieStr) {
     var cookieParts = cookieStr.split(',');
     var splitCookies = [];
     var processedCookie = null;
 
     for (var i = 0; i < cookieParts.length; ++i) {
-        if (cookieParts[i].substr(-11, 8).toLowerCase() === 'expires=') {
-            processedCookie = cookieParts[i] + ',' + cookieParts[i + 1];
-            i++;
-        } else {
-            processedCookie = cookieParts[i];
-        }
+      if (cookieParts[i].substr(-11, 8).toLowerCase() === 'expires=') {
+        processedCookie = cookieParts[i] + ',' + cookieParts[i + 1];
+        i++;
+      } else {
+        processedCookie = cookieParts[i];
+      }
 
-        processedCookie = processedCookie.trim();
-        splitCookies.push(processedCookie);
+      processedCookie = processedCookie.trim();
+      splitCookies.push(processedCookie);
     }
 
     return splitCookies;
-}
+  }
 
-function setCookieFromString(url, cookieStr) {
+  function setCookieFromString(url, cookieStr) {
     if (!cookieStr) return;
 
     var cookies = splitCookieString(cookieStr);
 
     for (var i = 0; i < cookies.length; ++i) {
-        cookieJar.setCookieSync(cookies[i], url, { ignoreError: true });
+      cookieJar.setCookieSync(cookies[i], url, { ignoreError: true });
     }
-}
+  }
 
-function setCookie(url, cookie, options) {
-  options = options || {};
-  options.ignoreError = false;
-  cookieJar.setCookieSync(cookie, url, options);
-}
+  function setCookie(url, cookie, options) {
+    options = options || {};
+    options.ignoreError = false;
+    cookieJar.setCookieSync(cookie, url, options);
+  }
 
-function getCookieString(url) {
+  function getCookieString(url) {
     return cookieJar.getCookieStringSync(url);
-}
+  }
 
-function clearCookies() {
+  function clearCookies() {
     window.localStorage.removeItem(storeKey);
-}
+  }
 
-function removeCookies(url, cb) {
-    cookieJar.getCookies(url, function(error, cookies) {
-        if (!cookies || cookies.length === 0) {
+  function removeCookies(url, cb) {
+    cookieJar.getCookies(url, function (error, cookies) {
+      if (!cookies || cookies.length === 0) {
         return cb(null, []);
-        }
+      }
 
-        var domain = cookies[0].domain;
+      var domain = cookies[0].domain;
 
-        cookieJar.store.removeCookies(domain, null, cb);
+      cookieJar.store.removeCookies(domain, null, cb);
     });
-}
+  }
+};

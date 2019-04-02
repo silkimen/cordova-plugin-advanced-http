@@ -1,21 +1,27 @@
 const chai = require('chai');
 const mock = require('mock-require');
-const path = require('path');
-
 const should = chai.should();
 
-const HELPERS_ID = path.resolve(__dirname, '..', 'www', 'helpers');
-const PLUGIN_ID = path.resolve(__dirname, '..', 'www', 'advanced-http');
-
-describe('Advanced HTTP www interface', function() {
+describe('Advanced HTTP public interface', function () {
   let http = {};
-  let helpers = {};
 
   const noop = () => { /* intentionally doing nothing */ };
 
-  const loadHttp = () => {
-    mock(`${PLUGIN_ID}.helpers`, mock.reRequire('../www/helpers'));
-    http = mock.reRequire('../www/advanced-http');
+  const getDependenciesBlueprint = () => {
+    const messages = require('../www/messages');
+    const globalConfigs = require('../www/global-configs');
+    const ToughCookie = require('../www/umd-tough-cookie');
+    const lodash = require('../www/lodash');
+    const WebStorageCookieStore = require('../www/local-storage-store')(ToughCookie, lodash);
+    const cookieHandler = require('../www/cookie-handler')(null, ToughCookie, WebStorageCookieStore);
+    const helpers = require('../www/helpers')(cookieHandler, messages);
+    const urlUtil = require('../www/url-util')(helpers);
+
+    return { exec: noop, cookieHandler, urlUtil: urlUtil, helpers, globalConfigs };
+  };
+
+  const loadHttp = (deps) => {
+    http = require('../www/public-interface')(deps.exec, deps.cookieHandler, deps.urlUtil, deps.helpers, deps.globalConfigs);
   };
 
   this.timeout(900000);
@@ -23,13 +29,7 @@ describe('Advanced HTTP www interface', function() {
   beforeEach(() => {
     // mocked btoa function (base 64 encoding strings)
     global.btoa = decoded => new Buffer(decoded).toString('base64');
-
-    mock('cordova/exec', noop);
-    mock(`${PLUGIN_ID}.cookie-handler`, {});
-    mock(`${HELPERS_ID}.cookie-handler`, {});
-    mock(`${HELPERS_ID}.messages`, require('../www/messages'));
-
-    loadHttp();
+    loadHttp(getDependenciesBlueprint());
   });
 
   it('sets global headers correctly with two args (old interface)', () => {
@@ -48,76 +48,76 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('resolves global headers correctly #24', () => {
-    mock(`${HELPERS_ID}.cookie-handler`, {
-      getCookieString: () => 'fakeCookieString'
-    });
+    const deps = getDependenciesBlueprint();
 
-    mock('cordova/exec', (onSuccess, onFail, namespace, method, params) => {
-      const headers = params[2];
+    deps.cookieHandler.getCookieString = () => 'fakeCookieString';
+
+    deps.exec = (onSuccess, onFail, namespace, method, params) => {
+      const headers = params[1];
       headers.should.eql({
         Cookie: 'fakeCookieString',
         myKey: 'myValue'
       });
-    });
+    };
 
-    loadHttp();
+    loadHttp(deps);
 
     http.setHeader('*', 'myKey', 'myValue');
     http.get('url', {}, {}, noop, noop);
   });
 
   it('resolves host headers correctly (set without port number) #37', () => {
-    mock(`${HELPERS_ID}.cookie-handler`, {
-      getCookieString: () => 'fakeCookieString'
-    });
+    const deps = getDependenciesBlueprint();
 
-    mock('cordova/exec', (onSuccess, onFail, namespace, method, params) => {
-      const headers = params[2];
+    deps.cookieHandler.getCookieString = () => 'fakeCookieString';
+
+    deps.exec = (onSuccess, onFail, namespace, method, params) => {
+      const headers = params[1];
       headers.should.eql({
         Cookie: 'fakeCookieString',
         myKey: 'myValue'
       });
-    });
+    };
 
-    loadHttp();
+    loadHttp(deps);
 
     http.setHeader('www.google.de', 'myKey', 'myValue');
     http.get('https://www.google.de/?gws_rd=ssl', {}, {}, noop, noop);
   });
 
   it('resolves host headers correctly (set with port number) #37', () => {
-    mock(`${HELPERS_ID}.cookie-handler`, {
-      getCookieString: () => 'fakeCookieString'
-    });
+    const deps = getDependenciesBlueprint();
 
-    mock('cordova/exec', (onSuccess, onFail, namespace, method, params) => {
-      const headers = params[2];
+    deps.cookieHandler.getCookieString = () => 'fakeCookieString';
+
+    deps.exec = (onSuccess, onFail, namespace, method, params) => {
+      const headers = params[1];
       headers.should.eql({
         Cookie: 'fakeCookieString',
         myKey: 'myValue'
       });
-    });
+    };
 
-    loadHttp();
+    loadHttp(deps);
 
     http.setHeader('www.google.de:8080', 'myKey', 'myValue');
     http.get('https://www.google.de:8080/?gws_rd=ssl', {}, {}, noop, noop);
   });
 
   it('resolves request headers correctly', () => {
-    mock(`${HELPERS_ID}.cookie-handler`, {
-      getCookieString: () => 'fakeCookieString'
-    });
+    const deps = getDependenciesBlueprint();
 
-    mock('cordova/exec', (onSuccess, onFail, namespace, method, params) => {
-      const headers = params[2];
+    deps.cookieHandler.getCookieString = () => 'fakeCookieString';
+
+    deps.exec = (onSuccess, onFail, namespace, method, params) => {
+      const headers = params[1];
       headers.should.eql({
         Cookie: 'fakeCookieString',
         myKey: 'myValue'
       });
-    });
+    };
 
-    loadHttp();
+    loadHttp(deps);
 
     http.get('https://www.google.de/?gws_rd=ssl', {}, { myKey: 'myValue' }, noop, noop);
   });
@@ -128,6 +128,95 @@ describe('Advanced HTTP www interface', function() {
   });
 
   it('throws an Error when you try to add a cookie by using "setHeader" #46', () => {
-    (function() { http.setHeader('*', 'cookie', 'value') }).should.throw();
+    (function () { http.setHeader('*', 'cookie', 'value') }).should.throw();
+  });
+});
+
+describe('URL handler', function () {
+  const helpers = require('../www/helpers')(null, null);
+  const handler = require('../www/url-util')(helpers);
+
+  it('parses URL with protocol, hostname and path correctly', () => {
+    handler.parseUrl('http://ilkimen.net/test').should.include({
+      protocol: 'http:',
+      host: 'ilkimen.net',
+      hostname: 'ilkimen.net',
+      pathname: '/test',
+      port: '',
+      search: '',
+      hash: ''
+    });
+  });
+
+  it('parses URL with protocol, hostname, port and path correctly', () => {
+    handler.parseUrl('http://ilkimen.net:8080/test').should.include({
+      protocol: 'http:',
+      host: 'ilkimen.net:8080',
+      hostname: 'ilkimen.net',
+      pathname: '/test',
+      port: '8080',
+      search: '',
+      hash: ''
+    });
+  });
+
+  it('parses URL with protocol, hostname, port, path and query string correctly', () => {
+    handler.parseUrl('http://ilkimen.net:8080/test?param=value').should.include({
+      protocol: 'http:',
+      host: 'ilkimen.net:8080',
+      hostname: 'ilkimen.net',
+      pathname: '/test',
+      port: '8080',
+      search: '?param=value',
+      hash: ''
+    });
+  });
+
+  it('parses URL with protocol, hostname, port, path, query string and hash param correctly', () => {
+    handler.parseUrl('http://ilkimen.net:8080/test?param=value#myHash').should.include({
+      protocol: 'http:',
+      host: 'ilkimen.net:8080',
+      hostname: 'ilkimen.net',
+      pathname: '/test',
+      port: '8080',
+      search: '?param=value',
+      hash: '#myHash'
+    });
+  });
+
+  it('serializes query params correctly without URL encoding', () => {
+    handler.serializeQueryParams({
+      param1: 'value with spaces',
+      param2: 'value with special character äöü%'
+    }, false).should.equal('param1=value with spaces&param2=value with special character äöü%');
+  });
+
+  it('serializes array of query params correctly without URL encoding', () => {
+    handler.serializeQueryParams({
+      myArray: ['val1', 'val2', 'val3'],
+      myString: 'testString'
+    }, false).should.equal('myArray[]=val1&myArray[]=val2&myArray[]=val3&myString=testString');
+  });
+
+  it('serializes query params correctly with URL encoding enabled', () => {
+    handler.serializeQueryParams({
+      param1: 'value with spaces',
+      param2: 'value with special character äöü%&'
+    }, true).should.equal('param1=value%20with%20spaces&param2=value%20with%20special%20character%20%C3%A4%C3%B6%C3%BC%25%26');
+  });
+
+  it('appends query params string correctly to given URL without query parameters', () => {
+    handler.appendQueryParamsString('http://ilkimen.net/', 'param1=value1')
+      .should.equal('http://ilkimen.net/?param1=value1');
+  });
+
+  it('appends query params string correctly to given URL with existing query parameters', () => {
+    handler.appendQueryParamsString('http://ilkimen.net/?myParam=myValue', 'param1=value1')
+      .should.equal('http://ilkimen.net/?myParam=myValue&param1=value1');
+  });
+
+  it('appends query params string correctly to given URL with existing query parameters and hash value', () => {
+    handler.appendQueryParamsString('http://ilkimen.net/?myParam=myValue#myHash', 'param1=value1')
+      .should.equal('http://ilkimen.net/?myParam=myValue&param1=value1#myHash');
   });
 });

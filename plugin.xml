@@ -8,12 +8,15 @@
     <engine name="cordova" version=">=4.0.0"/>
   </engines>
   <dependency id="cordova-plugin-file" version=">=2.0.0"/>
-  <js-module src="www/lodash.js" name="lodash"/>
-  <js-module src="www/umd-tough-cookie.js" name="tough-cookie"/>
-  <js-module src="www/messages.js" name="messages"/>
-  <js-module src="www/local-storage-store.js" name="local-storage-store"/>
   <js-module src="www/cookie-handler.js" name="cookie-handler"/>
+  <js-module src="www/global-configs.js" name="global-configs"/>
   <js-module src="www/helpers.js" name="helpers"/>
+  <js-module src="www/local-storage-store.js" name="local-storage-store"/>
+  <js-module src="www/lodash.js" name="lodash"/>
+  <js-module src="www/messages.js" name="messages"/>
+  <js-module src="www/public-interface.js" name="public-interface"/>
+  <js-module src="www/umd-tough-cookie.js" name="tough-cookie"/>
+  <js-module src="www/url-util.js" name="url-util"/>
   <js-module src="www/advanced-http.js" name="http">
     <clobbers target="cordova.plugin.http"/>
   </js-module>

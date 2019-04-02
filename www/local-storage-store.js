@@ -30,30 +30,27 @@
 
 'use strict';
 
-var pluginId = module.id.slice(0, module.id.lastIndexOf('.'));
-var ToughCookie = require(pluginId + '.tough-cookie');
-var _ = require(pluginId + '.lodash');
-
-function WebStorageCookieStore(storage, storeKey) {
+module.exports = function init(ToughCookie, _) {
+  function WebStorageCookieStore(storage, storeKey) {
     ToughCookie.Store.call(this);
-    this._storage = storage || window.localStorage;
+    this._storage = storage;
     this._storeKey = storeKey || '__cookieStore__';
     this.synchronous = true;
-}
+  }
 
-WebStorageCookieStore.prototype = Object.create(ToughCookie.Store);
+  WebStorageCookieStore.prototype = Object.create(ToughCookie.Store);
 
-WebStorageCookieStore.prototype.findCookie = function(domain, path, key, callback) {
+  WebStorageCookieStore.prototype.findCookie = function (domain, path, key, callback) {
     var store = this._readStore();
     var cookie = _.get(store, [domain, path, key], null);
 
     callback(null, ToughCookie.Cookie.fromJSON(cookie));
-};
+  };
 
-WebStorageCookieStore.prototype.findCookies = function(domain, path, callback) {
+  WebStorageCookieStore.prototype.findCookies = function (domain, path, callback) {
     if (!domain) {
-        callback(null, []);
-        return;
+      callback(null, []);
+      return;
     }
 
     var that = this;
@@ -61,123 +58,124 @@ WebStorageCookieStore.prototype.findCookies = function(domain, path, callback) {
     var store = this._readStore();
     var domains = ToughCookie.permuteDomain(domain) || [domain];
 
-    domains.forEach(function(domain) {
-        if (!store[domain]) {
-            return;
-        }
+    domains.forEach(function (domain) {
+      if (!store[domain]) {
+        return;
+      }
 
-        var matchingPaths = Object.keys(store[domain]);
+      var matchingPaths = Object.keys(store[domain]);
 
-        if (path != null) {
-            matchingPaths = matchingPaths.filter(function(cookiePath) {
-                return that._isOnPath(cookiePath, path);
-            });
-        }
-
-        matchingPaths.forEach(function(path) {
-            Array.prototype.push.apply(cookies, _.values(store[domain][path]));
+      if (path != null) {
+        matchingPaths = matchingPaths.filter(function (cookiePath) {
+          return that._isOnPath(cookiePath, path);
         });
+      }
+
+      matchingPaths.forEach(function (path) {
+        Array.prototype.push.apply(cookies, _.values(store[domain][path]));
+      });
     });
 
-    cookies = cookies.map(function(cookie) {
-        return ToughCookie.Cookie.fromJSON(cookie);
+    cookies = cookies.map(function (cookie) {
+      return ToughCookie.Cookie.fromJSON(cookie);
     });
 
     callback(null, cookies);
-};
+  };
 
-/**
- * Returns whether `cookiePath` is on the given `urlPath`
- */
-WebStorageCookieStore.prototype._isOnPath = function(cookiePath, urlPath) {
+  /**
+   * Returns whether `cookiePath` is on the given `urlPath`
+   */
+  WebStorageCookieStore.prototype._isOnPath = function (cookiePath, urlPath) {
     if (!cookiePath) {
-        return false;
+      return false;
     }
 
     if (cookiePath === urlPath) {
-        return true;
+      return true;
     }
 
     if (urlPath.indexOf(cookiePath) !== 0) {
-        return false;
+      return false;
     }
 
     if (cookiePath[cookiePath.length - 1] !== '/' && urlPath[cookiePath.length] !== '/') {
-        return false;
+      return false;
     }
 
     return true;
-};
+  };
 
-WebStorageCookieStore.prototype.putCookie = function(cookie, callback) {
-     var store = this._readStore();
+  WebStorageCookieStore.prototype.putCookie = function (cookie, callback) {
+    var store = this._readStore();
 
-     _.set(store, [cookie.domain, cookie.path, cookie.key], cookie);
-     this._writeStore(store);
-     callback(null);
-};
+    _.set(store, [cookie.domain, cookie.path, cookie.key], cookie);
+    this._writeStore(store);
+    callback(null);
+  };
 
-WebStorageCookieStore.prototype.updateCookie = function(oldCookie, newCookie, callback) {
+  WebStorageCookieStore.prototype.updateCookie = function (oldCookie, newCookie, callback) {
     this.putCookie(newCookie, callback);
-};
+  };
 
 
-WebStorageCookieStore.prototype.removeCookie = function(domain, path, key, callback) {
+  WebStorageCookieStore.prototype.removeCookie = function (domain, path, key, callback) {
     var store = this._readStore();
 
     _.unset(store, [domain, path, key]);
     this._writeStore(store);
     callback(null);
-};
+  };
 
-WebStorageCookieStore.prototype.removeCookies = function(domain, path, callback) {
+  WebStorageCookieStore.prototype.removeCookies = function (domain, path, callback) {
     var store = this._readStore();
 
     if (path == null) {
-        _.unset(store, [domain]);
+      _.unset(store, [domain]);
     } else {
-        _.unset(store, [domain, path]);
+      _.unset(store, [domain, path]);
     }
 
     this._writeStore(store);
     callback(null);
-};
+  };
 
-WebStorageCookieStore.prototype.getAllCookies = function(callback) {
+  WebStorageCookieStore.prototype.getAllCookies = function (callback) {
     var cookies = [];
     var store = this._readStore();
 
-    Object.keys(store).forEach(function(domain) {
-        Object.keys(store[domain]).forEach(function(path) {
-            Array.protype.push.apply(cookies, _.values(store[domain][path]));
-        });
+    Object.keys(store).forEach(function (domain) {
+      Object.keys(store[domain]).forEach(function (path) {
+        Array.protype.push.apply(cookies, _.values(store[domain][path]));
+      });
     });
 
-    cookies = cookies.map(function(cookie) {
-        return ToughCookie.Cookie.fromJSON(cookie);
+    cookies = cookies.map(function (cookie) {
+      return ToughCookie.Cookie.fromJSON(cookie);
     });
 
-    cookies.sort(function(c1, c2) {
-        return (c1.creationIndex || 0) - (c2.creationIndex || 0);
+    cookies.sort(function (c1, c2) {
+      return (c1.creationIndex || 0) - (c2.creationIndex || 0);
     });
 
     callback(null, cookies);
-};
+  };
 
-WebStorageCookieStore.prototype._readStore = function() {
+  WebStorageCookieStore.prototype._readStore = function () {
     var json = this._storage.getItem(this._storeKey);
 
     if (json !== null) {
-        try {
-            return JSON.parse(json);
-        } catch (e) { }
+      try {
+        return JSON.parse(json);
+      } catch (e) { }
     }
 
     return {};
-};
+  };
 
-WebStorageCookieStore.prototype._writeStore = function(store) {
+  WebStorageCookieStore.prototype._writeStore = function (store) {
     this._storage.setItem(this._storeKey, JSON.stringify(store));
-};
+  };
 
-module.exports = WebStorageCookieStore;
+  return WebStorageCookieStore;
+};
