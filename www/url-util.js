@@ -82,7 +82,7 @@ module.exports = function init(helpers) {
 
   function serializeIdentifier(parentKey, key, encode) {
     if (!parentKey.length) {
-      return key;
+      return encode ? encodeURIComponent(key) : key;
     }
 
     if (encode) {

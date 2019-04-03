@@ -191,9 +191,9 @@ describe('URL util', function () {
 
   it('serializes query params correctly with URL encoding enabled', () => {
     util.serializeQueryParams({
-      param1: 'value with spaces',
-      param2: 'value with special character äöü%&'
-    }, true).should.equal('param1=value%20with%20spaces&param2=value%20with%20special%20character%20%C3%A4%C3%B6%C3%BC%25%26');
+      'param 1': 'value with spaces',
+      'param 2': 'value with special character äöü%&'
+    }, true).should.equal('param%201=value%20with%20spaces&param%202=value%20with%20special%20character%20%C3%A4%C3%B6%C3%BC%25%26');
   });
 
   it('serializes array of query params correctly', () => {
