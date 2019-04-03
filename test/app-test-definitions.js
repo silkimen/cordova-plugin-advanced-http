@@ -566,6 +566,31 @@ const tests = [
       result.type.should.be.equal('resolved');
       JSON.parse(result.data.data).url.should.be.equal('https://httpbin.org/anything?query key=very long query value with spaces');
     }
+  },
+  {
+    description: 'should download a file from given HTTPS URL to given path in local filesystem #197',
+    expected: 'resolved: {"content": "<?xml version=\'1.0\' encoding=\'us-ascii\'?>\\n\\n<!--  A SAMPLE set of slides  -->" ...',
+    func: function(resolve, reject) {
+      var sourceUrl = 'https://httpbin.org/xml';
+      var targetPath = cordova.file.cacheDirectory + 'test.xml';
+
+      cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function(entry) {
+        helpers.getWithXhr(function(content) {
+          resolve({
+            sourceUrl: sourceUrl,
+            targetPath: targetPath,
+            fullPath: entry.fullPath,
+            name: entry.name,
+            content: content
+          });
+        }, targetPath);
+      }, reject);
+    },
+    validationFunc: function(driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.name.should.be.equal('test.xml');
+      result.data.content.should.be.equal("<?xml version='1.0' encoding='us-ascii'?>\n\n<!--  A SAMPLE set of slides  -->\n\n<slideshow \n    title=\"Sample Slide Show\"\n    date=\"Date of publication\"\n    author=\"Yours Truly\"\n    >\n\n    <!-- TITLE SLIDE -->\n    <slide type=\"all\">\n      <title>Wake up to WonderWidgets!</title>\n    </slide>\n\n    <!-- OVERVIEW -->\n    <slide type=\"all\">\n        <title>Overview</title>\n        <item>Why <em>WonderWidgets</em> are great</item>\n        <item/>\n        <item>Who <em>buys</em> WonderWidgets</item>\n    </slide>\n\n</slideshow>");
+    }
   }
 ];
 
