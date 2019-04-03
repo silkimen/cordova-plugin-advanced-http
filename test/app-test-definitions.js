@@ -551,7 +551,7 @@ const tests = [
   },
   {
     description: 'should not double encode spaces in url path #195',
-    expected: '',
+    expected: 'resolved: {"status": 200, "data": "{\\"url\\":\\"https://httpbin.org/anything/containing spaces in url\\" ...',
     func: function(resolve, reject) { cordova.plugin.http.get('https://httpbin.org/anything/containing%20spaces%20in%20url', {}, {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
@@ -560,7 +560,7 @@ const tests = [
   },
   {
     description: 'should encode spaces in url query correctly',
-    expected: '',
+    expected: 'resolved: {"status": 200, "data": "{\\"url\\":\\"https://httpbin.org/anything?query key=very long query value with spaces\\" ...',
     func: function(resolve, reject) { cordova.plugin.http.get('https://httpbin.org/anything', { 'query key': 'very long query value with spaces' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');

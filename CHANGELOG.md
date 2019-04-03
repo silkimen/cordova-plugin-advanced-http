@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.7
+
+- Fixed #195: URLs are double-encoded on Android
+
 ## 2.0.6
 
 - Fixed #187: setSSLCertMode with "default" throws an error on Android

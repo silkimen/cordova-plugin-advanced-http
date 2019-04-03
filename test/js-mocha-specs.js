@@ -184,9 +184,12 @@ describe('URL util', function () {
 
   it('serializes query params correctly', () => {
     util.serializeQueryParams({
-      param1: 'value with spaces',
-      param2: 'value with special character äöü%'
-    }, false).should.equal('param1=value with spaces&param2=value with special character äöü%');
+      strParam1: 'value with spaces',
+      strParam2: 'value with special character äöü%',
+      boolParam: true,
+      numberParam: 1,
+      nullParam: null,
+    }, false).should.equal('strParam1=value with spaces&strParam2=value with special character äöü%&boolParam=true&numberParam=1&nullParam=null');
   });
 
   it('serializes query params correctly with URL encoding enabled', () => {
