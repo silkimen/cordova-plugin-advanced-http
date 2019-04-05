@@ -40,18 +40,13 @@ class CordovaClientAuth implements Runnable, KeyChainAliasCallback {
 
   @Override
   public void run() {
-    switch (this.mode) {
-    case "systemstore":
+    if ("systemstore".equals(this.mode)) {
       KeyChain.choosePrivateKeyAlias(this.activity, this, null, null, null, -1, null);
-      break;
-    case "file":
-      // @todo use pfx in bundle
+    } else if ("file".equals(this.mode)) {
       this.callbackContext.error("Not implemented, yet");
-      break;
-    default:
+    } else {
       this.tlsConfiguration.setKeyManagers(null);
       this.callbackContext.success();
-      break;
     }
   }
 

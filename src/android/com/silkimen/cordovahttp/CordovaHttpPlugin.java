@@ -51,30 +51,29 @@ public class CordovaHttpPlugin extends CordovaPlugin {
       return false;
     }
 
-    switch (action) {
-    case "get":
+    if ("get".equals(action)) {
       return this.executeHttpRequestWithoutData(action, args, callbackContext);
-    case "post":
-      return this.executeHttpRequestWithData(action, args, callbackContext);
-    case "put":
-      return this.executeHttpRequestWithData(action, args, callbackContext);
-    case "patch":
-      return this.executeHttpRequestWithData(action, args, callbackContext);
-    case "head":
+    } else if ("head".equals(action)) {
       return this.executeHttpRequestWithoutData(action, args, callbackContext);
-    case "delete":
+    } else if ("delete".equals(action)) {
       return this.executeHttpRequestWithoutData(action, args, callbackContext);
-    case "uploadFile":
+    } else if ("post".equals(action)) {
+      return this.executeHttpRequestWithData(action, args, callbackContext);
+    } else if ("put".equals(action)) {
+      return this.executeHttpRequestWithData(action, args, callbackContext);
+    } else if ("patch".equals(action)) {
+      return this.executeHttpRequestWithData(action, args, callbackContext);
+    } else if ("uploadFile".equals(action)) {
       return this.uploadFile(args, callbackContext);
-    case "downloadFile":
+    } else if ("downloadFile".equals(action)) {
       return this.downloadFile(args, callbackContext);
-    case "setServerTrustMode":
+    } else if ("setServerTrustMode".equals(action)) {
       return this.setServerTrustMode(args, callbackContext);
-    case "setClientAuthMode":
+    } else if ("setClientAuthMode".equals(action)) {
       return this.setClientAuthMode(args, callbackContext);
-    case "disableRedirect":
+    } else if ("disableRedirect".equals(action)) {
       return this.disableRedirect(args, callbackContext);
-    default:
+    } else {
       return false;
     }
   }

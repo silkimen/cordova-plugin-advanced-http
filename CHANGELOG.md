@@ -2,6 +2,8 @@
 
 ## 2.0.8
 
+- Fixed #200: compatibility with Java 6 is broken due to string switch on Android
+
 - :warning: **Deprecation**: Deprecated "setSSLCertMode" in favor of "setServerTrustMode"
 
 ## 2.0.7

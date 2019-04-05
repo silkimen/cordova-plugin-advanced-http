@@ -131,16 +131,12 @@ abstract class CordovaHttpBase implements Runnable {
   }
 
   protected void setContentType(HttpRequest request) {
-    switch (this.serializer) {
-    case "json":
+    if ("json".equals(this.serializer)) {
       request.contentType("application/json", "UTF-8");
-      break;
-    case "utf8":
+    } else if ("utf8".equals(this.serializer)) {
       request.contentType("text/plain", "UTF-8");
-      break;
-    case "urlencoded":
+    } else if ("urlencoded".equals(this.serializer)) {
       // intentionally left blank, because content type is set in HttpRequest.form()
-      break;
     }
   }
 
@@ -149,16 +145,12 @@ abstract class CordovaHttpBase implements Runnable {
       return;
     }
 
-    switch (this.serializer) {
-    case "json":
+    if ("json".equals(this.serializer)) {
       request.send(this.data.toString());
-      break;
-    case "utf8":
+    } else if ("utf8".equals(this.serializer)) {
       request.send(((JSONObject) this.data).getString("text"));
-      break;
-    case "urlencoded":
+    } else if ("urlencoded".equals(this.serializer)) {
       request.form(JsonUtils.getObjectMap((JSONObject) this.data));
-      break;
     }
   }
 

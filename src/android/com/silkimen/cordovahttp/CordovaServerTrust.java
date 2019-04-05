@@ -63,23 +63,18 @@ class CordovaServerTrust implements Runnable {
   @Override
   public void run() {
     try {
-      switch (this.mode) {
-      case "legacy":
+      if ("legacy".equals(this.mode)) {
         this.tlsConfiguration.setHostnameVerifier(null);
         this.tlsConfiguration.setTrustManagers(null);
-        break;
-      case "nocheck":
+      } else if ("nocheck".equals(this.mode)) {
         this.tlsConfiguration.setHostnameVerifier(this.noOpVerifier);
         this.tlsConfiguration.setTrustManagers(this.noOpTrustManagers);
-        break;
-      case "pinned":
+      } else if ("pinned".equals(this.mode)) {
         this.tlsConfiguration.setHostnameVerifier(null);
         this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromBundle("www/certificates")));
-        break;
-      default:
+      } else {
         this.tlsConfiguration.setHostnameVerifier(null);
         this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromKeyStore("AndroidCAStore")));
-        break;
       }
 
       callbackContext.success();
