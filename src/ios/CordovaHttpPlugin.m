@@ -126,7 +126,7 @@
     return headerFieldsCopy;
 }
 
-- (void)setSSLCertMode:(CDVInvokedUrlCommand*)command {
+- (void)setServerTrustMode:(CDVInvokedUrlCommand*)command {
     NSString *certMode = [command.arguments objectAtIndex:0];
 
     if ([certMode isEqualToString: @"default"] || [certMode isEqualToString: @"legacy"]) {

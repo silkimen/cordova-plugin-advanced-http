@@ -28,8 +28,8 @@ public class TLSSocketFactory extends SSLSocketFactory {
   }
 
   @Override
-  public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
-    return enableTLSOnSocket(delegate.createSocket(s, host, port, autoClose));
+  public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
+    return enableTLSOnSocket(delegate.createSocket(socket, host, port, autoClose));
   }
 
   @Override

@@ -128,13 +128,13 @@ cordova.plugin.http.clearCookies();
 ## Asynchronous Functions
 These functions all take success and error callbacks as their last 2 arguments.
 
-### setSSLCertMode<a name="setSSLCertMode"></a>
-Set SSL Cert handling mode, being one of the following values:
+### setServerTrustMode<a name="setServerTrustMode"></a>
+Set server trust mode, being one of the following values:
 
-* `default`: default SSL cert handling using system's CA certs
+* `default`: default SSL trustship and hostname verification handling using system's CA certs
 * `legacy`: use legacy default behavior (< 2.0.3), excluding user installed CA certs (only for Android)
-* `nocheck`: disable SSL cert checking, trusting all certs (meant to be used only for testing purposes)
-* `pinned`: trust only provided certs
+* `nocheck`: disable SSL certificate checking and hostname verification, trusting all certs (meant to be used only for testing purposes)
+* `pinned`: trust only provided certificates
 
 To use SSL pinning you must include at least one `.cer` SSL certificate in your app project.  You can pin to your server certificate or to one of the issuing CA certificates. Include your certificate in the `www/certificates` folder. All `.cer` files found there will be loaded automatically.
 
@@ -142,32 +142,38 @@ To use SSL pinning you must include at least one `.cer` SSL certificate in your 
 
 ```js
 // enable SSL pinning
-cordova.plugin.http.setSSLCertMode('pinned', function() {
+cordova.plugin.http.setServerTrustMode('pinned', function() {
   console.log('success!');
 }, function() {
   console.log('error :(');
 });
 
 // use system's default CA certs
-cordova.plugin.http.setSSLCertMode('default', function() {
+cordova.plugin.http.setServerTrustMode('default', function() {
   console.log('success!');
 }, function() {
   console.log('error :(');
 });
 
 // disable SSL cert checking, only meant for testing purposes, do NOT use in production!
-cordova.plugin.http.setSSLCertMode('nocheck', function() {
+cordova.plugin.http.setServerTrustMode('nocheck', function() {
   console.log('success!');
 }, function() {
   console.log('error :(');
 });
 ```
 
+### setSSLCertMode (deprecated)
+This function was deprecated in 2.0.8. Use ["setServerTrustMode"](#setServerTrustMode) instead.
+
 ### enableSSLPinning (obsolete)
-This function was removed in 2.0.0. Use ["setSSLCertMode"](#setSSLCertMode) to enable SSL pinning (mode "pinned").
+This function was removed in 2.0.0. Use ["setServerTrustMode"](#setServerTrustMode) to enable SSL pinning (mode "pinned").
 
 ### acceptAllCerts (obsolete)
-This function was removed in 2.0.0. Use ["setSSLCertMode"](#setSSLCertMode) to disable checking certs (mode "nocheck").
+This function was removed in 2.0.0. Use ["setServerTrustMode"](#setServerTrustMode) to disable checking certs (mode "nocheck").
+
+### validateDomainName (obsolete)
+This function was removed in v1.6.2. Domain name validation is disabled automatically when you set server trust mode to "nocheck".
 
 ### disableRedirect
 If set to `true`, it won't follow redirects automatically. This defaults to false.
@@ -179,9 +185,6 @@ cordova.plugin.http.disableRedirect(true, function() {
   console.log('error :(');
 });
 ```
-
-### validateDomainName (obsolete)
-This function was removed in v1.6.2. Domain name validation is disabled automatically when you set SSL cert mode to "nocheck".
 
 ### removeCookies
 Remove all cookies associated with a given URL.

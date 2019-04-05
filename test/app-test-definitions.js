@@ -1,14 +1,14 @@
 const hooks = {
   onBeforeEachTest: function(done) {
     cordova.plugin.http.clearCookies();
-    helpers.setDefaultCertMode(done);
+    helpers.setDefaultServerTrustMode(done);
   }
 };
 
 const helpers = {
-  setDefaultCertMode: function(done) { cordova.plugin.http.setSSLCertMode('default', done, done); },
-  setNoCheckCertMode: function(done) { cordova.plugin.http.setSSLCertMode('nocheck', done, done); },
-  setPinnedCertMode: function(done) { cordova.plugin.http.setSSLCertMode('pinned', done, done); },
+  setDefaultServerTrustMode: function(done) { cordova.plugin.http.setServerTrustMode('default', done, done); },
+  setNoCheckServerTrustMode: function(done) { cordova.plugin.http.setServerTrustMode('nocheck', done, done); },
+  setPinnedServerTrustMode: function(done) { cordova.plugin.http.setServerTrustMode('pinned', done, done); },
   setJsonSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('json')); },
   setUtf8StringSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('utf8')); },
   setUrlEncodedSerializer: function(done) { done(cordova.plugin.http.setDataSerializer('urlencoded')); },
@@ -91,7 +91,7 @@ const tests = [
   {
     description: 'should accept bad cert (GET)',
     expected: 'resolved: {"status":200, ...',
-    before: helpers.setNoCheckCertMode,
+    before: helpers.setNoCheckServerTrustMode,
     func: function(resolve, reject) { cordova.plugin.http.get('https://self-signed.badssl.com/', {}, {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
@@ -101,7 +101,7 @@ const tests = [
   {
     description: 'should accept bad cert (PUT)',
     expected: 'rejected: {"status":405, ... // will be rejected because PUT is not allowed',
-    before: helpers.setNoCheckCertMode,
+    before: helpers.setNoCheckServerTrustMode,
     func: function(resolve, reject) { cordova.plugin.http.put('https://self-signed.badssl.com/', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('rejected');
@@ -111,7 +111,7 @@ const tests = [
   {
     description: 'should accept bad cert (POST)',
     expected: 'rejected: {"status":405, ... // will be rejected because POST is not allowed',
-    before: helpers.setNoCheckCertMode,
+    before: helpers.setNoCheckServerTrustMode,
     func: function(resolve, reject) { cordova.plugin.http.post('https://self-signed.badssl.com/', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('rejected');
@@ -121,7 +121,7 @@ const tests = [
   {
     description: 'should accept bad cert (PATCH)',
     expected: 'rejected: {"status":405, ... // will be rejected because PATCH is not allowed',
-    before: helpers.setNoCheckCertMode,
+    before: helpers.setNoCheckServerTrustMode,
     func: function(resolve, reject) { cordova.plugin.http.patch('https://self-signed.badssl.com/', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('rejected');
@@ -131,7 +131,7 @@ const tests = [
   {
     description: 'should accept bad cert (DELETE)',
     expected: 'rejected: {"status":405, ... // will be rejected because DELETE is not allowed',
-    before: helpers.setNoCheckCertMode,
+    before: helpers.setNoCheckServerTrustMode,
     func: function(resolve, reject) { cordova.plugin.http.delete('https://self-signed.badssl.com/', {}, {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('rejected');
@@ -141,7 +141,7 @@ const tests = [
   {
     description: 'should fetch data from http://httpbin.org/ (GET)',
     expected: 'resolved: {"status":200, ...',
-    before: helpers.setNoCheckCertMode,
+    before: helpers.setNoCheckServerTrustMode,
     func: function(resolve, reject) { cordova.plugin.http.get('http://httpbin.org/', {}, {}, resolve, reject); },
     validationFunc: function(driver, result) {
       result.type.should.be.equal('resolved');
@@ -468,7 +468,7 @@ const tests = [
   {
     description: 'should pin SSL cert correctly (GET)',
     expected: 'resolved: {"status": 200 ...',
-    before: helpers.setPinnedCertMode,
+    before: helpers.setPinnedServerTrustMode,
     func: function(resolve, reject) {
       cordova.plugin.http.get('https://httpbin.org', {}, {}, resolve, reject);
     },
@@ -480,7 +480,7 @@ const tests = [
   {
     description: 'should reject when pinned cert does not match received server cert (GET)',
     expected: 'rejected: {"status": -2 ...',
-    before: helpers.setPinnedCertMode,
+    before: helpers.setPinnedServerTrustMode,
     func: function(resolve, reject) {
       cordova.plugin.http.get('https://sha512.badssl.com/', {}, {}, resolve, reject);
     },

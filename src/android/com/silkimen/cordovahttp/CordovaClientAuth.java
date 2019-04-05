@@ -21,15 +21,17 @@ class CordovaClientAuth implements Runnable, KeyChainAliasCallback {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
   private String mode;
+  private String filePath;
   private Activity activity;
   private Context context;
   private TLSConfiguration tlsConfiguration;
   private CallbackContext callbackContext;
 
-  public CordovaClientAuth(final String mode, final Activity activity, final Context context,
+  public CordovaClientAuth(final String mode, final String filePath, final Activity activity, final Context context,
       final TLSConfiguration configContainer, final CallbackContext callbackContext) {
 
     this.mode = mode;
+    this.filePath = filePath;
     this.activity = activity;
     this.tlsConfiguration = configContainer;
     this.context = context;
@@ -42,7 +44,7 @@ class CordovaClientAuth implements Runnable, KeyChainAliasCallback {
     case "systemstore":
       KeyChain.choosePrivateKeyAlias(this.activity, this, null, null, null, -1, null);
       break;
-    case "bundle":
+    case "file":
       // @todo use pfx in bundle
       this.callbackContext.error("Not implemented, yet");
       break;

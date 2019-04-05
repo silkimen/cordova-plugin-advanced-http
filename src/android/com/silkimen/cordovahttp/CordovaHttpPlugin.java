@@ -68,8 +68,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
       return this.uploadFile(args, callbackContext);
     case "downloadFile":
       return this.downloadFile(args, callbackContext);
-    case "setSSLCertMode":
-      return this.setSSLCertMode(args, callbackContext);
+    case "setServerTrustMode":
+      return this.setServerTrustMode(args, callbackContext);
     case "setClientAuthMode":
       return this.setClientAuthMode(args, callbackContext);
     case "disableRedirect":
@@ -140,7 +140,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     return true;
   }
 
-  private boolean setSSLCertMode(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+  private boolean setServerTrustMode(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
     CordovaServerTrust runnable = new CordovaServerTrust(args.getString(0), this.cordova.getActivity(),
         this.tlsConfiguration, callbackContext);
 
@@ -150,7 +150,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
   }
 
   private boolean setClientAuthMode(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    CordovaClientAuth runnable = new CordovaClientAuth(args.getString(0), this.cordova.getActivity(),
+    CordovaClientAuth runnable = new CordovaClientAuth(args.getString(0), args.getString(1), this.cordova.getActivity(),
         this.cordova.getContext(), this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(runnable);

@@ -12,7 +12,9 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     getCookieString: getCookieString,
     getRequestTimeout: getRequestTimeout,
     setRequestTimeout: setRequestTimeout,
-    setSSLCertMode: setSSLCertMode,
+    // for being backward compatible
+    setSSLCertMode: setServerTrustMode,
+    setServerTrustMode: setServerTrustMode,
     setClientAuthMode: setClientAuthMode,
     disableRedirect: disableRedirect,
     sendRequest: sendRequest,
@@ -89,15 +91,34 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     globalConfigs.timeout = timeout;
   }
 
-  function setSSLCertMode(mode, success, failure) {
-    return exec(success, failure, 'CordovaHttpPlugin', 'setSSLCertMode', [helpers.checkSSLCertMode(mode)]);
+  function setServerTrustMode(mode, success, failure) {
+    helpers.handleMissingCallbacks(success, failure);
+
+    return exec(success, failure, 'CordovaHttpPlugin', 'setServerTrustMode', [helpers.checkSSLCertMode(mode)]);
   }
 
-  function setClientAuthMode(mode, success, failure) {
-    return exec(success, failure, 'CordovaHttpPlugin', 'setClientAuthMode', [helpers.checkClientAuthMode(mode)]);
+  function setClientAuthMode() {
+    // filePath is an optional param
+    var mode = arguments[0];
+    var success = arguments[1];
+    var failure = arguments[2];
+    var filePath = null;
+
+    if (arguments.length === 4) {
+      mode = arguments[0];
+      filePath = arguments[1];
+      success = arguments[2];
+      failure = arguments[3];
+    }
+
+    helpers.handleMissingCallbacks(success, failure);
+
+    return exec(success, failure, 'CordovaHttpPlugin', 'setClientAuthMode', [helpers.checkClientAuthMode(mode), filePath]);
   }
 
   function disableRedirect(disable, success, failure) {
+    helpers.handleMissingCallbacks(success, failure);
+
     return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [!!disable]);
   }
 

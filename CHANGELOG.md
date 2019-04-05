@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.8
+
+- :warning: **Deprecation**: Deprecated "setSSLCertMode" in favor of "setServerTrustMode"
+
 ## 2.0.7
 
 - Fixed #195: URLs are double-encoded on Android

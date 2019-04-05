@@ -1,7 +1,7 @@
 module.exports = function init(cookieHandler, messages) {
   var validSerializers = ['urlencoded', 'json', 'utf8'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
-  var validClientAuthModes = ['none', 'systemstore', 'bundle'];
+  var validClientAuthModes = ['none', 'systemstore', 'file'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
 
   return {
