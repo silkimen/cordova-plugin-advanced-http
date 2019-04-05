@@ -1,6 +1,7 @@
 module.exports = function init(cookieHandler, messages) {
   var validSerializers = ['urlencoded', 'json', 'utf8'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
+  var validClientAuthModes = ['none', 'systemstore', 'bundle'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
 
   return {
@@ -8,6 +9,7 @@ module.exports = function init(cookieHandler, messages) {
     getTypeOf: getTypeOf,
     checkSerializer: checkSerializer,
     checkSSLCertMode: checkSSLCertMode,
+    checkClientAuthMode: checkClientAuthMode,
     checkForBlacklistedHeaderKey: checkForBlacklistedHeaderKey,
     checkForInvalidHeaderValue: checkForInvalidHeaderValue,
     injectCookieHandler: injectCookieHandler,
@@ -80,6 +82,10 @@ module.exports = function init(cookieHandler, messages) {
 
   function checkSSLCertMode(mode) {
     return checkForValidStringValue(validCertModes, mode, messages.INVALID_SSL_CERT_MODE);
+  }
+
+  function checkClientAuthMode(mode) {
+    return checkForValidStringValue(validClientAuthModes, mode, messages.INVALID_CLIENT_AUTH_MODE);
   }
 
   function checkForBlacklistedHeaderKey(key) {

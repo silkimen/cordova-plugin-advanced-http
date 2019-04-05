@@ -59,19 +59,21 @@
     <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.INTERNET"/>
     </config-file>
+    <source-file src="src/android/com/silkimen/cordovahttp/CordovaClientAuth.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpBase.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpDownload.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpOperation.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpPlugin.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpResponse.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/silkimen/cordovahttp"/>
-    <source-file src="src/android/com/silkimen/http/HostnameVerifierFactory.java" target-dir="src/com/silkimen/http"/>
+    <source-file src="src/android/com/silkimen/cordovahttp/CordovaServerTrust.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/http/HttpBodyDecoder.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/HttpRequest.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/JsonUtils.java" target-dir="src/com/silkimen/http"/>
+    <source-file src="src/android/com/silkimen/http/KeyChainKeyManager.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/OkConnectionFactory.java" target-dir="src/com/silkimen/http"/>
+    <source-file src="src/android/com/silkimen/http/TLSConfiguration.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/TLSSocketFactory.java" target-dir="src/com/silkimen/http"/>
-    <source-file src="src/android/com/silkimen/http/TrustManagersFactory.java" target-dir="src/com/silkimen/http"/>
     <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.10.0"/>
   </platform>
   <platform name="browser">

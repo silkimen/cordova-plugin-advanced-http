@@ -7,6 +7,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.silkimen.http.HttpRequest;
+import com.silkimen.http.TLSConfiguration;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.file.FileUtils;
@@ -15,12 +16,10 @@ import org.json.JSONObject;
 class CordovaHttpDownload extends CordovaHttpBase {
   private String filePath;
 
-  public CordovaHttpDownload(String url, JSONObject headers, String filePath, int timeout,
-      boolean followRedirects, SSLSocketFactory customSSLSocketFactory, HostnameVerifier customHostnameVerifier,
-      CallbackContext callbackContext) {
+  public CordovaHttpDownload(String url, JSONObject headers, String filePath, int timeout, boolean followRedirects,
+      TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
 
-    super("GET", url, headers, timeout, followRedirects, customSSLSocketFactory, customHostnameVerifier,
-        callbackContext);
+    super("GET", url, headers, timeout, followRedirects, tlsConfiguration, callbackContext);
     this.filePath = filePath;
   }
 

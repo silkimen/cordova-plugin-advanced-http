@@ -1,5 +1,6 @@
 package com.silkimen.cordovahttp;
 
+import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 
 import java.net.SocketTimeoutException;
@@ -7,15 +8,14 @@ import java.net.UnknownHostException;
 
 import java.nio.ByteBuffer;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLSocketFactory;
 
 import com.silkimen.http.HttpBodyDecoder;
 import com.silkimen.http.HttpRequest;
 import com.silkimen.http.HttpRequest.HttpRequestException;
 import com.silkimen.http.JsonUtils;
 import com.silkimen.http.OkConnectionFactory;
+import com.silkimen.http.TLSConfiguration;
 
 import org.apache.cordova.CallbackContext;
 
@@ -34,13 +34,11 @@ abstract class CordovaHttpBase implements Runnable {
   protected JSONObject headers;
   protected int timeout;
   protected boolean followRedirects;
-  protected SSLSocketFactory customSSLSocketFactory;
-  protected HostnameVerifier customHostnameVerifier;
+  protected TLSConfiguration tlsConfiguration;
   protected CallbackContext callbackContext;
 
   public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout,
-      boolean followRedirects, SSLSocketFactory customSSLSocketFactory, HostnameVerifier customHostnameVerifier,
-      CallbackContext callbackContext) {
+      boolean followRedirects, TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
 
     this.method = method;
     this.url = url;
@@ -49,22 +47,19 @@ abstract class CordovaHttpBase implements Runnable {
     this.headers = headers;
     this.timeout = timeout;
     this.followRedirects = followRedirects;
-    this.customSSLSocketFactory = customSSLSocketFactory;
-    this.customHostnameVerifier = customHostnameVerifier;
+    this.tlsConfiguration = tlsConfiguration;
     this.callbackContext = callbackContext;
   }
 
-  public CordovaHttpBase(String method, String url, JSONObject headers, int timeout,
-      boolean followRedirects, SSLSocketFactory customSSLSocketFactory, HostnameVerifier customHostnameVerifier,
-      CallbackContext callbackContext) {
+  public CordovaHttpBase(String method, String url, JSONObject headers, int timeout, boolean followRedirects,
+      TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
 
     this.method = method;
     this.url = url;
     this.headers = headers;
     this.timeout = timeout;
     this.followRedirects = followRedirects;
-    this.customSSLSocketFactory = customSSLSocketFactory;
-    this.customHostnameVerifier = customHostnameVerifier;
+    this.tlsConfiguration = tlsConfiguration;
     this.callbackContext = callbackContext;
   }
 
@@ -116,20 +111,18 @@ abstract class CordovaHttpBase implements Runnable {
     return new HttpRequest(this.url, this.method);
   }
 
-  protected void prepareRequest(HttpRequest request) throws JSONException {
+  protected void prepareRequest(HttpRequest request) throws JSONException, IOException {
     request.followRedirects(this.followRedirects);
     request.readTimeout(this.timeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
     request.setConnectionFactory(new OkConnectionFactory());
 
-    if (this.customHostnameVerifier != null) {
-      request.setHostnameVerifier(this.customHostnameVerifier);
+    if (this.tlsConfiguration.getHostnameVerifier() != null) {
+      request.setHostnameVerifier(this.tlsConfiguration.getHostnameVerifier());
     }
 
-    if (this.customSSLSocketFactory != null) {
-      request.setSSLSocketFactory(this.customSSLSocketFactory);
-    }
+    request.setSSLSocketFactory(this.tlsConfiguration.getTLSSocketFactory());
 
     // setup content type before applying headers, so user can override it
     this.setContentType(request);

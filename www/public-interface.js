@@ -13,6 +13,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     getRequestTimeout: getRequestTimeout,
     setRequestTimeout: setRequestTimeout,
     setSSLCertMode: setSSLCertMode,
+    setClientAuthMode: setClientAuthMode,
     disableRedirect: disableRedirect,
     sendRequest: sendRequest,
     post: post,
@@ -90,6 +91,10 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
 
   function setSSLCertMode(mode, success, failure) {
     return exec(success, failure, 'CordovaHttpPlugin', 'setSSLCertMode', [helpers.checkSSLCertMode(mode)]);
+  }
+
+  function setClientAuthMode(mode, success, failure) {
+    return exec(success, failure, 'CordovaHttpPlugin', 'setClientAuthMode', [helpers.checkClientAuthMode(mode)]);
   }
 
   function disableRedirect(disable, success, failure) {

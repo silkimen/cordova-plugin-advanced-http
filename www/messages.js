@@ -6,6 +6,7 @@ module.exports = {
   INVALID_HTTP_METHOD: 'advanced-http: invalid HTTP method, supported methods are:',
   INVALID_DATA_SERIALIZER: 'advanced-http: invalid serializer, supported serializers are:',
   INVALID_SSL_CERT_MODE: 'advanced-http: invalid SSL cert mode, supported modes are:',
+  INVALID_CLIENT_AUTH_MODE: 'advanced-http: invalid client certificate authentication mode, supported modes are:',
   INVALID_HEADERS_VALUE: 'advanced-http: header values must be strings',
   INVALID_TIMEOUT_VALUE: 'advanced-http: invalid timeout value, needs to be a positive numeric value',
   INVALID_PARAMS_VALUE: 'advanced-http: invalid params object, needs to be an object with strings'
