@@ -184,8 +184,11 @@ var browserInterface = {
   downloadFile: function (success, failure, opts) {
     return failure('advanced-http: function "downloadFile" not supported on browser platform');
   },
-  setSSLCertMode: function (success, failure, opts) {
-    return failure('advanced-http: function "setSSLCertMode" not supported on browser platform');
+  setServerTrustMode: function (success, failure, opts) {
+    return failure('advanced-http: function "setServerTrustMode" not supported on browser platform');
+  },
+  setClientAuthMode: function (success, failure, opts) {
+    return failure('advanced-http: function "setClientAuthMode" not supported on browser platform');
   },
   disableRedirect: function (success, failure, opts) {
     return failure('advanced-http: function "disableRedirect" not supported on browser platform');
