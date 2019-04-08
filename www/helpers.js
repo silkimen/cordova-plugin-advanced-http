@@ -1,4 +1,4 @@
-module.exports = function init(cookieHandler, messages) {
+module.exports = function init(jsUtil, cookieHandler, messages) {
   var validSerializers = ['urlencoded', 'json', 'utf8'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
   var validClientAuthModes = ['none', 'systemstore', 'file'];
@@ -6,7 +6,6 @@ module.exports = function init(cookieHandler, messages) {
 
   return {
     b64EncodeUnicode: b64EncodeUnicode,
-    getTypeOf: getTypeOf,
     checkSerializer: checkSerializer,
     checkSSLCertMode: checkSSLCertMode,
     checkClientAuthMode: checkClientAuthMode,
@@ -43,7 +42,7 @@ module.exports = function init(cookieHandler, messages) {
   }
 
   function checkForValidStringValue(list, value, onInvalidValueMessage) {
-    if (getTypeOf(value) !== 'String') {
+    if (jsUtil.getTypeOf(value) !== 'String') {
       throw new Error(onInvalidValueMessage + ' ' + list.join(', '));
     }
 
@@ -57,14 +56,14 @@ module.exports = function init(cookieHandler, messages) {
   }
 
   function checkKeyValuePairObject(obj, allowedChildren, onInvalidValueMessage) {
-    if (getTypeOf(obj) !== 'Object') {
+    if (jsUtil.getTypeOf(obj) !== 'Object') {
       throw new Error(onInvalidValueMessage);
     }
 
     var keys = Object.keys(obj);
 
     for (var i = 0; i < keys.length; i++) {
-      if (allowedChildren.indexOf(getTypeOf(obj[keys[i]])) === -1) {
+      if (allowedChildren.indexOf(jsUtil.getTypeOf(obj[keys[i]])) === -1) {
         throw new Error(onInvalidValueMessage);
       }
     }
@@ -97,7 +96,7 @@ module.exports = function init(cookieHandler, messages) {
   }
 
   function checkForInvalidHeaderValue(value) {
-    if (getTypeOf(value) !== 'String') {
+    if (jsUtil.getTypeOf(value) !== 'String') {
       throw new Error(messages.INVALID_HEADERS_VALUE);
     }
 
@@ -105,7 +104,7 @@ module.exports = function init(cookieHandler, messages) {
   }
 
   function checkTimeoutValue(timeout) {
-    if (getTypeOf(timeout) !== 'Number' || timeout < 0) {
+    if (jsUtil.getTypeOf(timeout) !== 'Number' || timeout < 0) {
       throw new Error(messages.INVALID_TIMEOUT_VALUE);
     }
 
@@ -180,30 +179,6 @@ module.exports = function init(cookieHandler, messages) {
     return mergedHeaders;
   }
 
-  // typeof is not working reliably in JS
-  function getTypeOf(object) {
-    switch (Object.prototype.toString.call(object)) {
-      case '[object Array]':
-        return 'Array';
-      case '[object Boolean]':
-        return 'Boolean';
-      case '[object Function]':
-        return 'Function';
-      case '[object Null]':
-        return 'Null';
-      case '[object Number]':
-        return 'Number';
-      case '[object Object]':
-        return 'Object';
-      case '[object String]':
-        return 'String';
-      case '[object Undefined]':
-        return 'Undefined';
-      default:
-        return 'Unknown';
-    }
-  }
-
   function getAllowedDataTypes(dataSerializer) {
     switch (dataSerializer) {
       case 'utf8':
@@ -216,7 +191,7 @@ module.exports = function init(cookieHandler, messages) {
   }
 
   function getProcessedData(data, dataSerializer) {
-    var currentDataType = getTypeOf(data);
+    var currentDataType = jsUtil.getTypeOf(data);
     var allowedDataTypes = getAllowedDataTypes(dataSerializer);
 
     if (allowedDataTypes.indexOf(currentDataType) === -1) {
@@ -231,11 +206,11 @@ module.exports = function init(cookieHandler, messages) {
   }
 
   function handleMissingCallbacks(successFn, failFn) {
-    if (getTypeOf(successFn) !== 'Function') {
+    if (jsUtil.getTypeOf(successFn) !== 'Function') {
       throw new Error(messages.MANDATORY_SUCCESS);
     }
 
-    if (getTypeOf(failFn) !== 'Function') {
+    if (jsUtil.getTypeOf(failFn) !== 'Function') {
       throw new Error(messages.MANDATORY_FAIL);
     }
   }
@@ -249,7 +224,7 @@ module.exports = function init(cookieHandler, messages) {
       timeout: checkTimeoutValue(options.timeout || globals.timeout),
       headers: checkHeadersObject(options.headers || {}),
       params: checkParamsObject(options.params || {}),
-      data: getTypeOf(options.data) === 'Undefined' ? null : options.data,
+      data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data,
       filePath: options.filePath || '',
       name: options.name || ''
     };

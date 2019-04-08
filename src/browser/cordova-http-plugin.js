@@ -1,7 +1,7 @@
 var pluginId = module.id.slice(0, module.id.lastIndexOf('.'));
 
 var cordovaProxy = require('cordova/exec/proxy');
-var helpers = require(pluginId + '.helpers');
+var jsUtil = require(pluginId + '.js-util');
 
 function serializeJsonData(data) {
   try {
@@ -29,7 +29,7 @@ function serializeParams(params) {
   if (params === null) return '';
 
   return Object.keys(params).map(function(key) {
-    if (helpers.getTypeOf(params[key]) === 'Array') {
+    if (jsUtil.getTypeOf(params[key]) === 'Array') {
       return serializeArray(key, params[key]);
     }
 
@@ -56,7 +56,7 @@ function createXhrSuccessObject(xhr) {
   return {
     url: xhr.responseURL,
     status: xhr.status,
-    data: helpers.getTypeOf(xhr.responseText) === 'String' ? xhr.responseText : xhr.response,
+    data: jsUtil.getTypeOf(xhr.responseText) === 'String' ? xhr.responseText : xhr.response,
     headers: deserializeResponseHeaders(xhr.getAllResponseHeaders())
   };
 }
@@ -65,7 +65,7 @@ function createXhrFailureObject(xhr) {
   var obj = {};
 
   obj.headers = xhr.getAllResponseHeaders();
-  obj.error = helpers.getTypeOf(xhr.responseText) === 'String' ? xhr.responseText : xhr.response;
+  obj.error = jsUtil.getTypeOf(xhr.responseText) === 'String' ? xhr.responseText : xhr.response;
   obj.error = obj.error || 'advanced-http: please check browser console for error messages';
 
   if (xhr.responseURL) obj.url = xhr.responseURL;

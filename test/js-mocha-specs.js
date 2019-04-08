@@ -10,12 +10,13 @@ describe('Advanced HTTP public interface', function () {
   const getDependenciesBlueprint = () => {
     const messages = require('../www/messages');
     const globalConfigs = require('../www/global-configs');
+    const jsUtil = require('../www/js-util');
     const ToughCookie = require('../www/umd-tough-cookie');
     const lodash = require('../www/lodash');
     const WebStorageCookieStore = require('../www/local-storage-store')(ToughCookie, lodash);
     const cookieHandler = require('../www/cookie-handler')(null, ToughCookie, WebStorageCookieStore);
-    const helpers = require('../www/helpers')(cookieHandler, messages);
-    const urlUtil = require('../www/url-util')(helpers);
+    const helpers = require('../www/helpers')(jsUtil, cookieHandler, messages);
+    const urlUtil = require('../www/url-util')(jsUtil);
 
     return { exec: noop, cookieHandler, urlUtil: urlUtil, helpers, globalConfigs };
   };
@@ -131,8 +132,8 @@ describe('Advanced HTTP public interface', function () {
 });
 
 describe('URL util', function () {
-  const helpers = require('../www/helpers')(null, null);
-  const util = require('../www/url-util')(helpers);
+  const jsUtil = require('../www/js-util');
+  const util = require('../www/url-util')(jsUtil);
 
   it('parses URL with protocol, hostname and path correctly', () => {
     util.parseUrl('http://ilkimen.net/test').should.include({

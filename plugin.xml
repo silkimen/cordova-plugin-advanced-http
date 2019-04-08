@@ -11,6 +11,7 @@
   <js-module src="www/cookie-handler.js" name="cookie-handler"/>
   <js-module src="www/global-configs.js" name="global-configs"/>
   <js-module src="www/helpers.js" name="helpers"/>
+  <js-module src="www/js-util.js" name="js-util"/>
   <js-module src="www/local-storage-store.js" name="local-storage-store"/>
   <js-module src="www/lodash.js" name="lodash"/>
   <js-module src="www/messages.js" name="messages"/>

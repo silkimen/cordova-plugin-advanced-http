@@ -1,4 +1,4 @@
-module.exports = function init(helpers) {
+module.exports = function init(jsUtil) {
   return {
     parseUrl: parseUrl,
     appendQueryParamsString: appendQueryParamsString,
@@ -48,10 +48,10 @@ module.exports = function init(helpers) {
 
       var identifier = parentKey.length ? parentKey + '[' + key + ']' : key;
 
-      if (helpers.getTypeOf(object[key]) === 'Array') {
+      if (jsUtil.getTypeOf(object[key]) === 'Array') {
         parts.push(serializeArray(identifier, object[key], encode));
         continue;
-      } else if (helpers.getTypeOf(object[key]) === 'Object') {
+      } else if (jsUtil.getTypeOf(object[key]) === 'Object') {
         parts.push(serializeObject(identifier, object[key], encode));
         continue;
       }
@@ -66,10 +66,10 @@ module.exports = function init(helpers) {
     var parts = [];
 
     for (var i = 0; i < array.length; ++i) {
-      if (helpers.getTypeOf(array[i]) === 'Array') {
+      if (jsUtil.getTypeOf(array[i]) === 'Array') {
         parts.push(serializeArray(parentKey + '[]', array[i], encode));
         continue;
-      } else if (helpers.getTypeOf(array[i]) === 'Object') {
+      } else if (jsUtil.getTypeOf(array[i]) === 'Object') {
         parts.push(serializeObject(parentKey + '[]' + array[i], encode));
         continue;
       }
