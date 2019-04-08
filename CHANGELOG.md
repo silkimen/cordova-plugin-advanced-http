@@ -2,6 +2,9 @@
 
 ## 2.0.8
 
+- Fixed #201: browser implementation is broken due to broken dependency
+- Fixed #197: iOS crashes when multiple request are done simultaneously (reverted a8e3637)
+- Fixed #189: error code mappings are not precise
 - Fixed #200: compatibility with Java 6 is broken due to string switch on Android
 
 - :warning: **Deprecation**: Deprecated "setSSLCertMode" in favor of "setServerTrustMode"
