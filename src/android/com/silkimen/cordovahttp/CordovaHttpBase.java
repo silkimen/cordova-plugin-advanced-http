@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 
 import java.nio.ByteBuffer;
 
-import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLException;
 
 import com.silkimen.http.HttpBodyDecoder;
 import com.silkimen.http.HttpRequest;
@@ -73,10 +73,10 @@ abstract class CordovaHttpBase implements Runnable {
       this.sendBody(request);
       this.processResponse(request, response);
     } catch (HttpRequestException e) {
-      if (e.getCause() instanceof SSLHandshakeException) {
+      if (e.getCause() instanceof SSLException) {
         response.setStatus(-2);
-        response.setErrorMessage("SSL handshake failed: " + e.getMessage());
-        Log.w(TAG, "SSL handshake failed", e);
+        response.setErrorMessage("TLS connection could not be established: " + e.getMessage());
+        Log.w(TAG, "TLS connection could not be established", e);
       } else if (e.getCause() instanceof UnknownHostException) {
         response.setStatus(-3);
         response.setErrorMessage("Host could not be resolved: " + e.getMessage());

@@ -38,7 +38,7 @@ const helpers = {
 };
 
 const messageFactory = {
-  sslTrustAnchor: function() { return 'SSL handshake failed: javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.' },
+  sslTrustAnchor: function() { return 'TLS connection could not be established: javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.' },
   invalidCertificate: function(domain) { return 'The certificate for this server is invalid. You might be connecting to a server that is pretending to be “' + domain + '” which could put your confidential information at risk.' }
 }
 

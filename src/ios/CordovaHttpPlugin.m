@@ -106,8 +106,12 @@
         case -1009:
             // no connection
             return [NSNumber numberWithInt:-6];
-        case -1202:
-            // untrusted SSL certificate
+        case -1200: // secure connection failed
+        case -1201: // certificate has bad date
+        case -1202: // certificate untrusted
+        case -1203: // certificate has unknown root
+        case -1204: // certificate is not yet valid
+            // configuring SSL failed
             return [NSNumber numberWithInt:-2];
         default:
             return [NSNumber numberWithInt:-1];
