@@ -2,6 +2,7 @@
 
 ## 2.0.8
 
+- Fixed #198: cookie header is always passed even if there is no cookie
 - Fixed #201: browser implementation is broken due to broken dependency
 - Fixed #197: iOS crashes when multiple request are done simultaneously (reverted a8e3637)
 - Fixed #189: error code mappings are not precise

@@ -383,8 +383,7 @@ const tests = [
       JSON
         .parse(result.data.data)
         .headers
-        .Cookie
-        .should.be.equal('');
+        .should.not.have.property('Cookie');
     }
   },
   {

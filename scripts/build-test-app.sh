@@ -35,10 +35,11 @@ while :; do
    shift
 done
 
+printf 'Building test app for %s\n' $PLATFORM
 rm -rf $ROOT/temp
 mkdir $ROOT/temp
-cp -r $ROOT/test/app-template/. $ROOT/temp/
-cp $ROOT/test/app-test-definitions.js $ROOT/temp/www/
+cp -r $ROOT/test/e2e-app-template/. $ROOT/temp/
+cp $ROOT/test/e2e-specs.js $ROOT/temp/www/
 rsync -ax --exclude node_modules --exclude scripts --exclude temp --exclude test $ROOT/. $WORKINGCOPY
 cd $ROOT/temp
 $CDV prepare

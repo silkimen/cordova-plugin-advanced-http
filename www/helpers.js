@@ -4,7 +4,7 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
   var validClientAuthModes = ['none', 'systemstore', 'file'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
 
-  return {
+  var interface = {
     b64EncodeUnicode: b64EncodeUnicode,
     checkSerializer: checkSerializer,
     checkSSLCertMode: checkSSLCertMode,
@@ -18,6 +18,24 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
     handleMissingCallbacks: handleMissingCallbacks,
     handleMissingOptions: handleMissingOptions
   };
+
+  // expose all functions for testing purposes
+  if (init.debug) {
+    interface.mergeHeaders = mergeHeaders;
+    interface.checkForValidStringValue = checkForValidStringValue;
+    interface.checkKeyValuePairObject = checkKeyValuePairObject;
+    interface.checkHttpMethod = checkHttpMethod;
+    interface.checkTimeoutValue = checkTimeoutValue;
+    interface.checkHeadersObject = checkHeadersObject;
+    interface.checkParamsObject = checkParamsObject;
+    interface.resolveCookieString = resolveCookieString;
+    interface.createFileEntry = createFileEntry;
+    interface.getCookieHeader = getCookieHeader;
+    interface.getMatchingHostHeaders = getMatchingHostHeaders;
+    interface.getAllowedDataTypes = getAllowedDataTypes;
+  }
+
+  return interface;
 
   // Thanks Mozilla: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
   function b64EncodeUnicode(str) {
@@ -158,7 +176,13 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
   }
 
   function getCookieHeader(url) {
-    return { Cookie: cookieHandler.getCookieString(url) };
+    var cookieString = cookieHandler.getCookieString(url);
+
+    if (cookieString.length) {
+      return { Cookie: cookieHandler.getCookieString(url) };
+    }
+
+    return {};
   }
 
   function getMatchingHostHeaders(url, headersList) {

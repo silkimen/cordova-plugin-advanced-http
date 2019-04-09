@@ -235,3 +235,30 @@ describe('URL util', function () {
       .should.equal('http://ilkimen.net/?myParam=myValue&param1=value1#myHash');
   });
 });
+
+describe('Common helpers', function () {
+  describe('mergeHeaders(globalHeaders, localHeaders)', function () {
+    const init = require('../www/helpers');
+    init.debug = true;
+
+    const helpers = init(null, null, null);
+
+    it('merges empty header sets correctly', () => {
+      helpers.mergeHeaders({}, {}).should.eql({});
+    });
+  });
+
+  describe('getCookieHeader(url)', function () {
+    it('resolves cookie header correctly when no cookie is set #198', () => {
+      const helpers = require('../www/helpers')(null, { getCookieString: () => '' }, null);
+
+      helpers.getCookieHeader('http://ilkimen.net').should.eql({});
+    });
+
+    it('resolves cookie header correctly when a cookie is set', () => {
+      const helpers = require('../www/helpers')(null, { getCookieString: () => 'cookie=value' }, null);
+
+      helpers.getCookieHeader('http://ilkimen.net').should.eql({ Cookie: 'cookie=value' });
+    });
+  });
+})

@@ -8,6 +8,7 @@ if [ $CI == "true" ] && ([ -z $SAUCE_USERNAME ] || [ -z $SAUCE_ACCESS_KEY ]); th
   exit 0;
 fi
 
+printf 'Running e2e tests\n'
 pushd $ROOT
-./node_modules/.bin/mocha ./test/app-mocha-specs/test.js "$@"
+./node_modules/.bin/mocha ./test/e2e-tooling/test.js "$@"
 popd
