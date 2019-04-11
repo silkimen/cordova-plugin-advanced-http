@@ -75,7 +75,8 @@
     <source-file src="src/android/com/silkimen/http/OkConnectionFactory.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/TLSConfiguration.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/TLSSocketFactory.java" target-dir="src/com/silkimen/http"/>
-    <framework src="com.squareup.okhttp3:okhttp-urlconnection:3.10.0"/>
+    <preference name="OKHTTP_VERSION" default="3.10.0" />
+    <framework src="com.squareup.okhttp3:okhttp-urlconnection:$OKHTTP_VERSION"/>
   </platform>
   <platform name="browser">
     <config-file target="config.xml" parent="/*">
