@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.9
+
+- Fixed #204: broken support for cordova-android  < 7.0
+
 ## 2.0.8
 
 - Fixed #198: cookie header is always passed even if there is no cookie

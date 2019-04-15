@@ -150,7 +150,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
   private boolean setClientAuthMode(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
     CordovaClientAuth runnable = new CordovaClientAuth(args.getString(0), args.getString(1), this.cordova.getActivity(),
-        this.cordova.getContext(), this.tlsConfiguration, callbackContext);
+        this.cordova.getActivity().getApplicationContext(), this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(runnable);
 
