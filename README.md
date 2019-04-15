@@ -104,6 +104,13 @@ Set how long to wait for a request to respond, in seconds.
 cordova.plugin.http.setRequestTimeout(5.0);
 ```
 
+### setFollowRedirect<a name="setFollowRedirect"></a>
+Configure if it should follow redirects automatically. This defaults to true.
+
+```js
+cordova.plugin.setFollowRedirect(true);
+```
+
 ### getCookieString
 Returns saved cookies (as string) matching given URL.
 
@@ -163,6 +170,9 @@ cordova.plugin.http.setServerTrustMode('nocheck', function() {
 });
 ```
 
+### disableRedirect (deprecated)
+This function was deprecated in 2.0.9. Use ["setFollowRedirect"](#setFollowRedirect) instead.
+
 ### setSSLCertMode (deprecated)
 This function was deprecated in 2.0.8. Use ["setServerTrustMode"](#setServerTrustMode) instead.
 
@@ -174,17 +184,6 @@ This function was removed in 2.0.0. Use ["setServerTrustMode"](#setServerTrustMo
 
 ### validateDomainName (obsolete)
 This function was removed in v1.6.2. Domain name validation is disabled automatically when you set server trust mode to "nocheck".
-
-### disableRedirect
-If set to `true`, it won't follow redirects automatically. This defaults to false.
-
-```js
-cordova.plugin.http.disableRedirect(true, function() {
-  console.log('success!');
-}, function() {
-  console.log('error :(');
-});
-```
 
 ### removeCookies
 Remove all cookies associated with a given URL.
@@ -204,6 +203,7 @@ The options object contains following keys:
 * `params`: query params to be appended to the URL (only applicable on `get`, `head`, `delete`, `upload` or `download` methods)
 * `serializer`: data serializer to be used (only applicable on `post`, `put` or `patch` methods), defaults to global serializer value, see [setDataSerializer](#setDataSerializer) for supported values
 * `timeout`: timeout value for the request in seconds, defaults to global timeout value
+* `followRedirect`: enable or disable automatically following redirects
 * `headers`: headers object (key value pair), will be merged with global values
 * `filePath`: filePath to be used during upload and download see [uploadFile](#uploadFile) and [downloadFile](#downloadFile) for detailed information
 * `name`: name to be used during upload see [uploadFile](#uploadFile) for detailed information

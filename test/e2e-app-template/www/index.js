@@ -118,26 +118,6 @@ const app = {
     onSuccessFactory([execBeforeEachTest, execBeforeTest, execTest])();
   },
 
-  onBeforeTest: function (testIndex, resolve, reject) {
-    const runBeforeEachTest = function (resolve, reject) {
-      if (!hooks || !hooks.onBeforeEachTest) return resolve();
-
-      hooks.onBeforeEachTest(resolve, reject);
-    };
-
-    const runBeforeTest = function (testIndex, resolve, reject) {
-      if (!tests[testIndex].before) return resolve();
-
-      tests[testIndex].before(resolve, reject);
-    };
-
-    app.lastResult = null;
-
-    runBeforeEachTest(function () {
-      runBeforeTest(testIndex, resolve);
-    }, reject);
-  },
-
   onFinishedAllTests: function () {
     const titleText = 'No more tests';
     const expectedText = 'You have run all available tests.';

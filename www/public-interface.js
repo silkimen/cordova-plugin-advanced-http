@@ -12,8 +12,11 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     getCookieString: getCookieString,
     getRequestTimeout: getRequestTimeout,
     setRequestTimeout: setRequestTimeout,
+    getFollowRedirect: getFollowRedirect,
+    setFollowRedirect: setFollowRedirect,
+    // @DEPRECATED
     disableRedirect: disableRedirect,
-    // for being backward compatible
+    // @DEPRECATED
     setSSLCertMode: setServerTrustMode,
     setServerTrustMode: setServerTrustMode,
     setClientAuthMode: setClientAuthMode,
@@ -88,7 +91,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
   }
 
   function setRequestTimeout(timeout) {
-    globalConfigs.timeout = timeout;
+    globalConfigs.timeout = helpers.checkTimeoutValue(timeout);
   }
 
   function getFollowRedirect() {
@@ -96,14 +99,15 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
   }
 
   function setFollowRedirect(follow) {
-    globalConfigs.followRedirect = follow;
+    globalConfigs.followRedirect = helpers.checkFollowRedirectValue(follow);
   }
 
-  // @TODO replace this one by "setFollowRedirect()"
+  // @DEPRECATED
   function disableRedirect(disable, success, failure) {
     helpers.handleMissingCallbacks(success, failure);
 
-    return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [!!disable]);
+    setFollowRedirect(!disable);
+    success();
   }
 
   function setServerTrustMode(mode, success, failure) {

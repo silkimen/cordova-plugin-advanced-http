@@ -4,6 +4,8 @@
 
 - Fixed #204: broken support for cordova-android  < 7.0
 
+- :warning: **Deprecation**: Deprecated "disableRedirect" in favor of "setFollowRedirect"
+
 ## 2.0.8
 
 - Fixed #198: cookie header is always passed even if there is no cookie

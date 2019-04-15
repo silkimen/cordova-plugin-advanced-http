@@ -13,18 +13,16 @@
 - (NSNumber*)getStatusCode:(NSError*) error;
 - (NSMutableDictionary*)copyHeaderFields:(NSDictionary*)headerFields;
 - (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager;
-- (void)setRedirect:(AFHTTPSessionManager*)manager;
+- (void)setRedirect:(bool)redirect forManager:(AFHTTPSessionManager*)manager;
 
 @end
 
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
-    bool redirect;
 }
 
 - (void)pluginInitialize {
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-    redirect = true;
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
@@ -43,14 +41,20 @@
     }];
 }
 
-- (void)setRedirect:(AFHTTPSessionManager*)manager {
-    [manager setTaskWillPerformHTTPRedirectionBlock:^NSURLRequest * _Nonnull(NSURLSession * _Nonnull session, NSURLSessionTask * _Nonnull task, NSURLResponse * _Nonnull response, NSURLRequest * _Nonnull request) {
-        if (redirect) {
+- (void)setRedirect:(bool)followRedirect forManager:(AFHTTPSessionManager*)manager {
+    [manager setTaskWillPerformHTTPRedirectionBlock:^NSURLRequest * _Nonnull(NSURLSession * _Nonnull session,
+        NSURLSessionTask * _Nonnull task, NSURLResponse * _Nonnull response, NSURLRequest * _Nonnull request) {
+
+        if (followRedirect) {
             return request;
         } else {
             return nil;
         }
     }];
+}
+
+- (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager {
+    [manager.requestSerializer setTimeoutInterval:timeout];
 }
 
 - (void)handleSuccess:(NSMutableDictionary*)dictionary withResponse:(NSHTTPURLResponse*)response andData:(id)data {
@@ -149,20 +153,6 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager {
-    [manager.requestSerializer setTimeoutInterval:timeout];
-}
-
-- (void)disableRedirect:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult = nil;
-    bool disable = [[command.arguments objectAtIndex:0] boolValue];
-
-    redirect = !disable;
-
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
 - (void)get:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
@@ -170,11 +160,12 @@
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:2] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:3] boolValue];
 
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
-    [self setRedirect: manager];
+    [self setRedirect:followRedirect forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -210,10 +201,11 @@
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:2] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:3] boolValue];
 
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
-    [self setRedirect: manager];
+    [self setRedirect:followRedirect forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
@@ -250,11 +242,12 @@
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:2] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:3] boolValue];
 
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
-    [self setRedirect: manager];
+    [self setRedirect:followRedirect forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -292,11 +285,12 @@
     NSString *serializerName = [command.arguments objectAtIndex:2];
     NSDictionary *headers = [command.arguments objectAtIndex:3];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
 
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
-    [self setRedirect: manager];
+    [self setRedirect:followRedirect forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -334,11 +328,12 @@
     NSString *serializerName = [command.arguments objectAtIndex:2];
     NSDictionary *headers = [command.arguments objectAtIndex:3];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
 
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
-    [self setRedirect: manager];
+    [self setRedirect:followRedirect forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -376,11 +371,12 @@
     NSString *serializerName = [command.arguments objectAtIndex:2];
     NSDictionary *headers = [command.arguments objectAtIndex:3];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
 
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
-    [self setRedirect: manager];
+    [self setRedirect:followRedirect forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -418,12 +414,13 @@
     NSString *filePath = [command.arguments objectAtIndex: 2];
     NSString *name = [command.arguments objectAtIndex: 3];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
 
     NSURL *fileURL = [NSURL URLWithString: filePath];
 
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
-    [self setRedirect: manager];
+    [self setRedirect:followRedirect forManager:manager];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     manager.responseSerializer = [TextResponseSerializer serializer];
@@ -472,10 +469,11 @@
     NSDictionary *headers = [command.arguments objectAtIndex:1];
     NSString *filePath = [command.arguments objectAtIndex: 2];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:4] boolValue];
 
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
-    [self setRedirect: manager];
+    [self setRedirect:followRedirect forManager:manager];
 
     if ([filePath hasPrefix:@"file://"]) {
         filePath = [filePath substringFromIndex:7];

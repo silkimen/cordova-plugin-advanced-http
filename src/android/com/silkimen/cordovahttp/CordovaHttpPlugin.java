@@ -20,7 +20,6 @@ import javax.net.ssl.TrustManagerFactory;
 public class CordovaHttpPlugin extends CordovaPlugin {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
-  private boolean followRedirects = true;
   private TLSConfiguration tlsConfiguration;
 
   @Override
@@ -72,8 +71,6 @@ public class CordovaHttpPlugin extends CordovaPlugin {
       return this.setServerTrustMode(args, callbackContext);
     } else if ("setClientAuthMode".equals(action)) {
       return this.setClientAuthMode(args, callbackContext);
-    } else if ("disableRedirect".equals(action)) {
-      return this.disableRedirect(args, callbackContext);
     } else {
       return false;
     }
@@ -85,9 +82,10 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     String url = args.getString(0);
     JSONObject headers = args.getJSONObject(1);
     int timeout = args.getInt(2) * 1000;
+    boolean followRedirect = args.getBoolean(3);
 
-    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, headers, timeout,
-        this.followRedirects, this.tlsConfiguration, callbackContext);
+    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, headers, timeout, followRedirect,
+        this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -102,9 +100,10 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     String serializer = args.getString(2);
     JSONObject headers = args.getJSONObject(3);
     int timeout = args.getInt(4) * 1000;
+    boolean followRedirect = args.getBoolean(5);
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
-        timeout, this.followRedirects, this.tlsConfiguration, callbackContext);
+        timeout, followRedirect, this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -117,8 +116,9 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     String filePath = args.getString(2);
     String uploadName = args.getString(3);
     int timeout = args.getInt(4) * 1000;
+    boolean followRedirect = args.getBoolean(5);
 
-    CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePath, uploadName, timeout, this.followRedirects,
+    CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePath, uploadName, timeout, followRedirect,
         this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(upload);
@@ -131,8 +131,9 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     JSONObject headers = args.getJSONObject(1);
     String filePath = args.getString(2);
     int timeout = args.getInt(3) * 1000;
+    boolean followRedirect = args.getBoolean(4);
 
-    CordovaHttpDownload download = new CordovaHttpDownload(url, headers, filePath, timeout, this.followRedirects,
+    CordovaHttpDownload download = new CordovaHttpDownload(url, headers, filePath, timeout, followRedirect,
         this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(download);
@@ -157,14 +158,6 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(runnable);
-
-    return true;
-  }
-
-  private boolean disableRedirect(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    this.followRedirects = !args.getBoolean(0);
-
-    callbackContext.success();
 
     return true;
   }

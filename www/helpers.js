@@ -12,6 +12,8 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
     checkClientAuthOptions: checkClientAuthOptions,
     checkForBlacklistedHeaderKey: checkForBlacklistedHeaderKey,
     checkForInvalidHeaderValue: checkForInvalidHeaderValue,
+    checkTimeoutValue: checkTimeoutValue,
+    checkFollowRedirectValue: checkFollowRedirectValue,
     injectCookieHandler: injectCookieHandler,
     injectFileEntryHandler: injectFileEntryHandler,
     getMergedHeaders: getMergedHeaders,
@@ -26,7 +28,6 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
     interface.checkForValidStringValue = checkForValidStringValue;
     interface.checkKeyValuePairObject = checkKeyValuePairObject;
     interface.checkHttpMethod = checkHttpMethod;
-    interface.checkTimeoutValue = checkTimeoutValue;
     interface.checkHeadersObject = checkHeadersObject;
     interface.checkParamsObject = checkParamsObject;
     interface.resolveCookieString = resolveCookieString;

@@ -3,12 +3,12 @@ const mock = require('mock-require');
 const should = chai.should();
 
 describe('Advanced HTTP public interface', function () {
+  const messages = require('../www/messages');
   let http = {};
 
   const noop = () => { /* intentionally doing nothing */ };
 
   const getDependenciesBlueprint = () => {
-    const messages = require('../www/messages');
     const globalConfigs = require('../www/global-configs');
     const jsUtil = require('../www/js-util');
     const ToughCookie = require('../www/umd-tough-cookie');
@@ -127,7 +127,25 @@ describe('Advanced HTTP public interface', function () {
   });
 
   it('throws an Error when you try to add a cookie by using "setHeader" #46', () => {
-    (function () { http.setHeader('*', 'cookie', 'value') }).should.throw();
+    (function () { http.setHeader('*', 'cookie', 'value'); }).should.throw();
+  });
+
+  it('configures global timeout value correctly with given valid value', () => {
+    http.setRequestTimeout(10);
+    http.getRequestTimeout().should.equal(10);
+  });
+
+  it('throws an Error when you try to configure global timeout with a string', () => {
+    (function () { http.setRequestTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
+  });
+
+  it('sets global option for following redirects correctly', () => {
+    http.setFollowRedirect(false);
+    http.getFollowRedirect().should.equal(false);
+  });
+
+  it('throws an Error when you try to configure global option for following redirects with a string', () => {
+    (function () { http.setFollowRedirect('myString'); }).should.throw(messages.INVALID_FOLLOW_REDIRECT_VALUE);
   });
 });
 

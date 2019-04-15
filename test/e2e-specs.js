@@ -1,11 +1,14 @@
 const hooks = {
   onBeforeEachTest: function (resolve, reject) {
     cordova.plugin.http.clearCookies();
-    helpers.setDefaultServerTrustMode(function () {
-      // @TODO: not ready yet
-      // helpers.setNoneClientAuthMode(resolve, reject);
-      resolve();
-    }, reject);
+
+    helpers.enableFollowingRedirect(function() {
+      helpers.setDefaultServerTrustMode(function () {
+        // @TODO: not ready yet
+        // helpers.setNoneClientAuthMode(resolve, reject);
+        resolve();
+      }, reject);
+    });
   }
 };
 
@@ -25,6 +28,8 @@ const helpers = {
   setJsonSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('json')); },
   setUtf8StringSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('utf8')); },
   setUrlEncodedSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('urlencoded')); },
+  disableFollowingRedirect: function (resolve) { resolve(cordova.plugin.http.setFollowRedirect(false)); },
+  enableFollowingRedirect: function(resolve) { resolve(cordova.plugin.http.setFollowRedirect(true)); },
   getWithXhr: function (done, url, type) {
     var xhr = new XMLHttpRequest();
 
@@ -264,6 +269,16 @@ const tests = [
     validationFunc: function (driver, result) {
       result.type.should.be.equal('resolved');
       result.data.url.should.be.equal('http://httpbin.org/anything');
+    }
+  },
+  {
+    description: 'should not follow 302 redirect when following redirects is disabled',
+    expected: 'rejected: {"status": 302, ...',
+    before: function(resolve, reject) { cordova.plugin.http.disableRedirect(true, resolve, reject)},
+    func: function (resolve, reject) { cordova.plugin.http.get('http://httpbin.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.status.should.be.equal(302);
     }
   },
   {
