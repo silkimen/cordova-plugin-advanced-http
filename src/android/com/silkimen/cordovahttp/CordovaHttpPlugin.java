@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
+import android.util.Base64;
 
 import javax.net.ssl.TrustManagerFactory;
 
@@ -149,8 +150,11 @@ public class CordovaHttpPlugin extends CordovaPlugin {
   }
 
   private boolean setClientAuthMode(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    CordovaClientAuth runnable = new CordovaClientAuth(args.getString(0), args.getString(1), this.cordova.getActivity(),
-        this.cordova.getActivity().getApplicationContext(), this.tlsConfiguration, callbackContext);
+    byte[] pkcs = args.isNull(2) ? null : Base64.decode(args.getString(2), Base64.DEFAULT);
+
+    CordovaClientAuth runnable = new CordovaClientAuth(args.getString(0), args.isNull(1) ? null : args.getString(1),
+        pkcs, args.getString(3), this.cordova.getActivity(), this.cordova.getActivity().getApplicationContext(),
+        this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(runnable);
 

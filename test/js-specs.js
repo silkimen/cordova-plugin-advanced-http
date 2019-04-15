@@ -261,4 +261,69 @@ describe('Common helpers', function () {
       helpers.getCookieHeader('http://ilkimen.net').should.eql({ Cookie: 'cookie=value' });
     });
   });
+
+  describe('checkClientAuthOptions()', function () {
+    const jsUtil = require('../www/js-util');
+    const messages = require('../www/messages');
+    const helpers = require('../www/helpers')(jsUtil, null, messages);
+
+    it('returns options object with empty values when mode is "none" and no options are given', () => {
+      helpers.checkClientAuthOptions('none').should.eql({
+        alias: null,
+        pkcsPath: '',
+        pkcsPassword: ''
+      });
+    });
+
+    it('returns options object with empty values when mode is "none" and random options are given', () => {
+      helpers.checkClientAuthOptions('none', {
+        alias: 'myAlias',
+        pkcsPath: 'myPath'
+      }).should.eql({
+        alias: null,
+        pkcsPath: '',
+        pkcsPassword: ''
+      });
+    });
+
+    it('throws an error when mode is "systemstore" and alias is not a string or undefined', () => {
+      (() => helpers.checkClientAuthOptions('systemstore', { alias: 1 }))
+        .should.throw(messages.INVALID_CLIENT_AUTH_ALIAS);
+
+      (() => helpers.checkClientAuthOptions('systemstore', { alias: undefined }))
+        .should.not.throw();
+    });
+
+    it('returns an object with null alias when mode is "systemstore" and no options object is given', () => {
+      helpers.checkClientAuthOptions('systemstore').should.eql({
+        alias: null,
+        pkcsPath: '',
+        pkcsPassword: ''
+      });
+    });
+
+    it('throws an error when mode is "file" and pkcsPath is not a string', () => {
+      (() => helpers.checkClientAuthOptions('file', {
+        pkcsPath: undefined,
+        pkcsPassword: 'password'
+      })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PATH);
+
+      (() => helpers.checkClientAuthOptions('file', {
+        pkcsPath: 1,
+        pkcsPassword: 'password'
+      })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PATH);
+    });
+
+    it('throws an error when mode is "file" and pkcsPassword is not a string', () => {
+      (() => helpers.checkClientAuthOptions('file', {
+        pkcsPath: 'path',
+        pkcsPassword: undefined
+      })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PASSWORD);
+
+      (() => helpers.checkClientAuthOptions('file', {
+        pkcsPath: 'path',
+        pkcsPassword: 1
+      })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PASSWORD);
+    });
+  });
 })

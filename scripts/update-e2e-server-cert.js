@@ -30,13 +30,11 @@ const getCert = hostname => new Promise((resolve, reject) => {
   req.end();
 });
 
-console.log(`Updating test certificate from ${SOURCE_HOST}`);
+console.log(`Updating server certificate from ${SOURCE_HOST}`);
 
 getCert(SOURCE_HOST)
-  .then(cert => {
-    fs.writeFileSync(TARGET_PATH, cert.raw);
-  })
+  .then(cert => fs.writeFileSync(TARGET_PATH, cert.raw))
   .catch(error => {
-    console.error(`Updating test cert failed: ${error}`);
+    console.error(`Updating server certificate failed: ${error}`);
     process.exit(1);
   });

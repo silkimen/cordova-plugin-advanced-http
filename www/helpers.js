@@ -1,7 +1,7 @@
 module.exports = function init(jsUtil, cookieHandler, messages) {
   var validSerializers = ['urlencoded', 'json', 'utf8'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
-  var validClientAuthModes = ['none', 'systemstore', 'file'];
+  var validClientAuthModes = ['none', 'systemstore', 'buffer'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
 
   var interface = {
@@ -9,6 +9,7 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
     checkSerializer: checkSerializer,
     checkSSLCertMode: checkSSLCertMode,
     checkClientAuthMode: checkClientAuthMode,
+    checkClientAuthOptions: checkClientAuthOptions,
     checkForBlacklistedHeaderKey: checkForBlacklistedHeaderKey,
     checkForInvalidHeaderValue: checkForInvalidHeaderValue,
     injectCookieHandler: injectCookieHandler,
@@ -103,6 +104,54 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
 
   function checkClientAuthMode(mode) {
     return checkForValidStringValue(validClientAuthModes, mode, messages.INVALID_CLIENT_AUTH_MODE);
+  }
+
+  function checkClientAuthOptions(mode, options) {
+    options = options || {};
+
+    // none
+    if (mode === validClientAuthModes[0]) {
+      return {
+        alias: null,
+        rawPkcs: null,
+        pkcsPassword: ''
+      };
+    }
+
+    if (jsUtil.getTypeOf(options) !== 'Object') {
+      throw new Error(messages.INVALID_CLIENT_AUTH_OPTIONS);
+    }
+
+    // systemstore
+    if (mode === validClientAuthModes[1]) {
+      if (jsUtil.getTypeOf(options.alias) !== 'String'
+        && jsUtil.getTypeOf(options.alias) !== 'Undefined') {
+        throw new Error(messages.INVALID_CLIENT_AUTH_ALIAS);
+      }
+
+      return {
+        alias: jsUtil.getTypeOf(options.alias) === 'Undefined' ? null : options.alias,
+        rawPkcs: null,
+        pkcsPassword: ''
+      };
+    }
+
+    // buffer
+    if (mode === validClientAuthModes[2]) {
+      if (jsUtil.getTypeOf(options.rawPkcs) !== 'ArrayBuffer') {
+        throw new Error(messages.INVALID_CLIENT_AUTH_RAW_PKCS);
+      }
+
+      if (jsUtil.getTypeOf(options.pkcsPassword) !== 'String') {
+        throw new Error(messages.INVALID_CLIENT_AUTH_PKCS_PASSWORD);
+      }
+
+      return {
+        alias: null,
+        rawPkcs: options.rawPkcs,
+        pkcsPassword: options.pkcsPassword
+      }
+    }
   }
 
   function checkForBlacklistedHeaderKey(key) {

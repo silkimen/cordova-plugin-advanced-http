@@ -98,22 +98,23 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
   }
 
   function setClientAuthMode() {
-    // filePath is an optional param
     var mode = arguments[0];
+    var options = null;
     var success = arguments[1];
     var failure = arguments[2];
-    var filePath = null;
 
     if (arguments.length === 4) {
-      mode = arguments[0];
-      filePath = arguments[1];
+      options = arguments[1];
       success = arguments[2];
       failure = arguments[3];
     }
 
+    mode = helpers.checkClientAuthMode(mode);
+    options = helpers.checkClientAuthOptions(mode, options);
+
     helpers.handleMissingCallbacks(success, failure);
 
-    return exec(success, failure, 'CordovaHttpPlugin', 'setClientAuthMode', [helpers.checkClientAuthMode(mode), filePath]);
+    return exec(success, failure, 'CordovaHttpPlugin', 'setClientAuthMode', [mode, options.alias, options.rawPkcs, options.pkcsPassword]);
   }
 
   function disableRedirect(disable, success, failure) {

@@ -6,11 +6,15 @@ import android.security.KeyChain;
 import android.security.KeyChainAliasCallback;
 import android.util.Log;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 
 import org.apache.cordova.CallbackContext;
 
@@ -21,17 +25,22 @@ class CordovaClientAuth implements Runnable, KeyChainAliasCallback {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
   private String mode;
-  private String filePath;
+  private String aliasString;
+  private byte[] rawPkcs;
+  private String pkcsPassword;
   private Activity activity;
   private Context context;
   private TLSConfiguration tlsConfiguration;
   private CallbackContext callbackContext;
 
-  public CordovaClientAuth(final String mode, final String filePath, final Activity activity, final Context context,
-      final TLSConfiguration configContainer, final CallbackContext callbackContext) {
+  public CordovaClientAuth(final String mode, final String aliasString, final byte[] rawPkcs,
+      final String pkcsPassword, final Activity activity, final Context context, final TLSConfiguration configContainer,
+      final CallbackContext callbackContext) {
 
     this.mode = mode;
-    this.filePath = filePath;
+    this.aliasString = aliasString;
+    this.rawPkcs = rawPkcs;
+    this.pkcsPassword = pkcsPassword;
     this.activity = activity;
     this.tlsConfiguration = configContainer;
     this.context = context;
@@ -41,13 +50,43 @@ class CordovaClientAuth implements Runnable, KeyChainAliasCallback {
   @Override
   public void run() {
     if ("systemstore".equals(this.mode)) {
-      KeyChain.choosePrivateKeyAlias(this.activity, this, null, null, null, -1, null);
-    } else if ("file".equals(this.mode)) {
-      this.callbackContext.error("Not implemented, yet");
+      this.loadFromSystemStore();
+    } else if ("buffer".equals(this.mode)) {
+      this.loadFromBuffer();
     } else {
-      this.tlsConfiguration.setKeyManagers(null);
-      this.callbackContext.success();
+      this.disableClientAuth();
     }
+  }
+
+  private void loadFromSystemStore() {
+    if (this.aliasString == null) {
+      KeyChain.choosePrivateKeyAlias(this.activity, this, null, null, null, -1, null);
+    } else {
+      this.alias(this.aliasString);
+    }
+  }
+
+  private void loadFromBuffer() {
+    try {
+      KeyStore keyStore = KeyStore.getInstance("PKCS12");
+      String keyManagerFactoryAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
+      KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(keyManagerFactoryAlgorithm);
+      ByteArrayInputStream stream = new ByteArrayInputStream(this.rawPkcs);
+
+      keyStore.load(stream, this.pkcsPassword.toCharArray());
+      keyManagerFactory.init(keyStore, this.pkcsPassword.toCharArray());
+
+      this.tlsConfiguration.setKeyManagers(keyManagerFactory.getKeyManagers());
+      this.callbackContext.success();
+    } catch (Exception e) {
+      Log.e(TAG, "Couldn't load given PKCS12 container for authentication", e);
+      this.callbackContext.error("Couldn't load given PKCS12 container for authentication");
+    }
+  }
+
+  private void disableClientAuth() {
+    this.tlsConfiguration.setKeyManagers(null);
+    this.callbackContext.success();
   }
 
   @Override
@@ -63,10 +102,12 @@ class CordovaClientAuth implements Runnable, KeyChainAliasCallback {
 
       this.tlsConfiguration.setKeyManagers(new KeyManager[] { keyManager });
 
-      this.callbackContext.success();
+      this.callbackContext.success(alias);
     } catch (Exception e) {
-      Log.e(TAG, "Couldn't load private key and certificate pair for authentication", e);
-      this.callbackContext.error("Couldn't load private key and certificate pair for authentication");
+      Log.e(TAG, "Couldn't load private key and certificate pair with given alias \"" + alias + "\" for authentication",
+          e);
+      this.callbackContext.error(
+          "Couldn't load private key and certificate pair with given alias \"" + alias + "\" for authentication");
     }
   }
 }
