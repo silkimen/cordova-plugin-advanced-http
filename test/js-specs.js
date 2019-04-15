@@ -270,7 +270,7 @@ describe('Common helpers', function () {
     it('returns options object with empty values when mode is "none" and no options are given', () => {
       helpers.checkClientAuthOptions('none').should.eql({
         alias: null,
-        pkcsPath: '',
+        rawPkcs: null,
         pkcsPassword: ''
       });
     });
@@ -281,7 +281,7 @@ describe('Common helpers', function () {
         pkcsPath: 'myPath'
       }).should.eql({
         alias: null,
-        pkcsPath: '',
+        rawPkcs: null,
         pkcsPassword: ''
       });
     });
@@ -297,31 +297,31 @@ describe('Common helpers', function () {
     it('returns an object with null alias when mode is "systemstore" and no options object is given', () => {
       helpers.checkClientAuthOptions('systemstore').should.eql({
         alias: null,
-        pkcsPath: '',
+        rawPkcs: null,
         pkcsPassword: ''
       });
     });
 
-    it('throws an error when mode is "file" and pkcsPath is not a string', () => {
-      (() => helpers.checkClientAuthOptions('file', {
-        pkcsPath: undefined,
+    it('throws an error when mode is "buffer" and rawPkcs is not an array buffer', () => {
+      (() => helpers.checkClientAuthOptions('buffer', {
+        rawPkcs: undefined,
         pkcsPassword: 'password'
-      })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PATH);
+      })).should.throw(messages.INVALID_CLIENT_AUTH_RAW_PKCS);
 
-      (() => helpers.checkClientAuthOptions('file', {
+      (() => helpers.checkClientAuthOptions('buffer', {
         pkcsPath: 1,
         pkcsPassword: 'password'
-      })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PATH);
+      })).should.throw(messages.INVALID_CLIENT_AUTH_RAW_PKCS);
     });
 
-    it('throws an error when mode is "file" and pkcsPassword is not a string', () => {
-      (() => helpers.checkClientAuthOptions('file', {
-        pkcsPath: 'path',
+    it('throws an error when mode is "buffer" and pkcsPassword is not a string', () => {
+      (() => helpers.checkClientAuthOptions('buffer', {
+        rawPkcs: new ArrayBuffer(),
         pkcsPassword: undefined
       })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PASSWORD);
 
-      (() => helpers.checkClientAuthOptions('file', {
-        pkcsPath: 'path',
+      (() => helpers.checkClientAuthOptions('buffer', {
+        rawPkcs: new ArrayBuffer(),
         pkcsPassword: 1
       })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PASSWORD);
     });
