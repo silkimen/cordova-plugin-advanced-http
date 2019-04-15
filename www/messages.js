@@ -13,5 +13,6 @@ module.exports = {
   INVALID_CLIENT_AUTH_PKCS_PASSWORD: 'advanced-http: invalid PKCS12 container password, needs to be a string',
   INVALID_HEADERS_VALUE: 'advanced-http: header values must be strings',
   INVALID_TIMEOUT_VALUE: 'advanced-http: invalid timeout value, needs to be a positive numeric value',
+  INVALID_FOLLOW_REDIRECT_VALUE: 'advanced-http: invalid follow redirect value, needs to be a boolean value',
   INVALID_PARAMS_VALUE: 'advanced-http: invalid params object, needs to be an object with strings'
 };

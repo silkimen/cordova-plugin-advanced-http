@@ -178,6 +178,14 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
     return timeout;
   }
 
+  function checkFollowRedirectValue(follow) {
+    if (jsUtil.getTypeOf(follow) !== 'Boolean') {
+      throw new Error(messages.INVALID_FOLLOW_REDIRECT_VALUE);
+    }
+
+    return follow;
+  }
+
   function checkHeadersObject(headers) {
     return checkKeyValuePairObject(headers, ['String'], messages.INVALID_HEADERS_VALUE);
   }
@@ -295,6 +303,7 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
       method: checkHttpMethod(options.method || validHttpMethods[0]),
       serializer: checkSerializer(options.serializer || globals.serializer),
       timeout: checkTimeoutValue(options.timeout || globals.timeout),
+      followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
       headers: checkHeadersObject(options.headers || {}),
       params: checkParamsObject(options.params || {}),
       data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data,

@@ -12,11 +12,11 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     getCookieString: getCookieString,
     getRequestTimeout: getRequestTimeout,
     setRequestTimeout: setRequestTimeout,
+    disableRedirect: disableRedirect,
     // for being backward compatible
     setSSLCertMode: setServerTrustMode,
     setServerTrustMode: setServerTrustMode,
     setClientAuthMode: setClientAuthMode,
-    disableRedirect: disableRedirect,
     sendRequest: sendRequest,
     post: post,
     get: get,
@@ -91,6 +91,21 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     globalConfigs.timeout = timeout;
   }
 
+  function getFollowRedirect() {
+    return globalConfigs.followRedirect;
+  }
+
+  function setFollowRedirect(follow) {
+    globalConfigs.followRedirect = follow;
+  }
+
+  // @TODO replace this one by "setFollowRedirect()"
+  function disableRedirect(disable, success, failure) {
+    helpers.handleMissingCallbacks(success, failure);
+
+    return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [!!disable]);
+  }
+
   function setServerTrustMode(mode, success, failure) {
     helpers.handleMissingCallbacks(success, failure);
 
@@ -117,12 +132,6 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     return exec(success, failure, 'CordovaHttpPlugin', 'setClientAuthMode', [mode, options.alias, options.rawPkcs, options.pkcsPassword]);
   }
 
-  function disableRedirect(disable, success, failure) {
-    helpers.handleMissingCallbacks(success, failure);
-
-    return exec(success, failure, 'CordovaHttpPlugin', 'disableRedirect', [!!disable]);
-  }
-
   function sendRequest(url, options, success, failure) {
     helpers.handleMissingCallbacks(success, failure);
 
@@ -138,14 +147,14 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
       case 'put':
       case 'patch':
         var data = helpers.getProcessedData(options.data, options.serializer);
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout, options.followRedirect]);
       case 'upload':
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [url, headers, options.filePath, options.name, options.timeout]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [url, headers, options.filePath, options.name, options.timeout, options.followRedirect]);
       case 'download':
         var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));
-        return exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, headers, options.filePath, options.timeout]);
+        return exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, headers, options.filePath, options.timeout, options.followRedirect]);
       default:
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, headers, options.timeout]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, headers, options.timeout, options.followRedirect]);
     }
   }
 

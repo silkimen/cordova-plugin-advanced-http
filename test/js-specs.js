@@ -246,6 +246,14 @@ describe('Common helpers', function () {
     it('merges empty header sets correctly', () => {
       helpers.mergeHeaders({}, {}).should.eql({});
     });
+
+    it('merges ssimple header sets without collision correctly', () => {
+      helpers.mergeHeaders({ a: 1 }, { b: 2 }).should.eql({ a: 1, b: 2 });
+    });
+
+    it('merges header sets with collision correctly', () => {
+      helpers.mergeHeaders({ a: 1 }, { a: 2 }).should.eql({ a: 2 });
+    });
   });
 
   describe('getCookieHeader(url)', function () {
@@ -324,6 +332,27 @@ describe('Common helpers', function () {
         rawPkcs: new ArrayBuffer(),
         pkcsPassword: 1
       })).should.throw(messages.INVALID_CLIENT_AUTH_PKCS_PASSWORD);
+    });
+  });
+
+  describe('handleMissingOptions()', function () {
+    const jsUtil = require('../www/js-util');
+    const messages = require('../www/messages');
+    const helpers = require('../www/helpers')(jsUtil, null, messages);
+    const mockGlobals = {
+      headers: {},
+      serializer: 'urlencoded',
+      followRedirect: true,
+      timeout: 60.0,
+    }
+
+    it('adds missing "followRedirect" option correctly', () => {
+      helpers.handleMissingOptions({}, mockGlobals).should.include({ followRedirect: true });
+    });
+
+    it('throws an error when "followRedirect" option is not a boolean', () => {
+      (() => helpers.handleMissingOptions({ followRedirect: 1 }, mockGlobals))
+        .should.throw(messages.INVALID_FOLLOW_REDIRECT_VALUE);
     });
   });
 })
