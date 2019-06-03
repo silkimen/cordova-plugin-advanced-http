@@ -93,7 +93,7 @@ You can choose one of these:
 * `json`: send data as JSON encoded content in body (content type "application/json")
 * `utf8`: send data as plain UTF8 encoded string in body (content type "plain/text")
 
-You can also override the default content type headers by specifying your own headers (see [setHeader](#setHeader)).
+This defaults to `urlencoded`. You can also override the default content type headers by specifying your own headers (see [setHeader](#setHeader)).
 
 __Caution__: `urlencoded` does not support serializing deep structures whereas `json` does.
 
