@@ -101,12 +101,20 @@ function setHeaders(xhr, headers) {
 }
 
 function sendRequest(method, withData, opts, success, failure) {
-  var data = withData ? opts[1] : null;
-  var params = withData ? null : serializeParams(opts[1]);
-  var serializer = withData ? opts[2] : null;
-  var headers = withData ? opts[3] : opts[2];
-  var timeout = withData ? opts[4] : opts[3];
-  var url = params ? opts[0] + '?' + params : opts[0];
+  var data, serializer, headers, timeout, followRedirect;
+  var url = opts[0];
+
+  if (withData) {
+    data = opts[1];
+    serializer = opts[2];
+    headers = opts[3];
+    timeout = opts[4];
+    followRedirect = opts[5];
+  } else {
+    headers = opts[1];
+    timeout = opts[2];
+    followRedirect = opts[3];
+  }
 
   var processedData = null;
   var xhr = new XMLHttpRequest();
@@ -115,6 +123,10 @@ function sendRequest(method, withData, opts, success, failure) {
 
   if (headers.Cookie && headers.Cookie.length > 0) {
     return failure('advanced-http: custom cookies not supported on browser platform');
+  }
+
+  if (!followRedirect) {
+    return failure('advanced-http: disabling follow redirect not supported on browser platform');
   }
 
   switch (serializer) {
@@ -160,23 +172,23 @@ function sendRequest(method, withData, opts, success, failure) {
 }
 
 var browserInterface = {
-  post: function (success, failure, opts) {
-    return sendRequest('post', true, opts, success, failure);
-  },
   get: function (success, failure, opts) {
     return sendRequest('get', false, opts, success, failure);
+  },
+  head: function (success, failure, opts) {
+    return sendRequest('head', false, opts, success, failure);
+  },
+  delete: function (success, failure, opts) {
+    return sendRequest('delete', false, opts, success, failure);
+  },
+  post: function (success, failure, opts) {
+    return sendRequest('post', true, opts, success, failure);
   },
   put: function (success, failure, opts) {
     return sendRequest('put', true, opts, success, failure);
   },
   patch: function (success, failure, opts) {
     return sendRequest('patch', true, opts, success, failure);
-  },
-  delete: function (success, failure, opts) {
-    return sendRequest('delete', false, opts, success, failure);
-  },
-  head: function (success, failure, opts) {
-    return sendRequest('head', false, opts, success, failure);
   },
   uploadFile: function (success, failure, opts) {
     return failure('advanced-http: function "uploadFile" not supported on browser platform');
@@ -189,9 +201,6 @@ var browserInterface = {
   },
   setClientAuthMode: function (success, failure, opts) {
     return failure('advanced-http: function "setClientAuthMode" not supported on browser platform');
-  },
-  disableRedirect: function (success, failure, opts) {
-    return failure('advanced-http: function "disableRedirect" not supported on browser platform');
   }
 };
 

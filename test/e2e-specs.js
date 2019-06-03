@@ -3,6 +3,11 @@ const hooks = {
     cordova.plugin.http.clearCookies();
 
     helpers.enableFollowingRedirect(function() {
+      // server trust mode is not supported on brpwser platform
+      if (cordova.platformId === 'browser') {
+        return resolve();
+      }
+
       helpers.setDefaultServerTrustMode(function () {
         // @TODO: not ready yet
         // helpers.setNoneClientAuthMode(resolve, reject);
