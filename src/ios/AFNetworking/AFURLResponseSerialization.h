@@ -308,4 +308,11 @@ FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLResponseErrorK
 
 FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLResponseDataErrorKey;
 
+/**
+`AFNetworkingOperationFailingURLResponseBodyErrorKey`
+The corresponding value is an `NSString` containing the decoded error message.
+ */
+
+FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLResponseBodyErrorKey;
+
 NS_ASSUME_NONNULL_END

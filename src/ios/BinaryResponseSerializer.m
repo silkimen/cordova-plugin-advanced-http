@@ -1,4 +1,4 @@
-#import "TextResponseSerializer.h"
+#import "BinaryResponseSerializer.h"
 
 static NSError * AFErrorWithUnderlyingError(NSError *error, NSError *underlyingError) {
   if (!error) {
@@ -25,10 +25,10 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
   return NO;
 }
 
-@implementation TextResponseSerializer
+@implementation BinaryResponseSerializer
 
 + (instancetype)serializer {
-  TextResponseSerializer *serializer = [[self alloc] init];
+  BinaryResponseSerializer *serializer = [[self alloc] init];
   return serializer;
 }
 
@@ -80,28 +80,10 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
 
 - (BOOL)validateResponse:(NSHTTPURLResponse *)response
                     data:(NSData *)data
-                 decoded:(NSString **)decoded
                    error:(NSError * __autoreleasing *)error
 {
-  BOOL responseIsValid = YES;
-  NSError *validationError = nil;
-
   if (response && [response isKindOfClass:[NSHTTPURLResponse class]]) {
-    if (data) {
-      *decoded = [self decodeResponseData:data withEncoding:[self getEncoding:response]];
-    }
-
-    if (data && !*decoded) {
-      NSMutableDictionary *mutableUserInfo = [@{
-        NSURLErrorFailingURLErrorKey:[response URL],
-        AFNetworkingOperationFailingURLResponseErrorKey: response,
-        AFNetworkingOperationFailingURLResponseDataErrorKey: data,
-        AFNetworkingOperationFailingURLResponseBodyErrorKey: @"Could not decode response data due to invalid or unknown charset encoding",
-      } mutableCopy];
-
-      validationError = AFErrorWithUnderlyingError([NSError errorWithDomain:AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo], validationError);
-      responseIsValid = NO;
-    } else if (self.acceptableStatusCodes && ![self.acceptableStatusCodes containsIndex:(NSUInteger)response.statusCode] && [response URL]) {
+    if (self.acceptableStatusCodes && ![self.acceptableStatusCodes containsIndex:(NSUInteger)response.statusCode] && [response URL]) {
       NSMutableDictionary *mutableUserInfo = [@{
         NSLocalizedDescriptionKey: [NSString stringWithFormat:NSLocalizedStringFromTable(@"Request failed: %@ (%ld)", @"AFNetworking", nil), [NSHTTPURLResponse localizedStringForStatusCode:response.statusCode], (long)response.statusCode],
         NSURLErrorFailingURLErrorKey: [response URL],
@@ -110,19 +92,20 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
 
       if (data) {
         mutableUserInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] = data;
-        mutableUserInfo[AFNetworkingOperationFailingURLResponseBodyErrorKey] = *decoded;
+
+        // trying to decode error message in body
+        mutableUserInfo[AFNetworkingOperationFailingURLResponseBodyErrorKey] = [self decodeResponseData:data withEncoding:[self getEncoding:response]];
       }
 
-      validationError = AFErrorWithUnderlyingError([NSError errorWithDomain:AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo], validationError);
-      responseIsValid = NO;
+      if (error) {
+        *error = [NSError errorWithDomain:AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo];
+      }
+
+      return NO;
     }
   }
 
-  if (error && !responseIsValid) {
-    *error = validationError;
-  }
-
-  return responseIsValid;
+  return YES;
 }
 
 #pragma mark - AFURLResponseSerialization
@@ -131,15 +114,13 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
                            data:(NSData *)data
                           error:(NSError *__autoreleasing *)error
 {
-  NSString* decoded = nil;
-
-  if (![self validateResponse:(NSHTTPURLResponse *)response data:data decoded:&decoded error:error]) {
+  if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
     if (!error || AFErrorOrUnderlyingErrorHasCodeInDomain(*error, NSURLErrorCannotDecodeContentData, AFURLResponseSerializationErrorDomain)) {
       return nil;
     }
   }
 
-  return decoded;
+  return [data base64EncodedStringWithOptions:0];
 }
 
 @end

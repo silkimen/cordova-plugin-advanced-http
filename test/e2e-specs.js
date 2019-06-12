@@ -642,7 +642,7 @@ const tests = [
     }
   },
   {
-    description: 'should fetch binary correctly when response type "arraybuffer" is given',
+    description: 'should fetch binary correctly when response type is "arraybuffer"',
     expected: 'resolved: {"hash":-1032603775,"byteLength":35588}',
     func: function (resolve, reject) {
       var url = 'https://httpbin.org/image/jpeg';
@@ -659,6 +659,20 @@ const tests = [
       result.type.should.be.equal('resolved');
       result.data.hash.should.be.equal(-1032603775);
       result.data.byteLength.should.be.equal(35588);
+    }
+  },
+  {
+    description: 'should decode error body even if response type is "arraybuffer"',
+    expected: 'rejected: {"status": 418, ...',
+    func: function (resolve, reject) {
+      var url = 'https://httpbin.org/status/418';
+      var options = { method: 'get', responseType: 'arraybuffer' };
+      cordova.plugin.http.sendRequest(url, options, resolve, reject);
+    },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.status.should.be.equal(418);
+      result.data.error.should.be.equal("\n    -=[ teapot ]=-\n\n       _...._\n     .'  _ _ `.\n    | .\"` ^ `\". _,\n    \\_;`\"---\"`|//\n      |       ;/\n      \\_     _/\n        `\"\"\"`\n");
     }
   }
   // @TODO: not ready yet
