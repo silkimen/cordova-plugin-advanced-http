@@ -83,9 +83,10 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     JSONObject headers = args.getJSONObject(1);
     int timeout = args.getInt(2) * 1000;
     boolean followRedirect = args.getBoolean(3);
+    String responseType = args.getString(4);
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, headers, timeout, followRedirect,
-        this.tlsConfiguration, callbackContext);
+        responseType, this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -101,9 +102,10 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     JSONObject headers = args.getJSONObject(3);
     int timeout = args.getInt(4) * 1000;
     boolean followRedirect = args.getBoolean(5);
+    String responseType = args.getString(6);
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
-        timeout, followRedirect, this.tlsConfiguration, callbackContext);
+        timeout, followRedirect, responseType, this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(request);
 
@@ -117,9 +119,10 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     String uploadName = args.getString(3);
     int timeout = args.getInt(4) * 1000;
     boolean followRedirect = args.getBoolean(5);
+    String responseType = args.getString(6);
 
     CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePath, uploadName, timeout, followRedirect,
-        this.tlsConfiguration, callbackContext);
+        responseType, this.tlsConfiguration, callbackContext);
 
     cordova.getThreadPool().execute(upload);
 

@@ -30,6 +30,7 @@ abstract class CordovaHttpBase implements Runnable {
   protected String method;
   protected String url;
   protected String serializer = "none";
+  protected String responseType;
   protected Object data;
   protected JSONObject headers;
   protected int timeout;
@@ -38,7 +39,8 @@ abstract class CordovaHttpBase implements Runnable {
   protected CallbackContext callbackContext;
 
   public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout,
-      boolean followRedirects, TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
+      boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
+      CallbackContext callbackContext) {
 
     this.method = method;
     this.url = url;
@@ -47,18 +49,20 @@ abstract class CordovaHttpBase implements Runnable {
     this.headers = headers;
     this.timeout = timeout;
     this.followRedirects = followRedirects;
+    this.responseType = responseType;
     this.tlsConfiguration = tlsConfiguration;
     this.callbackContext = callbackContext;
   }
 
   public CordovaHttpBase(String method, String url, JSONObject headers, int timeout, boolean followRedirects,
-      TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
+      String responseType, TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
 
     this.method = method;
     this.url = url;
     this.headers = headers;
     this.timeout = timeout;
     this.followRedirects = followRedirects;
+    this.responseType = responseType;
     this.tlsConfiguration = tlsConfiguration;
     this.callbackContext = callbackContext;
   }
@@ -158,17 +162,19 @@ abstract class CordovaHttpBase implements Runnable {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     request.receive(outputStream);
 
-    ByteBuffer rawOutput = ByteBuffer.wrap(outputStream.toByteArray());
-    String decodedBody = HttpBodyDecoder.decodeBody(rawOutput, request.charset());
-
     response.setStatus(request.code());
     response.setUrl(request.url().toString());
     response.setHeaders(request.headers());
 
     if (request.code() >= 200 && request.code() < 300) {
-      response.setBody(decodedBody);
+      if ("text".equals(this.responseType)) {
+        String decoded = HttpBodyDecoder.decodeBody(outputStream.toByteArray(), request.charset());
+        response.setBody(decoded);
+      } else {
+        response.setData(outputStream.toByteArray());
+      }
     } else {
-      response.setErrorMessage(decodedBody);
+      response.setErrorMessage(HttpBodyDecoder.decodeBody(outputStream.toByteArray(), request.charset()));
     }
   }
 }

@@ -62,6 +62,18 @@ const helpers = {
         }, done);
       }, done);
     }, done);
+  },
+  // adopted from: https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+  hashArrayBuffer: function (buffer) {
+    var hash = 0;
+    var byteArray = new Uint8Array(buffer);
+
+    for (var i = 0; i < byteArray.length; i++) {
+      hash  = ((hash << 5) - hash) + byteArray[i];
+      hash |= 0; // Convert to 32bit integer
+    }
+
+    return hash;
   }
 };
 
@@ -629,6 +641,26 @@ const tests = [
       result.data.content.should.be.equal("<?xml version='1.0' encoding='us-ascii'?>\n\n<!--  A SAMPLE set of slides  -->\n\n<slideshow \n    title=\"Sample Slide Show\"\n    date=\"Date of publication\"\n    author=\"Yours Truly\"\n    >\n\n    <!-- TITLE SLIDE -->\n    <slide type=\"all\">\n      <title>Wake up to WonderWidgets!</title>\n    </slide>\n\n    <!-- OVERVIEW -->\n    <slide type=\"all\">\n        <title>Overview</title>\n        <item>Why <em>WonderWidgets</em> are great</item>\n        <item/>\n        <item>Who <em>buys</em> WonderWidgets</item>\n    </slide>\n\n</slideshow>");
     }
   },
+  {
+    description: 'should fetch binary correctly when response type "arraybuffer" is given',
+    expected: 'resolved: {"hash":-1032603775,"byteLength":35588}',
+    func: function (resolve, reject) {
+      var url = 'https://httpbin.org/image/jpeg';
+      var options = { method: 'get', responseType: 'arraybuffer' };
+      var success = function (response) {
+        resolve({
+          hash: helpers.hashArrayBuffer(response.data),
+          byteLength: response.data.byteLength
+        });
+      };
+      cordova.plugin.http.sendRequest(url, options, success, reject);
+    },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.hash.should.be.equal(-1032603775);
+      result.data.byteLength.should.be.equal(35588);
+    }
+  }
   // @TODO: not ready yet
   // {
   //   description: 'should authenticate correctly when client cert auth is configured with a PKCS12 container',

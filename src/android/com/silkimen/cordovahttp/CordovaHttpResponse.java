@@ -1,5 +1,7 @@
 package com.silkimen.cordovahttp;
 
+import java.nio.ByteBuffer;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,15 +11,18 @@ import org.json.JSONObject;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Base64;
 
 class CordovaHttpResponse {
   private int status;
   private String url;
   private Map<String, List<String>> headers;
   private String body;
+  private byte[] rawData;
   private JSONObject fileEntry;
   private boolean hasFailed;
   private boolean isFileOperation;
+  private boolean isRawResponse;
   private String error;
 
   public void setStatus(int status) {
@@ -34,6 +39,11 @@ class CordovaHttpResponse {
 
   public void setBody(String body) {
     this.body = body;
+  }
+
+  public void setData(byte[] rawData) {
+    this.isRawResponse = true;
+    this.rawData = rawData;
   }
 
   public void setFileEntry(JSONObject entry) {
@@ -61,6 +71,9 @@ class CordovaHttpResponse {
     } else if (this.isFileOperation) {
       json.put("headers", new JSONObject(getFilteredHeaders()));
       json.put("file", this.fileEntry);
+    } else if (this.isRawResponse) {
+      json.put("headers", new JSONObject(getFilteredHeaders()));
+      json.put("data", Base64.encodeToString(this.rawData, Base64.DEFAULT));
     } else {
       json.put("headers", new JSONObject(getFilteredHeaders()));
       json.put("data", this.body);

@@ -10,21 +10,28 @@ import java.nio.charset.MalformedInputException;
 public class HttpBodyDecoder {
   private static final String[] ACCEPTED_CHARSETS = new String[] { "UTF-8", "ISO-8859-1" };
 
-  public static String decodeBody(ByteBuffer rawOutput, String charsetName)
+  public static String decodeBody(byte[] body, String charsetName)
+      throws CharacterCodingException, MalformedInputException {
+
+    return decodeBody(ByteBuffer.wrap(body), charsetName);
+  }
+
+  public static String decodeBody(ByteBuffer body, String charsetName)
       throws CharacterCodingException, MalformedInputException {
 
     if (charsetName == null) {
-      return tryDecodeByteBuffer(rawOutput);
+      return tryDecodeByteBuffer(body);
+    } else {
+      return decodeByteBuffer(body, charsetName);
     }
-
-    return decodeByteBuffer(rawOutput, charsetName);
   }
 
-  private static String tryDecodeByteBuffer(ByteBuffer rawOutput) throws CharacterCodingException, MalformedInputException {
+  private static String tryDecodeByteBuffer(ByteBuffer buffer)
+      throws CharacterCodingException, MalformedInputException {
 
     for (int i = 0; i < ACCEPTED_CHARSETS.length - 1; i++) {
       try {
-        return decodeByteBuffer(rawOutput, ACCEPTED_CHARSETS[i]);
+        return decodeByteBuffer(buffer, ACCEPTED_CHARSETS[i]);
       } catch (MalformedInputException e) {
         continue;
       } catch (CharacterCodingException e) {
@@ -32,13 +39,13 @@ public class HttpBodyDecoder {
       }
     }
 
-    return decodeBody(rawOutput, ACCEPTED_CHARSETS[ACCEPTED_CHARSETS.length - 1]);
+    return decodeBody(buffer, ACCEPTED_CHARSETS[ACCEPTED_CHARSETS.length - 1]);
   }
 
-  private static String decodeByteBuffer(ByteBuffer rawOutput, String charsetName)
+  private static String decodeByteBuffer(ByteBuffer buffer, String charsetName)
       throws CharacterCodingException, MalformedInputException {
 
-    return createCharsetDecoder(charsetName).decode(rawOutput).toString();
+    return createCharsetDecoder(charsetName).decode(buffer).toString();
   }
 
   private static CharsetDecoder createCharsetDecoder(String charsetName) {
