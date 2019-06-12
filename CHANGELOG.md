@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.10
+
+- Fixed #218: headers are used as params on browser platform
+
 ## 2.0.9
 
 - Fixed #204: broken support for cordova-android  < 7.0
