@@ -101,7 +101,7 @@ function setHeaders(xhr, headers) {
 }
 
 function sendRequest(method, withData, opts, success, failure) {
-  var data, serializer, headers, timeout, followRedirect;
+  var data, serializer, headers, timeout, followRedirect, responseType;
   var url = opts[0];
 
   if (withData) {
@@ -110,10 +110,13 @@ function sendRequest(method, withData, opts, success, failure) {
     headers = opts[3];
     timeout = opts[4];
     followRedirect = opts[5];
+    responseType = opts[6];
   } else {
     headers = opts[1];
     timeout = opts[2];
     followRedirect = opts[3];
+    responseType = opts[4];
+
   }
 
   var processedData = null;
@@ -152,6 +155,7 @@ function sendRequest(method, withData, opts, success, failure) {
   }
 
   xhr.timeout = timeout * 1000;
+  xhr.responseType = responseType;
   setHeaders(xhr, headers);
 
   xhr.onerror = xhr.ontimeout = function () {

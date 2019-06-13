@@ -202,6 +202,9 @@ The options object contains following keys:
 * `data`: payload to be send to the server (only applicable on `post`, `put` or `patch` methods)
 * `params`: query params to be appended to the URL (only applicable on `get`, `head`, `delete`, `upload` or `download` methods)
 * `serializer`: data serializer to be used (only applicable on `post`, `put` or `patch` methods), defaults to global serializer value, see [setDataSerializer](#setDataSerializer) for supported values
+* `responseType`: expected response type, defaults to `text`, needs to be one of the following values:
+  * `text` use this for all kind of text responses (e.g. JSON, XML, HTML, plain text, etc.)
+  * `arraybuffer` use this one for binary responses
 * `timeout`: timeout value for the request in seconds, defaults to global timeout value
 * `followRedirect`: enable or disable automatically following redirects
 * `headers`: headers object (key value pair), will be merged with global values
