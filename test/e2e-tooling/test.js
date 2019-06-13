@@ -1,11 +1,17 @@
-require('./helpers/setup');
-
 const wd = require('wd');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const apps = require('./helpers/apps');
 const caps = Object.assign({}, require('./helpers/caps'));
 const serverConfig = require('./helpers/server');
 const testDefinitions = require('../e2e-specs');
 const pkgjson = require('../../package.json');
+
+chai.use(chaiAsPromised);
+chaiAsPromised.transferPromiseness = wd.transferPromiseness;
+global.should = chai.should();
+
+require('colors');
 
 describe('Advanced HTTP', function() {
   const isDevice = process.argv.includes('--device');
@@ -49,7 +55,7 @@ describe('Advanced HTTP', function() {
         if (value === 'finished') {
           resolve();
         } else if (Date.now() > timeoutTimestamp) {
-          reject('Test function timed out!');
+          reject(new Error('Test function timed out!'));
         } else {
           setTimeout(checkIfFinished, 500);
         }

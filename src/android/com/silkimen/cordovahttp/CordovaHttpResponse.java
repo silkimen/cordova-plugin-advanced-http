@@ -56,13 +56,15 @@ class CordovaHttpResponse {
     json.put("status", this.status);
     json.put("url", this.url);
 
+    if (this.headers != null && !this.headers.isEmpty()) {
+      json.put("headers", new JSONObject(getFilteredHeaders()));
+    }
+
     if (this.hasFailed) {
       json.put("error", this.error);
     } else if (this.isFileOperation) {
-      json.put("headers", new JSONObject(getFilteredHeaders()));
       json.put("file", this.fileEntry);
     } else {
-      json.put("headers", new JSONObject(getFilteredHeaders()));
       json.put("data", this.body);
     }
 
@@ -71,10 +73,6 @@ class CordovaHttpResponse {
 
   private Map<String, String> getFilteredHeaders() throws JSONException {
     Map<String, String> filteredHeaders = new HashMap<String, String>();
-
-    if (this.headers == null || this.headers.isEmpty()) {
-      return filteredHeaders;
-    }
 
     for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
       String key = entry.getKey();

@@ -629,6 +629,60 @@ const tests = [
       result.data.content.should.be.equal("<?xml version='1.0' encoding='us-ascii'?>\n\n<!--  A SAMPLE set of slides  -->\n\n<slideshow \n    title=\"Sample Slide Show\"\n    date=\"Date of publication\"\n    author=\"Yours Truly\"\n    >\n\n    <!-- TITLE SLIDE -->\n    <slide type=\"all\">\n      <title>Wake up to WonderWidgets!</title>\n    </slide>\n\n    <!-- OVERVIEW -->\n    <slide type=\"all\">\n        <title>Overview</title>\n        <item>Why <em>WonderWidgets</em> are great</item>\n        <item/>\n        <item>Who <em>buys</em> WonderWidgets</item>\n    </slide>\n\n</slideshow>");
     }
   },
+  {
+    description: 'should return header object when request failed due to non-success response from server #221',
+    expected: 'rejected:',
+    func: function (resolve, reject) { cordova.plugin.http.get('https://httpbin.org/status/418', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.headers.should.be.an('object');
+    }
+  },
+  {
+    description: 'should return status code when request failed due to non-success response from server',
+    expected: 'rejected:',
+    func: function (resolve, reject) { cordova.plugin.http.get('https://httpbin.org/status/418', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.status.should.be.equal(418);
+    }
+  },
+  {
+    description: 'should return url string when request failed due to non-success response from server',
+    expected: 'rejected:',
+    func: function (resolve, reject) { cordova.plugin.http.get('https://httpbin.org/status/418', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.url.should.be.equal('https://httpbin.org/status/418');
+    }
+  },
+  {
+    description: 'shouldn\'t return header object when request failed before receiving response from server',
+    expected: 'rejected:',
+    func: function (resolve, reject) { cordova.plugin.http.get('https://not_existing_url', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      should.equal(result.data.headers, undefined);
+    }
+  },
+  {
+    description: 'should return status code when request failed before receiving response from server',
+    expected: 'rejected:',
+    func: function (resolve, reject) { cordova.plugin.http.get('https://not_existing_url', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.status.should.be.a('number');
+    }
+  },
+  {
+    description: 'shouldn\'t return url string when request failed before receiving response from server',
+    expected: 'rejected:',
+    func: function (resolve, reject) { cordova.plugin.http.get('https://not_existing_url', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      should.equal(result.data.url, undefined);
+    }
+  }
   // @TODO: not ready yet
   // {
   //   description: 'should authenticate correctly when client cert auth is configured with a PKCS12 container',

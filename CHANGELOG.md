@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.11
+
+- Fixed #221: headers not set on Android when request fails due to non-success status code
+
 ## 2.0.10
 
 - Fixed #218: headers are used as params on browser platform
