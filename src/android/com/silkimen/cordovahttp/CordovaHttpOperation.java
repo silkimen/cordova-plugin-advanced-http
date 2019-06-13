@@ -10,14 +10,16 @@ import org.json.JSONObject;
 
 class CordovaHttpOperation extends CordovaHttpBase {
   public CordovaHttpOperation(String method, String url, String serializer, Object data, JSONObject headers,
-      int timeout, boolean followRedirects, TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
+      int timeout, boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
+      CallbackContext callbackContext) {
 
-    super(method, url, serializer, data, headers, timeout, followRedirects, tlsConfiguration, callbackContext);
+    super(method, url, serializer, data, headers, timeout, followRedirects, responseType, tlsConfiguration,
+        callbackContext);
   }
 
   public CordovaHttpOperation(String method, String url, JSONObject headers, int timeout, boolean followRedirects,
-      TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
+      String responseType, TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
 
-    super(method, url, headers, timeout, followRedirects, tlsConfiguration, callbackContext);
+    super(method, url, headers, timeout, followRedirects, responseType, tlsConfiguration, callbackContext);
   }
 }

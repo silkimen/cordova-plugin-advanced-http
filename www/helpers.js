@@ -1,8 +1,9 @@
-module.exports = function init(jsUtil, cookieHandler, messages) {
+module.exports = function init(jsUtil, cookieHandler, messages, base64) {
   var validSerializers = ['urlencoded', 'json', 'utf8'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
   var validClientAuthModes = ['none', 'systemstore', 'buffer'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
+  var validResponseTypes = ['text','arraybuffer'];
 
   var interface = {
     b64EncodeUnicode: b64EncodeUnicode,
@@ -15,6 +16,7 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
     checkTimeoutValue: checkTimeoutValue,
     checkFollowRedirectValue: checkFollowRedirectValue,
     injectCookieHandler: injectCookieHandler,
+    injectRawResponseHandler: injectRawResponseHandler,
     injectFileEntryHandler: injectFileEntryHandler,
     getMergedHeaders: getMergedHeaders,
     getProcessedData: getProcessedData,
@@ -28,6 +30,7 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
     interface.checkForValidStringValue = checkForValidStringValue;
     interface.checkKeyValuePairObject = checkKeyValuePairObject;
     interface.checkHttpMethod = checkHttpMethod;
+    interface.checkResponseType = checkResponseType;
     interface.checkHeadersObject = checkHeadersObject;
     interface.checkParamsObject = checkParamsObject;
     interface.resolveCookieString = resolveCookieString;
@@ -93,6 +96,10 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
 
   function checkHttpMethod(method) {
     return checkForValidStringValue(validHttpMethods, method, messages.INVALID_HTTP_METHOD);
+  }
+
+  function checkResponseType(type) {
+    return checkForValidStringValue(validResponseTypes, type, messages.INVALID_RESPONSE_TYPE);
   }
 
   function checkSerializer(serializer) {
@@ -227,6 +234,17 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
     }
   }
 
+  function injectRawResponseHandler(responseType, cb) {
+    return function (response) {
+      // arraybuffer
+      if (responseType === validResponseTypes[1]) {
+        response.data = base64.toArrayBuffer(response.data);
+      }
+
+      cb(response);
+    }
+  }
+
   function injectFileEntryHandler(cb) {
     return function (response) {
       cb(createFileEntry(response.file));
@@ -302,6 +320,7 @@ module.exports = function init(jsUtil, cookieHandler, messages) {
 
     return {
       method: checkHttpMethod(options.method || validHttpMethods[0]),
+      responseType: checkResponseType(options.responseType || validResponseTypes[0]),
       serializer: checkSerializer(options.serializer || globals.serializer),
       timeout: checkTimeoutValue(options.timeout || globals.timeout),
       followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
