@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0
+
+- Feature #216: Support for response type `arraybuffer`
+- Feature #171: Support for response type `blob`
+
 ## 2.0.11
 
 - Fixed #221: headers not set on Android when request fails due to non-success status code

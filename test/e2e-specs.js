@@ -697,12 +697,13 @@ const tests = [
   },
   {
     description: 'should fetch binary correctly when response type is "arraybuffer"',
-    expected: 'resolved: {"hash":-1032603775,"byteLength":35588}',
+    expected: 'resolved: {"isArrayBuffer:true,"hash":-1032603775,"byteLength":35588}',
     func: function (resolve, reject) {
       var url = 'https://httpbin.org/image/jpeg';
       var options = { method: 'get', responseType: 'arraybuffer' };
       var success = function (response) {
         resolve({
+          isArrayBuffer: response.data.constructor === ArrayBuffer,
           hash: helpers.hashArrayBuffer(response.data),
           byteLength: response.data.byteLength
         });
@@ -711,7 +712,30 @@ const tests = [
     },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('resolved');
+      result.data.isArrayBuffer.should.be.equal(true);
       result.data.hash.should.be.equal(-1032603775);
+      result.data.byteLength.should.be.equal(35588);
+    }
+  },
+  {
+    description: 'should fetch binary correctly when response type is "blob"',
+    expected: 'resolved: {"isBlob":true,byteLength":35588}',
+    func: function (resolve, reject) {
+      var url = 'https://httpbin.org/image/jpeg';
+      var options = { method: 'get', responseType: 'blob' };
+      var success = function (response) {
+        resolve({
+          isBlob: response.data.constructor === Blob,
+          type: response.data.type,
+          byteLength: response.data.size
+        });
+      };
+      cordova.plugin.http.sendRequest(url, options, success, reject);
+    },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.isBlob.should.be.equal(true);
+      result.data.type.should.be.equal('image/jpeg');
       result.data.byteLength.should.be.equal(35588);
     }
   },
