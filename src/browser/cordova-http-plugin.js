@@ -52,11 +52,19 @@ function deserializeResponseHeaders(headers) {
   return headerMap;
 }
 
+function getResponseData(xhr) {
+  if (xhr.responseType !== 'text' || jsUtil.getTypeOf(xhr.responseText) !== 'String') {
+    return xhr.response;
+  }
+
+  return xhr.responseText;
+}
+
 function createXhrSuccessObject(xhr) {
   return {
     url: xhr.responseURL,
     status: xhr.status,
-    data: jsUtil.getTypeOf(xhr.responseText) === 'String' ? xhr.responseText : xhr.response,
+    data: getResponseData(xhr),
     headers: deserializeResponseHeaders(xhr.getAllResponseHeaders())
   };
 }
@@ -65,7 +73,7 @@ function createXhrFailureObject(xhr) {
   var obj = {};
 
   obj.headers = xhr.getAllResponseHeaders();
-  obj.error = jsUtil.getTypeOf(xhr.responseText) === 'String' ? xhr.responseText : xhr.response;
+  obj.error = getResponseData(xhr);
   obj.error = obj.error || 'advanced-http: please check browser console for error messages';
 
   if (xhr.responseURL) obj.url = xhr.responseURL;

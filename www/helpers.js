@@ -236,6 +236,13 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64) {
 
   function injectRawResponseHandler(responseType, cb) {
     return function (response) {
+      var dataType = jsUtil.getTypeOf(response.data);
+
+      // don't need post-processing if it's already binary type (on browser platform)
+      if (dataType === 'ArrayBuffer' || dataType === 'Blob') {
+        return cb(response);
+      }
+
       // arraybuffer
       if (responseType === validResponseTypes[1]) {
         var buffer = base64.toArrayBuffer(response.data);

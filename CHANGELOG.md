@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1
+
+- Fixed #224: response type "arraybuffer" and "blob" not working on browser platform
+
 ## 2.1.0
 
 - Feature #216: Support for response type `arraybuffer`
