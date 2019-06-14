@@ -4,6 +4,7 @@
 
 - Feature #216: Support for response type `arraybuffer`
 - Feature #171: Support for response type `blob`
+- Feature #205: Add preference for configuring OKHTTP version (thanks RougeCiel)
 
 ## 2.0.11
 
