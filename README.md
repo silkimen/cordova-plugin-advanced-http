@@ -192,8 +192,10 @@ Remove all cookies associated with a given URL.
 cordova.plugin.http.removeCookies(url, callback);
 ```
 
-### sendRequest
-Execute a HTTP request.  Takes a URL and an options object. This is the internally used implementation of the following shorthand functions ([post](#post), [get](#get), [put](#put), [patch](#patch), [delete](#delete), [head](#head), [uploadFile](#uploadFile) and [downloadFile](#downloadFile)). You can use this function, if you want to override global settings for each single request.
+### sendRequest<a name="sendRequest"></a>
+Execute a HTTP request.  Takes a URL and an options object. This is the internally used implementation of the following shorthand functions ([post](#post), [get](#get), [put](#put), [patch](#patch), [delete](#delete), [head](#head), [uploadFile](#uploadFile) and [downloadFile](#downloadFile)). You can use this function, if you want to override global settings for each single request. Check the documentation of the respective shorthand function for details on what is returned on success and failure.
+
+:warning: You need to encode the base URL yourself if it contains special characters like whitespaces. You can use `encodeURI()` for this purpose.
 
 The options object contains following keys:
 
@@ -235,6 +237,18 @@ cordova.plugin.http.sendRequest('https://google.com/', options, function(respons
 
 ### post<a name="post"></a>
 Execute a POST request.  Takes a URL, data, and headers.
+
+```js
+cordova.plugin.http.post('https://google.com/', {
+  test: 'testString'
+}, {
+  Authorization: 'OAuth2: token'
+}, function(response) {
+  console.log(response.status);
+}, function(response) {
+  console.error(response.error);
+});
+```
 
 #### success
 The success function receives a response object with 4 properties: status, data, url, and headers.  **status** is the HTTP response code as numeric value. **data** is the response from the server as a string. **url** is the final URL obtained after any redirects as a string. **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
