@@ -108,7 +108,7 @@ cordova.plugin.http.setRequestTimeout(5.0);
 Configure if it should follow redirects automatically. This defaults to true.
 
 ```js
-cordova.plugin.setFollowRedirect(true);
+cordova.plugin.http.setFollowRedirect(true);
 ```
 
 ### getCookieString
