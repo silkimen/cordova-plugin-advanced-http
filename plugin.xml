@@ -9,6 +9,7 @@
   </engines>
   <dependency id="cordova-plugin-file" version=">=2.0.0"/>
   <js-module src="www/cookie-handler.js" name="cookie-handler"/>
+  <js-module src="www/error-codes.js" name="error-codes"/>
   <js-module src="www/global-configs.js" name="global-configs"/>
   <js-module src="www/helpers.js" name="helpers"/>
   <js-module src="www/js-util.js" name="js-util"/>
