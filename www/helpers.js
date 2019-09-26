@@ -7,21 +7,22 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
 
   var interface = {
     b64EncodeUnicode: b64EncodeUnicode,
-    checkSerializer: checkSerializer,
-    checkSSLCertMode: checkSSLCertMode,
     checkClientAuthMode: checkClientAuthMode,
     checkClientAuthOptions: checkClientAuthOptions,
+    checkFileOptions: checkFileOptions,
+    checkFollowRedirectValue: checkFollowRedirectValue,
     checkForBlacklistedHeaderKey: checkForBlacklistedHeaderKey,
     checkForInvalidHeaderValue: checkForInvalidHeaderValue,
+    checkSerializer: checkSerializer,
+    checkSSLCertMode: checkSSLCertMode,
     checkTimeoutValue: checkTimeoutValue,
-    checkFollowRedirectValue: checkFollowRedirectValue,
-    injectCookieHandler: injectCookieHandler,
-    injectRawResponseHandler: injectRawResponseHandler,
-    injectFileEntryHandler: injectFileEntryHandler,
     getMergedHeaders: getMergedHeaders,
     getProcessedData: getProcessedData,
     handleMissingCallbacks: handleMissingCallbacks,
-    handleMissingOptions: handleMissingOptions
+    handleMissingOptions: handleMissingOptions,
+    injectCookieHandler: injectCookieHandler,
+    injectFileEntryHandler: injectFileEntryHandler,
+    injectRawResponseHandler: injectRawResponseHandler,
   };
 
   // expose all functions for testing purposes
@@ -92,6 +93,20 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
     }
 
     return obj;
+  }
+
+  function checkArray(array, allowedDataTypes, onInvalidValueMessage) {
+    if (jsUtil.getTypeOf(array) !== 'Array') {
+      throw new Error(onInvalidValueMessage);
+    }
+
+    for (var i = 0; i < array.length; ++i) {
+      if (allowedDataTypes.indexOf(jsUtil.getTypeOf(array[i])) === -1) {
+        throw new Error(onInvalidValueMessage);
+      }
+    }
+
+    return array;
   }
 
   function checkHttpMethod(method) {
@@ -172,7 +187,7 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
 
   function checkForInvalidHeaderValue(value) {
     if (jsUtil.getTypeOf(value) !== 'String') {
-      throw new Error(messages.INVALID_HEADERS_VALUE);
+      throw new Error(messages.INVALID_HEADER_VALUE);
     }
 
     return value;
@@ -195,11 +210,28 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
   }
 
   function checkHeadersObject(headers) {
-    return checkKeyValuePairObject(headers, ['String'], messages.INVALID_HEADERS_VALUE);
+    return checkKeyValuePairObject(headers, ['String'], messages.TYPE_MISMATCH_HEADERS);
   }
 
   function checkParamsObject(params) {
-    return checkKeyValuePairObject(params, ['String', 'Array'], messages.INVALID_PARAMS_VALUE);
+    return checkKeyValuePairObject(params, ['String', 'Array'], messages.TYPE_MISMATCH_PARAMS);
+  }
+
+  function checkFileOptions(filePaths, names) {
+    var opts = {
+      filePaths: checkArray(filePaths, ['String'], messages.TYPE_MISMATCH_FILE_PATHS),
+      names: checkArray(names, ['String'], messages.TYPE_MISMATCH_NAMES)
+    };
+
+    if (!opts.filePaths.length) {
+      throw new Error(messages.EMPTY_FILE_PATHS);
+    }
+
+    if (!opts.names.length) {
+      throw new Error(messages.EMPTY_NAMES);
+    }
+
+    return opts;
   }
 
   function resolveCookieString(headers) {
@@ -324,7 +356,7 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
     var allowedDataTypes = getAllowedDataTypes(dataSerializer);
 
     if (allowedDataTypes.indexOf(currentDataType) === -1) {
-      throw new Error(messages.DATA_TYPE_MISMATCH + ' ' + allowedDataTypes.join(', '));
+      throw new Error(messages.TYPE_MISMATCH_DATA + ' ' + allowedDataTypes.join(', '));
     }
 
     if (dataSerializer === 'utf8') {
@@ -355,9 +387,7 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
       followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
       headers: checkHeadersObject(options.headers || {}),
       params: checkParamsObject(options.params || {}),
-      data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data,
-      filePath: options.filePath || '',
-      name: options.name || ''
+      data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data
     };
   }
 };

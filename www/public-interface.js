@@ -28,6 +28,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     delete: del,
     head: head,
     uploadFile: uploadFile,
+    uploadFiles: uploadFiles,
     downloadFile: downloadFile,
     ErrorCode: errorCodes
   };
@@ -155,7 +156,8 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
         var data = helpers.getProcessedData(options.data, options.serializer);
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout, options.followRedirect, options.responseType]);
       case 'upload':
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [url, headers, options.filePath, options.name, options.timeout, options.followRedirect, options.responseType]);
+        var fileOptions = helpers.checkFileOptions(options.filePaths || [options.filePath], options.names || [options.name]);
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [url, headers, fileOptions.filePaths, fileOptions.names, options.timeout, options.followRedirect, options.responseType]);
       case 'download':
         var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));
         return exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, headers, options.filePath, options.timeout, options.followRedirect]);
@@ -190,6 +192,10 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
 
   function uploadFile(url, params, headers, filePath, name, success, failure) {
     return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name }, success, failure);
+  }
+
+  function uploadFiles(url, params, headers, filePaths, names, success, failure) {
+    return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePaths: filePaths, names: names }, success, failure);
   }
 
   function downloadFile(url, params, headers, filePath, success, failure) {

@@ -129,7 +129,7 @@ describe('Advanced HTTP public interface', function () {
   });
 
   it('throws an Error when you try to add a cookie by using "setHeader" #46', () => {
-    (function () { http.setHeader('*', 'cookie', 'value'); }).should.throw();
+    (() => { http.setHeader('*', 'cookie', 'value'); }).should.throw(messages.ADDING_COOKIES_NOT_SUPPORTED);
   });
 
   it('configures global timeout value correctly with given valid value', () => {
@@ -138,7 +138,7 @@ describe('Advanced HTTP public interface', function () {
   });
 
   it('throws an Error when you try to configure global timeout with a string', () => {
-    (function () { http.setRequestTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
+    (() => { http.setRequestTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
   });
 
   it('sets global option for following redirects correctly', () => {
@@ -147,7 +147,7 @@ describe('Advanced HTTP public interface', function () {
   });
 
   it('throws an Error when you try to configure global option for following redirects with a string', () => {
-    (function () { http.setFollowRedirect('myString'); }).should.throw(messages.INVALID_FOLLOW_REDIRECT_VALUE);
+    (() => { http.setFollowRedirect('myString'); }).should.throw(messages.INVALID_FOLLOW_REDIRECT_VALUE);
   });
 
   it('exposes an enumeration style object with mappings for the error codes', () => {
@@ -473,6 +473,36 @@ describe('Common helpers', function () {
       );
 
       handler({ data: 'NotValidJson' });
+    });
+  });
+
+  describe('checkFileOptions()', function() {
+    const jsUtil = require('../www/js-util');
+    const messages = require('../www/messages');
+    const helpers = require('../www/helpers')(jsUtil, null, messages, null, null);
+
+    it('checks valid file options correctly', () => {
+      const opts = {
+        filePaths: ['file://path/to/file.png'],
+        names: ['ScreenCapture']
+      };
+
+      helpers.checkFileOptions(opts.filePaths, opts.names).should.be.eql(opts);
+    });
+
+    it('throws an error when file options are missing', () => {
+      (() => helpers.checkFileOptions(undefined, ['ScreenCapture'])).should.throw(messages.FILE_PATHS_TYPE_MISMATCH);
+      (() => helpers.checkFileOptions(['file://path/to/file.png'], undefined)).should.throw(messages.NAMES_TYPE_MISMATCH);
+    });
+
+    it('throws an error when file options contains empty arrays', () => {
+      (() => helpers.checkFileOptions([], ['ScreenCapture'])).should.throw(messages.EMPTY_FILE_PATHS);
+      (() => helpers.checkFileOptions(['file://path/to/file.png'], [])).should.throw(messages.EMPTY_NAMES);
+    });
+
+    it('throws an error when file options contains invalid values', () => {
+      (() => helpers.checkFileOptions([1], ['ScreenCapture'])).should.throw(messages.FILE_PATHS_TYPE_MISMATCH);
+      (() => helpers.checkFileOptions(['file://path/to/file.png'], [1])).should.throw(messages.NAMES_TYPE_MISMATCH);
     });
   });
 })
