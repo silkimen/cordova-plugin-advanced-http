@@ -1,5 +1,14 @@
 module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConfigs) {
-  const publicInterface = {
+  var ErrorCode = {
+    Generic: -1,
+    SslException: -2,
+    ServerNotFound: -3,
+    Timeout: -4,
+    UnsupportedUrl: -5,
+    NotConnected: -6,
+  };
+
+  var publicInterface = {
     getBasicAuthHeader: getBasicAuthHeader,
     useBasicAuth: useBasicAuth,
     getHeaders: getHeaders,
@@ -28,7 +37,8 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     delete: del,
     head: head,
     uploadFile: uploadFile,
-    downloadFile: downloadFile
+    downloadFile: downloadFile,
+    ErrorCode: ErrorCode
   };
 
   function getBasicAuthHeader(username, password) {

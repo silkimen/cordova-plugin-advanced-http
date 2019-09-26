@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0
+
+- Feature #239: add enumeration style object for error codes
+
 ## 2.1.1
 
 - Fixed #224: response type "arraybuffer" and "blob" not working on browser platform

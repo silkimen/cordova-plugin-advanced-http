@@ -292,7 +292,7 @@ cordova.plugin.http.post('https://google.com/', {
 ```
 
 #### failure
-The error function receives a response object with 4 properties: status, error, url, and headers (url and headers being optional).  **status** is the HTTP response code as numeric value. **error** is the error response from the server as a string. **url** is the final URL obtained after any redirects as a string. **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
+The error function receives a response object with 4 properties: status, error, url, and headers (url and headers being optional).  **status** is a HTTP response code or an internal error code. Positive values are HTTP status codes whereas negative values do represent internal error codes. **error** is the error response from the server as a string or an internal error message. **url** is the final URL obtained after any redirects as a string. **headers** is an object with the headers. The keys of the returned object are the header names and the values are the respective header values. All header names are lowercase.
 
 Here's a quick example:
 
@@ -306,6 +306,8 @@ Here's a quick example:
   }
 }
 ```
+
+:warning: An enumeration style object is exposed as `cordova.plugin.http.ErrorCode`. You can use it to check against internal error codes.
 
 ### get<a name="get"></a>
 Execute a GET request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.

@@ -147,6 +147,10 @@ describe('Advanced HTTP public interface', function () {
   it('throws an Error when you try to configure global option for following redirects with a string', () => {
     (function () { http.setFollowRedirect('myString'); }).should.throw(messages.INVALID_FOLLOW_REDIRECT_VALUE);
   });
+
+  it('exposes an enumeration style object with mappings for the error codes', () => {
+    Object.keys(http.ErrorCode).forEach(key => http.ErrorCode[key].should.be.a('number'));
+  });
 });
 
 describe('URL util', function () {
