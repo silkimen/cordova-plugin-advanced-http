@@ -16,4 +16,5 @@ module.exports = {
   INVALID_TIMEOUT_VALUE: 'advanced-http: invalid timeout value, needs to be a positive numeric value',
   MANDATORY_FAIL: 'advanced-http: missing mandatory "onFail" callback function',
   MANDATORY_SUCCESS: 'advanced-http: missing mandatory "onSuccess" callback function',
+  POST_PROCESSING_FAILED: 'advanced-http: an error occured during post processing response:',
 };

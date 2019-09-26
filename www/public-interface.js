@@ -1,13 +1,4 @@
-module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConfigs) {
-  var ErrorCode = {
-    Generic: -1,
-    SslException: -2,
-    ServerNotFound: -3,
-    Timeout: -4,
-    UnsupportedUrl: -5,
-    NotConnected: -6,
-  };
-
+module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes) {
   var publicInterface = {
     getBasicAuthHeader: getBasicAuthHeader,
     useBasicAuth: useBasicAuth,
@@ -38,7 +29,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     head: head,
     uploadFile: uploadFile,
     downloadFile: downloadFile,
-    ErrorCode: ErrorCode
+    ErrorCode: errorCodes
   };
 
   function getBasicAuthHeader(username, password) {
@@ -155,7 +146,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     var headers = helpers.getMergedHeaders(url, options.headers, globalConfigs.headers);
 
     var onFail = helpers.injectCookieHandler(url, failure);
-    var onSuccess = helpers.injectCookieHandler(url, helpers.injectRawResponseHandler(options.responseType, success));
+    var onSuccess = helpers.injectCookieHandler(url, helpers.injectRawResponseHandler(options.responseType, success, failure));
 
     switch (options.method) {
       case 'post':

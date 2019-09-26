@@ -4,6 +4,7 @@ const should = chai.should();
 
 describe('Advanced HTTP public interface', function () {
   const messages = require('../www/messages');
+
   let http = {};
 
   const noop = () => { /* intentionally doing nothing */ };
@@ -13,16 +14,17 @@ describe('Advanced HTTP public interface', function () {
     const jsUtil = require('../www/js-util');
     const ToughCookie = require('../www/umd-tough-cookie');
     const lodash = require('../www/lodash');
+    const errorCodes = require('../www/error-codes');
     const WebStorageCookieStore = require('../www/local-storage-store')(ToughCookie, lodash);
     const cookieHandler = require('../www/cookie-handler')(null, ToughCookie, WebStorageCookieStore);
-    const helpers = require('../www/helpers')(jsUtil, cookieHandler, messages);
+    const helpers = require('../www/helpers')(jsUtil, cookieHandler, messages, errorCodes);
     const urlUtil = require('../www/url-util')(jsUtil);
 
-    return { exec: noop, cookieHandler, urlUtil: urlUtil, helpers, globalConfigs };
+    return { exec: noop, cookieHandler, urlUtil: urlUtil, helpers, globalConfigs, errorCodes };
   };
 
   const loadHttp = (deps) => {
-    http = require('../www/public-interface')(deps.exec, deps.cookieHandler, deps.urlUtil, deps.helpers, deps.globalConfigs);
+    http = require('../www/public-interface')(deps.exec, deps.cookieHandler, deps.urlUtil, deps.helpers, deps.globalConfigs, deps.errorCodes);
   };
 
   beforeEach(() => {
@@ -375,6 +377,102 @@ describe('Common helpers', function () {
     it('throws an error when "followRedirect" option is not a boolean', () => {
       (() => helpers.handleMissingOptions({ followRedirect: 1 }, mockGlobals))
         .should.throw(messages.INVALID_FOLLOW_REDIRECT_VALUE);
+    });
+  });
+
+  describe('injectRawResponseHandler()', function () {
+    const jsUtil = require('../www/js-util');
+    const messages = require('../www/messages');
+    const errorCodes = require('../www/error-codes');
+
+    const fakeBase64 = { toArrayBuffer: () => 'fakeArrayBuffer' };
+
+    global.Blob = function (array, meta) {
+      this.isFakeBlob = true;
+      this.array = array;
+      this.meta = meta;
+    };
+
+    it('does not change response data if it is an ArrayBuffer', () => {
+      const helpers = require('../www/helpers')(jsUtil, null, messages, null, errorCodes);
+      const buffer = new ArrayBuffer(5);
+      const handler = helpers.injectRawResponseHandler(
+        'arraybuffer',
+        response => response.data.should.be.equal(buffer)
+      );
+
+      handler({ data: buffer });
+    });
+
+    it('does not change response data if it is a Blob', () => {
+      const fakeJsUtil = { getTypeOf: () => 'Blob' };
+      const helpers = require('../www/helpers')(fakeJsUtil, null, messages, null, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'blob',
+        response => response.data.should.be.equal('fakeData')
+      );
+
+     handler({ data: 'fakeData' });
+    });
+
+    it('does not change response data if response type is "text"', () => {
+      const helpers = require('../www/helpers')(jsUtil, null, messages, null, errorCodes);
+      const example = 'exampleText';
+      const handler = helpers.injectRawResponseHandler(
+        'text',
+        response => response.data.should.be.equal(example)
+      );
+
+      handler({ data: example });
+    });
+
+    it('handles response type "json" correctly', () => {
+      const fakeData = { myString: 'bla', myNumber: 10 };
+      const helpers = require('../www/helpers')(jsUtil, null, messages, null, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'json',
+        response => response.data.should.be.eql(fakeData)
+      );
+
+      handler({ data: JSON.stringify(fakeData) });
+    });
+
+    it('handles response type "arraybuffer" correctly', () => {
+      const helpers = require('../www/helpers')(jsUtil, null, messages, fakeBase64, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'arraybuffer',
+        response => response.data.should.be.equal('fakeArrayBuffer')
+      );
+
+      handler({ data: 'myString' });
+    });
+
+    it('handles response type "blob" correctly', () => {
+      const helpers = require('../www/helpers')(jsUtil, null, messages, fakeBase64, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'blob',
+        (response) => {
+          response.data.isFakeBlob.should.be.equal(true);
+          response.data.array.should.be.eql(['fakeArrayBuffer']);
+          response.data.meta.type.should.be.equal('fakeType');
+        }
+      );
+
+      handler({ data: 'myString', headers: { 'content-type': 'fakeType'} });
+    });
+
+    it('calls failure callback when post-processing fails', () => {
+      const helpers = require('../www/helpers')(jsUtil, null, messages, fakeBase64, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'json',
+        null,
+        (response) => {
+          response.status.should.be.equal(errorCodes.POST_PROCESSING_FAILED);
+          response.error.should.include('Unexpected token N in JSON at position 0');
+        }
+      );
+
+      handler({ data: 'NotValidJson' });
     });
   });
 })

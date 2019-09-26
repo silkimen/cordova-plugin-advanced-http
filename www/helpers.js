@@ -1,9 +1,9 @@
-module.exports = function init(jsUtil, cookieHandler, messages, base64) {
+module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCodes) {
   var validSerializers = ['urlencoded', 'json', 'utf8'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
   var validClientAuthModes = ['none', 'systemstore', 'buffer'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
-  var validResponseTypes = ['text','arraybuffer', 'blob'];
+  var validResponseTypes = ['text', 'json', 'arraybuffer', 'blob'];
 
   var interface = {
     b64EncodeUnicode: b64EncodeUnicode,
@@ -234,30 +234,43 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64) {
     }
   }
 
-  function injectRawResponseHandler(responseType, cb) {
+  function injectRawResponseHandler(responseType, success, failure) {
     return function (response) {
       var dataType = jsUtil.getTypeOf(response.data);
 
       // don't need post-processing if it's already binary type (on browser platform)
       if (dataType === 'ArrayBuffer' || dataType === 'Blob') {
-        return cb(response);
+        return success(response);
       }
 
-      // arraybuffer
-      if (responseType === validResponseTypes[1]) {
-        var buffer = base64.toArrayBuffer(response.data);
-        response.data = buffer;
-      }
+      try {
+        // json
+        if (responseType === validResponseTypes[1]) {
+          response.data = JSON.parse(response.data);
+        }
 
-      // blob
-      if (responseType === validResponseTypes[2]) {
-        var buffer = base64.toArrayBuffer(response.data);
-        var type = response.headers['content-type'] || '';
-        var blob = new Blob([ buffer ], { type: type });
-        response.data = blob;
-      }
+        // arraybuffer
+        else if (responseType === validResponseTypes[2]) {
+          response.data = base64.toArrayBuffer(response.data);
+        }
 
-      cb(response);
+        // blob
+        else if (responseType === validResponseTypes[3]) {
+          var buffer = base64.toArrayBuffer(response.data);
+          var type = response.headers['content-type'] || '';
+          var blob = new Blob([ buffer ], { type: type });
+          response.data = blob;
+        }
+
+        success(response);
+      } catch (error) {
+        failure({
+          status: errorCodes.POST_PROCESSING_FAILED,
+          error: messages.POST_PROCESSING_FAILED + ' ' + error.message,
+          url: response.url,
+          headers: response.headers
+        });
+      }
     }
   }
 

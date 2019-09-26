@@ -3,6 +3,7 @@
 ## 2.2.0
 
 - Feature #239: add enumeration style object for error codes
+- Feature #253: add support for response type "json"
 
 ## 2.1.1
 
