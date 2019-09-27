@@ -156,7 +156,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
         var data = helpers.getProcessedData(options.data, options.serializer);
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout, options.followRedirect, options.responseType]);
       case 'upload':
-        var fileOptions = helpers.checkFileOptions(options.filePaths || [options.filePath], options.names || [options.name]);
+        var fileOptions = helpers.checkUploadFileOptions(options.filePaths || [options.filePath], options.names || [options.name]);
         return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFile', [url, headers, fileOptions.filePaths, fileOptions.names, options.timeout, options.followRedirect, options.responseType]);
       case 'download':
         var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));

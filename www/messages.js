@@ -19,7 +19,7 @@ module.exports = {
   POST_PROCESSING_FAILED: 'advanced-http: an error occured during post processing response:',
   TYPE_MISMATCH_DATA: 'advanced-http: "data" option supports only following data types:',
   TYPE_MISMATCH_FILE_PATHS: 'advanced-http: "filePaths" option needs to be an string array, <filePaths: string[]>',
-  TYPE_MISMATCH_HEADERS: 'advanced-http: "headers" option needs to be an dictionary style object, <headers: {[key: string]: string}>',
+  TYPE_MISMATCH_HEADERS: 'advanced-http: "headers" option needs to be an dictionary style object with string values, <headers: {[key: string]: string}>',
   TYPE_MISMATCH_NAMES: 'advanced-http: "names" option needs to be an string array, <names: string[]>',
   TYPE_MISMATCH_PARAMS: 'advanced-http: "params" option needs to be an dictionary style object, <params: {[key: string]: string | string[]}>',
 };

@@ -9,7 +9,7 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
     b64EncodeUnicode: b64EncodeUnicode,
     checkClientAuthMode: checkClientAuthMode,
     checkClientAuthOptions: checkClientAuthOptions,
-    checkFileOptions: checkFileOptions,
+    checkUploadFileOptions: checkUploadFileOptions,
     checkFollowRedirectValue: checkFollowRedirectValue,
     checkForBlacklistedHeaderKey: checkForBlacklistedHeaderKey,
     checkForInvalidHeaderValue: checkForInvalidHeaderValue,
@@ -217,7 +217,7 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
     return checkKeyValuePairObject(params, ['String', 'Array'], messages.TYPE_MISMATCH_PARAMS);
   }
 
-  function checkFileOptions(filePaths, names) {
+  function checkUploadFileOptions(filePaths, names) {
     var opts = {
       filePaths: checkArray(filePaths, ['String'], messages.TYPE_MISMATCH_FILE_PATHS),
       names: checkArray(names, ['String'], messages.TYPE_MISMATCH_NAMES)
@@ -380,14 +380,18 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
     options = options || {};
 
     return {
+      data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data,
+      filePath: options.filePath || '',
+      filePaths: options.filePaths || [],
+      followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
+      headers: checkHeadersObject(options.headers || {}),
       method: checkHttpMethod(options.method || validHttpMethods[0]),
+      name: options.name || '',
+      names: options.names || [],
+      params: checkParamsObject(options.params || {}),
       responseType: checkResponseType(options.responseType || validResponseTypes[0]),
       serializer: checkSerializer(options.serializer || globals.serializer),
       timeout: checkTimeoutValue(options.timeout || globals.timeout),
-      followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
-      headers: checkHeadersObject(options.headers || {}),
-      params: checkParamsObject(options.params || {}),
-      data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data
     };
   }
 };

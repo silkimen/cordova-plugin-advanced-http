@@ -373,7 +373,7 @@ const tests = [
     },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('throwed');
-      result.message.should.be.equal('advanced-http: header values must be strings');
+      result.message.should.be.equal(require('../www/messages').TYPE_MISMATCH_HEADERS);
     }
   },
   {
@@ -384,7 +384,7 @@ const tests = [
     },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('throwed');
-      result.message.should.be.equal('advanced-http: header values must be strings');
+      result.message.should.be.equal(require('../www/messages').INVALID_HEADER_VALUE);
     }
   },
   {
