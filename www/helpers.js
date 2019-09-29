@@ -9,13 +9,14 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
     b64EncodeUnicode: b64EncodeUnicode,
     checkClientAuthMode: checkClientAuthMode,
     checkClientAuthOptions: checkClientAuthOptions,
-    checkUploadFileOptions: checkUploadFileOptions,
+    checkDownloadFilePath: checkDownloadFilePath,
     checkFollowRedirectValue: checkFollowRedirectValue,
     checkForBlacklistedHeaderKey: checkForBlacklistedHeaderKey,
     checkForInvalidHeaderValue: checkForInvalidHeaderValue,
     checkSerializer: checkSerializer,
     checkSSLCertMode: checkSSLCertMode,
     checkTimeoutValue: checkTimeoutValue,
+    checkUploadFileOptions: checkUploadFileOptions,
     getMergedHeaders: getMergedHeaders,
     getProcessedData: getProcessedData,
     handleMissingCallbacks: handleMissingCallbacks,
@@ -217,7 +218,23 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
     return checkKeyValuePairObject(params, ['String', 'Array'], messages.TYPE_MISMATCH_PARAMS);
   }
 
+  function checkDownloadFilePath(filePath) {
+    if (!filePath || jsUtil.getTypeOf(filePath) !== 'String') {
+      throw new Error(messages.INVALID_DOWNLOAD_FILE_PATH);
+    }
+
+    return filePath;
+  }
+
   function checkUploadFileOptions(filePaths, names) {
+    if (jsUtil.getTypeOf(filePaths) === 'String') {
+      filePaths = [filePaths];
+    }
+
+    if (jsUtil.getTypeOf(names) === 'String') {
+      names = [names];
+    }
+
     var opts = {
       filePaths: checkArray(filePaths, ['String'], messages.TYPE_MISMATCH_FILE_PATHS),
       names: checkArray(names, ['String'], messages.TYPE_MISMATCH_NAMES)
@@ -381,13 +398,11 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
 
     return {
       data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data,
-      filePath: options.filePath || '',
-      filePaths: options.filePaths || [],
+      filePath: options.filePath,
       followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
       headers: checkHeadersObject(options.headers || {}),
       method: checkHttpMethod(options.method || validHttpMethods[0]),
-      name: options.name || '',
-      names: options.names || [],
+      name: options.name,
       params: checkParamsObject(options.params || {}),
       responseType: checkResponseType(options.responseType || validResponseTypes[0]),
       serializer: checkSerializer(options.serializer || globals.serializer),

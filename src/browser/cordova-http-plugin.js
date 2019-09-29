@@ -205,6 +205,9 @@ var browserInterface = {
   uploadFile: function (success, failure, opts) {
     return failure('advanced-http: function "uploadFile" not supported on browser platform');
   },
+  uploadFiles: function (success, failure, opts) {
+    return failure('advanced-http: function "uploadFiles" not supported on browser platform');
+  },
   downloadFile: function (success, failure, opts) {
     return failure('advanced-http: function "downloadFile" not supported on browser platform');
   },

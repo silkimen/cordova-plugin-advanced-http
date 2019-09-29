@@ -476,7 +476,7 @@ describe('Common helpers', function () {
     });
   });
 
-  describe('checkFileOptions()', function() {
+  describe('checkUploadFileOptions()', function() {
     const jsUtil = require('../www/js-util');
     const messages = require('../www/messages');
     const helpers = require('../www/helpers')(jsUtil, null, messages, null, null);
@@ -487,22 +487,25 @@ describe('Common helpers', function () {
         names: ['ScreenCapture']
       };
 
-      helpers.checkFileOptions(opts.filePaths, opts.names).should.be.eql(opts);
+      // string values
+      helpers.checkUploadFileOptions(opts.filePaths[0], opts.names[0]).should.be.eql(opts);
+      // string array values
+      helpers.checkUploadFileOptions(opts.filePaths, opts.names).should.be.eql(opts);
     });
 
     it('throws an error when file options are missing', () => {
-      (() => helpers.checkFileOptions(undefined, ['ScreenCapture'])).should.throw(messages.FILE_PATHS_TYPE_MISMATCH);
-      (() => helpers.checkFileOptions(['file://path/to/file.png'], undefined)).should.throw(messages.NAMES_TYPE_MISMATCH);
+      (() => helpers.checkUploadFileOptions(undefined, ['ScreenCapture'])).should.throw(messages.FILE_PATHS_TYPE_MISMATCH);
+      (() => helpers.checkUploadFileOptions(['file://path/to/file.png'], undefined)).should.throw(messages.NAMES_TYPE_MISMATCH);
     });
 
     it('throws an error when file options contains empty arrays', () => {
-      (() => helpers.checkFileOptions([], ['ScreenCapture'])).should.throw(messages.EMPTY_FILE_PATHS);
-      (() => helpers.checkFileOptions(['file://path/to/file.png'], [])).should.throw(messages.EMPTY_NAMES);
+      (() => helpers.checkUploadFileOptions([], ['ScreenCapture'])).should.throw(messages.EMPTY_FILE_PATHS);
+      (() => helpers.checkUploadFileOptions(['file://path/to/file.png'], [])).should.throw(messages.EMPTY_NAMES);
     });
 
     it('throws an error when file options contains invalid values', () => {
-      (() => helpers.checkFileOptions([1], ['ScreenCapture'])).should.throw(messages.FILE_PATHS_TYPE_MISMATCH);
-      (() => helpers.checkFileOptions(['file://path/to/file.png'], [1])).should.throw(messages.NAMES_TYPE_MISMATCH);
+      (() => helpers.checkUploadFileOptions([1], ['ScreenCapture'])).should.throw(messages.FILE_PATHS_TYPE_MISMATCH);
+      (() => helpers.checkUploadFileOptions(['file://path/to/file.png'], [1])).should.throw(messages.NAMES_TYPE_MISMATCH);
     });
   });
 })

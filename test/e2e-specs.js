@@ -350,6 +350,43 @@ const tests = [
     }
   },
   {
+    description: 'should upload multiple files from given paths in local filesystem to given URL #127',
+    expected: 'resolved: {"status": 200, "data": "files": {"test-file.txt": "I am a dummy file. I am used ...',
+    func: function (resolve, reject) {
+      var fileName = 'test-file.txt';
+      var fileName2 = 'test-file2.txt';
+
+      var fileContent = 'I am a dummy file. I am used for testing purposes!';
+      var fileContent2 = 'I am the second dummy file. I am used for testing purposes!';
+
+      var sourcePath = cordova.file.cacheDirectory + fileName;
+      var sourcePath2 = cordova.file.cacheDirectory + fileName2;
+
+      var targetUrl = 'http://httpbin.org/post';
+
+      helpers.writeToFile(function () {
+        helpers.writeToFile(function() {
+          cordova.plugin.http.uploadFile(targetUrl, {}, {}, [sourcePath, sourcePath2], [fileName, fileName2], resolve, reject);
+        }, fileName2, fileContent2);
+      }, fileName, fileContent);
+    },
+    validationFunc: function (driver, result) {
+      var fileName = 'test-file.txt';
+      var fileName2 = 'test-file2.txt';
+
+      var fileContent = 'I am a dummy file. I am used for testing purposes!';
+      var fileContent2 = 'I am the second dummy file. I am used for testing purposes!';
+
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.a('string');
+
+      var parsed = JSON.parse(result.data.data);
+
+      parsed.files[fileName].should.be.equal(fileContent);
+      parsed.files[fileName2].should.be.equal(fileContent2);
+    }
+  },
+  {
     description: 'should encode HTTP array params correctly (GET) #45',
     expected: 'resolved: {"status": 200, "data": "{\\"url\\":\\"http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3\\"}\" ...',
     func: function (resolve, reject) {

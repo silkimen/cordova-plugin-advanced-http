@@ -8,6 +8,7 @@ module.exports = {
   INVALID_CLIENT_AUTH_PKCS_PASSWORD: 'advanced-http: invalid PKCS12 container password, needs to be a string, <pkcsPassword: string>',
   INVALID_CLIENT_AUTH_RAW_PKCS: 'advanced-http: invalid PKCS12 container, needs to be an array buffer, <rawPkcs: ArrayBuffer>',
   INVALID_DATA_SERIALIZER: 'advanced-http: invalid serializer, supported serializers are:',
+  INVALID_DOWNLOAD_FILE_PATH: 'advanced-http: invalid "filePath" value, needs to be a string, <filePath: string>',
   INVALID_FOLLOW_REDIRECT_VALUE: 'advanced-http: invalid follow redirect value, needs to be a boolean value, <followRedirect: boolean>',
   INVALID_HEADER_VALUE: 'advanced-http: invalid header value, needs to be a string, <header: string>',
   INVALID_HTTP_METHOD: 'advanced-http: invalid HTTP method, supported methods are:',

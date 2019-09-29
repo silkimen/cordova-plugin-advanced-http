@@ -1,44 +1,92 @@
 package com.silkimen.cordovahttp;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.webkit.MimeTypeMap;
 
 import com.silkimen.http.HttpRequest;
+import com.silkimen.http.TLSConfiguration;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.silkimen.http.TLSConfiguration;
-
 import org.apache.cordova.CallbackContext;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 class CordovaHttpUpload extends CordovaHttpBase {
-  private String filePath;
-  private String uploadName;
+  private JSONArray filePaths;
+  private JSONArray uploadNames;
+  private Context applicationContext;
 
-  public CordovaHttpUpload(String url, JSONObject headers, String filePath, String uploadName, int timeout,
+  public CordovaHttpUpload(String url, JSONObject headers, JSONArray filePaths, JSONArray uploadNames, int timeout,
       boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
-      CallbackContext callbackContext) {
+      Context applicationContext, CallbackContext callbackContext) {
 
     super("POST", url, headers, timeout, followRedirects, responseType, tlsConfiguration, callbackContext);
-    this.filePath = filePath;
-    this.uploadName = uploadName;
+    this.filePaths = filePaths;
+    this.uploadNames = uploadNames;
+    this.applicationContext = applicationContext;
   }
 
   @Override
   protected void sendBody(HttpRequest request) throws Exception {
-    int filenameIndex = this.filePath.lastIndexOf('/');
-    String filename = this.filePath.substring(filenameIndex + 1);
+    for (int i = 0; i < this.filePaths.length(); ++i) {
+      String uploadName = this.uploadNames.getString(i);
+      String filePath = this.filePaths.getString(i);
 
-    int extIndex = this.filePath.lastIndexOf('.');
-    String ext = this.filePath.substring(extIndex + 1);
+      Uri fileUri = Uri.parse(filePath);
+
+      // File Scheme
+      if (ContentResolver.SCHEME_FILE.equals(fileUri.getScheme())) {
+        File file = new File(new URI(filePath));
+        String fileName = file.getName().trim();
+        String mimeType = this.getMimeTypeFromFileName(fileName);
+
+        request.part(uploadName, fileName, mimeType, file);
+      }
+
+      // Content Scheme
+      if (ContentResolver.SCHEME_CONTENT.equals(fileUri.getScheme())) {
+        InputStream inputStream = this.applicationContext.getContentResolver().openInputStream(fileUri);
+        String fileName = this.getFileNameFromContentScheme(fileUri, this.applicationContext).trim();
+        String mimeType = this.getMimeTypeFromFileName(fileName);
+
+        request.part(uploadName, fileName, mimeType, inputStream);
+      }
+    }
+  }
+
+  private String getFileNameFromContentScheme(Uri contentSchemeUri, Context applicationContext) {
+    Cursor returnCursor = applicationContext.getContentResolver().query(contentSchemeUri, null, null, null, null);
+
+    if (returnCursor == null || !returnCursor.moveToFirst()) {
+      return null;
+    }
+
+    int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+    String fileName = returnCursor.getString(nameIndex);
+    returnCursor.close();
+
+    return fileName;
+  }
+
+  private String getMimeTypeFromFileName(String fileName) {
+    if (fileName == null || !fileName.contains(".")) {
+      return null;
+    }
 
     MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-    String mimeType = mimeTypeMap.getMimeTypeFromExtension(ext);
+    int extIndex = fileName.lastIndexOf('.') + 1;
+    String extension = fileName.substring(extIndex).toLowerCase();
 
-    request.part(this.uploadName, filename, mimeType, new File(new URI(this.filePath)));
+    return mimeTypeMap.getMimeTypeFromExtension(extension);
   }
 }
