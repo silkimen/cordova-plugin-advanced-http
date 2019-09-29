@@ -212,8 +212,8 @@ The options object contains following keys:
 * `timeout`: timeout value for the request in seconds, defaults to global timeout value
 * `followRedirect`: enable or disable automatically following redirects
 * `headers`: headers object (key value pair), will be merged with global values
-* `filePath`: filePath to be used during upload and download see [uploadFile](#uploadFile) and [downloadFile](#downloadFile) for detailed information
-* `name`: name to be used during upload see [uploadFile](#uploadFile) for detailed information
+* `filePath`: file path(s) to be used during upload and download see [uploadFile](#uploadFile) and [downloadFile](#downloadFile) for detailed information
+* `name`: name(s) to be used during upload see [uploadFile](#uploadFile) for detailed information
 
 Here's a quick example:
 
@@ -337,13 +337,21 @@ Execute a DELETE request.  Takes a URL, parameters, and headers.  See the [post]
 Execute a HEAD request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ### uploadFile<a name="uploadFile"></a>
-Uploads a file saved on the device.  Takes a URL, parameters, headers, filePath, and the name of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
+Uploads one or more file(s) saved on the device.  Takes a URL, parameters, headers, filePath(s), and the name(s) of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ```js
+// e.g. for single file
+const filePath = 'file:///somepicture.jpg';
+const name = 'picture';
+
+// e.g. for multiple files
+const filePath = ['file:///somepicture.jpg', 'file:///somedocument.doc'];
+const name = ['picture', 'document'];
+
 cordova.plugin.http.uploadFile("https://google.com/", {
     id: '12',
     message: 'test'
-}, { Authorization: 'OAuth2: token' }, 'file:///somepicture.jpg', 'picture', function(response) {
+}, { Authorization: 'OAuth2: token' }, filePath, name, function(response) {
     console.log(response.status);
 }, function(response) {
     console.error(response.error);

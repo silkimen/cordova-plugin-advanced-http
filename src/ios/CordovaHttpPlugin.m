@@ -420,19 +420,17 @@
     }
 }
 
-- (void)uploadFile:(CDVInvokedUrlCommand*)command {
+- (void)uploadFiles:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];
-    NSString *filePath = [command.arguments objectAtIndex: 2];
-    NSString *name = [command.arguments objectAtIndex: 3];
+    NSArray *filePaths = [command.arguments objectAtIndex: 2];
+    NSArray *names = [command.arguments objectAtIndex: 3];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
     bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
     NSString *responseType = [command.arguments objectAtIndex:6];
-
-    NSURL *fileURL = [NSURL URLWithString: filePath];
 
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
@@ -445,7 +443,12 @@
     @try {
         [manager POST:url parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
             NSError *error;
-            [formData appendPartWithFileURL:fileURL name:name error:&error];
+            for (int i = 0; i < [filePaths count]; i++) {
+                NSString *filePath = (NSString *) [filePaths objectAtIndex:i];
+                NSString *uploadName = (NSString *) [names objectAtIndex:i];
+                NSURL *fileURL = [NSURL URLWithString: filePath];
+                [formData appendPartWithFileURL:fileURL name:uploadName error:&error];
+            }
             if (error) {
                 NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
                 [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
