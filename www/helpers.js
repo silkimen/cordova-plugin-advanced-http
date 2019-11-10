@@ -1,5 +1,5 @@
-module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCodes) {
-  var validSerializers = ['urlencoded', 'json', 'utf8'];
+module.exports = function init(global, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator) {
+  var validSerializers = ['urlencoded', 'json', 'utf8', 'multipart'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
   var validClientAuthModes = ['none', 'systemstore', 'buffer'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
@@ -270,7 +270,7 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
     entry.isFile = rawEntry.isFile;
     entry.name = rawEntry.name;
     entry.fullPath = rawEntry.fullPath;
-    entry.filesystem = new FileSystem(rawEntry.filesystemName || (rawEntry.filesystem == window.PERSISTENT ? 'persistent' : 'temporary'));
+    entry.filesystem = new FileSystem(rawEntry.filesystemName || (rawEntry.filesystem == global.PERSISTENT ? 'persistent' : 'temporary'));
     entry.nativeURL = rawEntry.nativeURL;
 
     return entry;
@@ -363,21 +363,42 @@ module.exports = function init(jsUtil, cookieHandler, messages, base64, errorCod
         return ['String'];
       case 'urlencoded':
         return ['Object'];
-      default:
+      case 'json':
         return ['Array', 'Object'];
+      default:
+        return [];
     }
+  }
+
+  function getAllowedInstanceType(dataSerializer) {
+    return dataSerializer === 'multipart' ? 'FormData' : null;
   }
 
   function getProcessedData(data, dataSerializer) {
     var currentDataType = jsUtil.getTypeOf(data);
     var allowedDataTypes = getAllowedDataTypes(dataSerializer);
+    var allowedInstanceType = getAllowedInstanceType(dataSerializer);
 
-    if (allowedDataTypes.indexOf(currentDataType) === -1) {
+    if (allowedInstanceType && !global[allowedInstanceType]) {
+      throw new Error(messages.INSTANCE_TYPE_NOT_SUPPORTED + ' ' + allowedInstanceType);
+    }
+
+    if (allowedInstanceType && !(data instanceof global[allowedInstanceType])) {
+      throw new Error(messages.INSTANCE_TYPE_MISMATCH_DATA + ' ' + allowedInstanceType);
+    }
+
+    if (!allowedInstanceType && allowedDataTypes.indexOf(currentDataType) === -1) {
       throw new Error(messages.TYPE_MISMATCH_DATA + ' ' + allowedDataTypes.join(', '));
     }
 
     if (dataSerializer === 'utf8') {
       data = { text: data };
+    }
+
+    if (dataSerializer === 'multipart') {
+      dependencyValidator.checkFormDataApi();
+
+      // TODO
     }
 
     return data;

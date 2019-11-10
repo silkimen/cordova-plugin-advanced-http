@@ -2,6 +2,9 @@ const chai = require('chai');
 const mock = require('mock-require');
 const should = chai.should();
 
+const ConsoleMock = require('./mocks/Console.mock');
+const FormDataMock = require('./mocks/FormData.mock');
+
 describe('Advanced HTTP public interface', function () {
   const messages = require('../www/messages');
 
@@ -17,7 +20,7 @@ describe('Advanced HTTP public interface', function () {
     const errorCodes = require('../www/error-codes');
     const WebStorageCookieStore = require('../www/local-storage-store')(ToughCookie, lodash);
     const cookieHandler = require('../www/cookie-handler')(null, ToughCookie, WebStorageCookieStore);
-    const helpers = require('../www/helpers')(jsUtil, cookieHandler, messages, errorCodes);
+    const helpers = require('../www/helpers')(null, jsUtil, cookieHandler, messages, errorCodes);
     const urlUtil = require('../www/url-util')(jsUtil);
 
     return { exec: noop, cookieHandler, urlUtil: urlUtil, helpers, globalConfigs, errorCodes };
@@ -265,13 +268,13 @@ describe('Common helpers', function () {
     const init = require('../www/helpers');
     init.debug = true;
 
-    const helpers = init(null, null, null);
+    const helpers = init(null, null, null, null, null, null);
 
     it('merges empty header sets correctly', () => {
       helpers.mergeHeaders({}, {}).should.eql({});
     });
 
-    it('merges ssimple header sets without collision correctly', () => {
+    it('merges simple header sets without collision correctly', () => {
       helpers.mergeHeaders({ a: 1 }, { b: 2 }).should.eql({ a: 1, b: 2 });
     });
 
@@ -282,13 +285,13 @@ describe('Common helpers', function () {
 
   describe('getCookieHeader(url)', function () {
     it('resolves cookie header correctly when no cookie is set #198', () => {
-      const helpers = require('../www/helpers')(null, { getCookieString: () => '' }, null);
+      const helpers = require('../www/helpers')(null, null, { getCookieString: () => '' }, null);
 
       helpers.getCookieHeader('http://ilkimen.net').should.eql({});
     });
 
     it('resolves cookie header correctly when a cookie is set', () => {
-      const helpers = require('../www/helpers')(null, { getCookieString: () => 'cookie=value' }, null);
+      const helpers = require('../www/helpers')(null, null, { getCookieString: () => 'cookie=value' }, null);
 
       helpers.getCookieHeader('http://ilkimen.net').should.eql({ Cookie: 'cookie=value' });
     });
@@ -297,7 +300,7 @@ describe('Common helpers', function () {
   describe('checkClientAuthOptions()', function () {
     const jsUtil = require('../www/js-util');
     const messages = require('../www/messages');
-    const helpers = require('../www/helpers')(jsUtil, null, messages);
+    const helpers = require('../www/helpers')(null, jsUtil, null, messages);
 
     it('returns options object with empty values when mode is "none" and no options are given', () => {
       helpers.checkClientAuthOptions('none').should.eql({
@@ -362,7 +365,7 @@ describe('Common helpers', function () {
   describe('handleMissingOptions()', function () {
     const jsUtil = require('../www/js-util');
     const messages = require('../www/messages');
-    const helpers = require('../www/helpers')(jsUtil, null, messages);
+    const helpers = require('../www/helpers')(null, jsUtil, null, messages);
     const mockGlobals = {
       headers: {},
       serializer: 'urlencoded',
@@ -394,7 +397,7 @@ describe('Common helpers', function () {
     };
 
     it('does not change response data if it is an ArrayBuffer', () => {
-      const helpers = require('../www/helpers')(jsUtil, null, messages, null, errorCodes);
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, null, errorCodes);
       const buffer = new ArrayBuffer(5);
       const handler = helpers.injectRawResponseHandler(
         'arraybuffer',
@@ -406,7 +409,7 @@ describe('Common helpers', function () {
 
     it('does not change response data if it is a Blob', () => {
       const fakeJsUtil = { getTypeOf: () => 'Blob' };
-      const helpers = require('../www/helpers')(fakeJsUtil, null, messages, null, errorCodes);
+      const helpers = require('../www/helpers')(null, fakeJsUtil, null, messages, null, errorCodes);
       const handler = helpers.injectRawResponseHandler(
         'blob',
         response => response.data.should.be.equal('fakeData')
@@ -416,7 +419,7 @@ describe('Common helpers', function () {
     });
 
     it('does not change response data if response type is "text"', () => {
-      const helpers = require('../www/helpers')(jsUtil, null, messages, null, errorCodes);
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, null, errorCodes);
       const example = 'exampleText';
       const handler = helpers.injectRawResponseHandler(
         'text',
@@ -428,7 +431,7 @@ describe('Common helpers', function () {
 
     it('handles response type "json" correctly', () => {
       const fakeData = { myString: 'bla', myNumber: 10 };
-      const helpers = require('../www/helpers')(jsUtil, null, messages, null, errorCodes);
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, null, errorCodes);
       const handler = helpers.injectRawResponseHandler(
         'json',
         response => response.data.should.be.eql(fakeData)
@@ -438,7 +441,7 @@ describe('Common helpers', function () {
     });
 
     it('handles response type "arraybuffer" correctly', () => {
-      const helpers = require('../www/helpers')(jsUtil, null, messages, fakeBase64, errorCodes);
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
       const handler = helpers.injectRawResponseHandler(
         'arraybuffer',
         response => response.data.should.be.equal('fakeArrayBuffer')
@@ -448,7 +451,7 @@ describe('Common helpers', function () {
     });
 
     it('handles response type "blob" correctly', () => {
-      const helpers = require('../www/helpers')(jsUtil, null, messages, fakeBase64, errorCodes);
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
       const handler = helpers.injectRawResponseHandler(
         'blob',
         (response) => {
@@ -462,7 +465,7 @@ describe('Common helpers', function () {
     });
 
     it('calls failure callback when post-processing fails', () => {
-      const helpers = require('../www/helpers')(jsUtil, null, messages, fakeBase64, errorCodes);
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
       const handler = helpers.injectRawResponseHandler(
         'json',
         null,
@@ -476,10 +479,10 @@ describe('Common helpers', function () {
     });
   });
 
-  describe('checkUploadFileOptions()', function() {
+  describe('checkUploadFileOptions()', function () {
     const jsUtil = require('../www/js-util');
     const messages = require('../www/messages');
-    const helpers = require('../www/helpers')(jsUtil, null, messages, null, null);
+    const helpers = require('../www/helpers')(null, jsUtil, null, messages, null, null);
 
     it('checks valid file options correctly', () => {
       const opts = {
@@ -508,4 +511,66 @@ describe('Common helpers', function () {
       (() => helpers.checkUploadFileOptions(['file://path/to/file.png'], [1])).should.throw(messages.NAMES_TYPE_MISMATCH);
     });
   });
-})
+
+  describe('getProcessedData()', function () {
+    const jsUtil = require('../www/js-util');
+    const messages = require('../www/messages');
+    const dependencyValidator = require('../www/dependency-validator')(FormDataMock, null, messages);
+    const helpers = require('../www/helpers')({ FormData: FormDataMock }, jsUtil, null, messages, null, null, dependencyValidator);
+
+    it('throws an error when given data does not match allowed data types', () => {
+      (() => helpers.getProcessedData('myString', 'urlencoded')).should.throw(messages.TYPE_MISMATCH_DATA);
+      (() => helpers.getProcessedData('myString', 'json')).should.throw(messages.TYPE_MISMATCH_DATA);
+      (() => helpers.getProcessedData({}, 'utf8')).should.throw(messages.TYPE_MISMATCH_DATA);
+    });
+
+    it('throws an error when needed Web API is not available', () => {
+      const helpers = require('../www/helpers')({}, jsUtil, null, messages, null, null);
+      (() => helpers.getProcessedData(null, 'multipart')).should.throw(`${messages.INSTANCE_TYPE_NOT_SUPPORTED} FormData`);
+    });
+
+    it('throws an error when given data does not match allowed instance types', () => {
+      (() => helpers.getProcessedData('myString', 'multipart')).should.throw(messages.INSTANCE_TYPE_MISMATCH_DATA);
+    });
+
+    it('processes data correctly when serializer "utf8" is configured', () => {
+      helpers.getProcessedData('myString', 'utf8').should.be.eql({text: 'myString'});
+    });
+
+    it('processes data correctly when serializer "multipart" is configured', () => {
+      helpers.getProcessedData(new FormDataMock(), 'multipart');
+    });
+  });
+});
+
+describe('Dependency Validator', function () {
+  const messages = require('../www/messages');
+
+  describe('logWarnings()', function () {
+    it('logs a warning message if FormData API is not supported', function () {
+      const console = new ConsoleMock();
+
+      require('../www/dependency-validator')(undefined, console, messages).logWarnings();
+
+      console.messageList.length.should.be.equal(1);
+      console.messageList[0].type.should.be.equal('warn');
+      console.messageList[0].message.should.be.eql([messages.MISSING_FORMDATA_API]);
+    });
+
+    it('logs a warning message if FormData.entries() API is not supported', function () {
+      const console = new ConsoleMock();
+
+      require('../www/dependency-validator')({}, console, messages).logWarnings();
+
+      console.messageList.length.should.be.equal(1);
+      console.messageList[0].type.should.be.equal('warn');
+      console.messageList[0].message.should.be.eql([messages.MISSING_FORMDATA_ENTRIES_API]);
+    });
+  });
+
+  describe('checkFormDataApi()', function () {
+    it('throws an error if FormData.entries() API is not supported', function () {
+      (() => require('../www/dependency-validator')(null, null, messages).checkFormDataApi()).should.throw(messages.MISSING_FORMDATA_ENTRIES_API);
+    });
+  });
+});
