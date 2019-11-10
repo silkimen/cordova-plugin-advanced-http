@@ -9,7 +9,7 @@ module.exports = function init(FormData, console, messages) {
   function logWarnings() {
     if (!FormData) {
       console.warn(messages.MISSING_FORMDATA_API);
-    } else if (!FormData.prototype || !FormData.prototype.entries) {
+    } else if (!FormData.prototype || !FormData.prototype.entries) {
       console.warn(messages.MISSING_FORMDATA_ENTRIES_API);
     }
   }

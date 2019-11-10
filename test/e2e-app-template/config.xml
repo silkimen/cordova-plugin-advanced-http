@@ -24,7 +24,7 @@
     </platform>
     <engine name="android" spec="7.1.0" />
     <engine name="browser" spec="5.0.0" />
-    <engine name="ios" spec="4.4.0" />
+    <engine name="ios" spec="5.0.1" />
     <plugin name="cordova-plugin-file" spec="6.0.1" />
     <preference name="AndroidPersistentFileLocation" value="Internal" />
 </widget>

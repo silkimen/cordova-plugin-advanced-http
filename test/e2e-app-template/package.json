@@ -14,7 +14,7 @@
         "cordova": "7.0.1",
         "cordova-android": "7.1.0",
         "cordova-browser": "5.0.0",
-        "cordova-ios": "4.4.0"
+        "cordova-ios": "5.0.1"
     },
     "cordova": {
         "platforms": [
