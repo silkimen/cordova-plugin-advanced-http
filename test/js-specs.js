@@ -1,8 +1,11 @@
 const chai = require('chai');
 const mock = require('mock-require');
+const util = require('util');
 const should = chai.should();
 
+const BlobMock = require('./mocks/Blob.mock');
 const ConsoleMock = require('./mocks/Console.mock');
+const FileReaderMock = require('./mocks/FileReader.mock');
 const FormDataMock = require('./mocks/FormData.mock');
 
 describe('Advanced HTTP public interface', function () {
@@ -32,7 +35,7 @@ describe('Advanced HTTP public interface', function () {
 
   beforeEach(() => {
     // mocked btoa function (base 64 encoding strings)
-    global.btoa = decoded => new Buffer(decoded).toString('base64');
+    global.btoa = decoded => Buffer.from(decoded).toString('base64');
     loadHttp(getDependenciesBlueprint());
   });
 
@@ -512,33 +515,82 @@ describe('Common helpers', function () {
     });
   });
 
-  describe('getProcessedData()', function () {
+  describe('processData()', function () {
+    const mockWindow = {
+      Blob: BlobMock,
+      FileReader: FileReaderMock,
+      FormData: FormDataMock,
+      TextEncoder: util.TextEncoder,
+    }
+
+    const base64 = { fromArrayBuffer: ab => Buffer.from(ab).toString('base64') };
     const jsUtil = require('../www/js-util');
     const messages = require('../www/messages');
-    const dependencyValidator = require('../www/dependency-validator')(FormDataMock, null, messages);
-    const helpers = require('../www/helpers')({ FormData: FormDataMock }, jsUtil, null, messages, null, null, dependencyValidator);
+    const dependencyValidator = require('../www/dependency-validator')(mockWindow, null, messages);
+    const helpers = require('../www/helpers')(mockWindow, jsUtil, null, messages, base64, null, dependencyValidator);
+
+    const testString = 'Test String öäüß 👍😉';
+    const testStringBase64 = Buffer.from(testString).toString('base64');
 
     it('throws an error when given data does not match allowed data types', () => {
-      (() => helpers.getProcessedData('myString', 'urlencoded')).should.throw(messages.TYPE_MISMATCH_DATA);
-      (() => helpers.getProcessedData('myString', 'json')).should.throw(messages.TYPE_MISMATCH_DATA);
-      (() => helpers.getProcessedData({}, 'utf8')).should.throw(messages.TYPE_MISMATCH_DATA);
+      (() => helpers.processData('myString', 'urlencoded')).should.throw(messages.TYPE_MISMATCH_DATA);
+      (() => helpers.processData('myString', 'json')).should.throw(messages.TYPE_MISMATCH_DATA);
+      (() => helpers.processData({}, 'utf8')).should.throw(messages.TYPE_MISMATCH_DATA);
     });
 
     it('throws an error when needed Web API is not available', () => {
       const helpers = require('../www/helpers')({}, jsUtil, null, messages, null, null);
-      (() => helpers.getProcessedData(null, 'multipart')).should.throw(`${messages.INSTANCE_TYPE_NOT_SUPPORTED} FormData`);
+      (() => helpers.processData(null, 'multipart')).should.throw(`${messages.INSTANCE_TYPE_NOT_SUPPORTED} FormData`);
     });
 
     it('throws an error when given data does not match allowed instance types', () => {
-      (() => helpers.getProcessedData('myString', 'multipart')).should.throw(messages.INSTANCE_TYPE_MISMATCH_DATA);
+      (() => helpers.processData('myString', 'multipart')).should.throw(messages.INSTANCE_TYPE_MISMATCH_DATA);
     });
 
-    it('processes data correctly when serializer "utf8" is configured', () => {
-      helpers.getProcessedData('myString', 'utf8').should.be.eql({text: 'myString'});
+    it('processes data correctly when serializer "utf8" is configured', (cb) => {
+      helpers.processData('myString', 'utf8', (data) => {
+        data.should.be.eql({text: 'myString'});
+        cb();
+      })
     });
 
-    it('processes data correctly when serializer "multipart" is configured', () => {
-      helpers.getProcessedData(new FormDataMock(), 'multipart');
+    it('processes data correctly when serializer "multipart" is configured and form data contains string value', (cb) => {
+      const formData = new FormDataMock();
+      formData.append('myString', testString);
+
+      helpers.processData(formData, 'multipart', (data) => {
+        data.buffers.length.should.be.equal(1);
+        data.names.length.should.be.equal(1);
+        data.fileNames.length.should.be.equal(1);
+        data.types.length.should.be.equal(1);
+
+        data.buffers[0].should.be.eql(testStringBase64);
+        data.names[0].should.be.equal('myString');
+        should.equal(data.fileNames[0], null);
+        data.types[0].should.be.equal('text/plain');
+
+
+        cb();
+      });
+    });
+
+    it('processes data correctly when serializer "multipart" is configured and form data contains file value', (cb) => {
+      const formData = new FormDataMock();
+      formData.append('myFile', new BlobMock([testString], { type: 'application/octet-stream' }));
+
+      helpers.processData(formData, 'multipart', (data) => {
+        data.buffers.length.should.be.equal(1);
+        data.names.length.should.be.equal(1);
+        data.fileNames.length.should.be.equal(1);
+        data.types.length.should.be.equal(1);
+
+        data.buffers[0].should.be.eql(testStringBase64);
+        data.names[0].should.be.equal('myFile');
+        data.fileNames[0].should.be.equal('blob');
+        data.types[0].should.be.equal('application/octet-stream');
+
+        cb();
+      });
     });
   });
 });
@@ -550,7 +602,7 @@ describe('Dependency Validator', function () {
     it('logs a warning message if FormData API is not supported', function () {
       const console = new ConsoleMock();
 
-      require('../www/dependency-validator')(undefined, console, messages).logWarnings();
+      require('../www/dependency-validator')({}, console, messages).logWarnings();
 
       console.messageList.length.should.be.equal(1);
       console.messageList[0].type.should.be.equal('warn');
@@ -560,7 +612,7 @@ describe('Dependency Validator', function () {
     it('logs a warning message if FormData.entries() API is not supported', function () {
       const console = new ConsoleMock();
 
-      require('../www/dependency-validator')({}, console, messages).logWarnings();
+      require('../www/dependency-validator')({ FormData: {} }, console, messages).logWarnings();
 
       console.messageList.length.should.be.equal(1);
       console.messageList[0].type.should.be.equal('warn');
@@ -568,9 +620,39 @@ describe('Dependency Validator', function () {
     });
   });
 
+  describe('checkBlobApi()', function () {
+    it('throws an error if Blob API is not supported', function () {
+      const console = new ConsoleMock();
+      const validator = require('../www/dependency-validator')({}, console, messages);
+
+      (() => validator.checkBlobApi()).should.throw(messages.MISSING_BLOB_API);
+    });
+  });
+
+  describe('checkFileReaderApi()', function () {
+    it('throws an error if FileReader API is not supported', function () {
+      const console = new ConsoleMock();
+      const validator = require('../www/dependency-validator')({}, console, messages);
+
+      (() => validator.checkFileReaderApi()).should.throw(messages.MISSING_FILE_READER_API);
+    });
+  });
+
   describe('checkFormDataApi()', function () {
     it('throws an error if FormData.entries() API is not supported', function () {
-      (() => require('../www/dependency-validator')(null, null, messages).checkFormDataApi()).should.throw(messages.MISSING_FORMDATA_ENTRIES_API);
+      const console = new ConsoleMock();
+      const validator = require('../www/dependency-validator')({ FormData: {}}, console, messages);
+
+      (() => validator.checkFormDataApi()).should.throw(messages.MISSING_FORMDATA_ENTRIES_API);
+    });
+  });
+
+  describe('checkTextEncoderApi()', function () {
+    it('throws an error if TextEncoder API is not supported', function () {
+      const console = new ConsoleMock();
+      const validator = require('../www/dependency-validator')({}, console, messages);
+
+      (() => validator.checkTextEncoderApi()).should.throw(messages.MISSING_TEXT_ENCODER_API);
     });
   });
 });

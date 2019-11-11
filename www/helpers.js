@@ -18,7 +18,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     checkTimeoutValue: checkTimeoutValue,
     checkUploadFileOptions: checkUploadFileOptions,
     getMergedHeaders: getMergedHeaders,
-    getProcessedData: getProcessedData,
+    processData: processData,
     handleMissingCallbacks: handleMissingCallbacks,
     handleMissingOptions: handleMissingOptions,
     injectCookieHandler: injectCookieHandler,
@@ -374,7 +374,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     return dataSerializer === 'multipart' ? 'FormData' : null;
   }
 
-  function getProcessedData(data, dataSerializer) {
+  function processData(data, dataSerializer, cb) {
     var currentDataType = jsUtil.getTypeOf(data);
     var allowedDataTypes = getAllowedDataTypes(dataSerializer);
     var allowedInstanceType = getAllowedInstanceType(dataSerializer);
@@ -391,17 +391,67 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
       throw new Error(messages.TYPE_MISMATCH_DATA + ' ' + allowedDataTypes.join(', '));
     }
 
-    if (dataSerializer === 'utf8') {
-      data = { text: data };
+    switch (dataSerializer) {
+      case 'utf8':
+        return cb({ text: data });
+      case 'multipart':
+        return processFormData(data, cb);
+      default:
+        return cb(data);
+    }
+  }
+
+  function processFormData(data, cb) {
+    dependencyValidator.checkBlobApi();
+    dependencyValidator.checkFileReaderApi();
+    dependencyValidator.checkFormDataApi();
+    dependencyValidator.checkTextEncoderApi();
+
+    var textEncoder = new global.TextEncoder('utf8');
+    var iterator = data.entries();
+
+    var result = {
+      buffers: [],
+      names: [],
+      fileNames: [],
+      types: []
+    };
+
+    processFormDataIterator(iterator, textEncoder, result, cb);
+  }
+
+  function processFormDataIterator(iterator, textEncoder, result, onFinished) {
+    var entry = iterator.next();
+
+    if (entry.done) {
+      return onFinished(result);
     }
 
-    if (dataSerializer === 'multipart') {
-      dependencyValidator.checkFormDataApi();
+    if (entry.value[1] instanceof global.Blob) {
+      var reader = new global.FileReader();
 
-      // TODO
+      reader.onload = function() {
+        result.buffers.push(base64.fromArrayBuffer(reader.result));
+        result.names.push(entry.value[0]);
+        result.fileNames.push(entry.value[1].name || 'blob');
+        result.types.push(entry.value[1].type || '');
+        processFormDataIterator(iterator, textEncoder, result, onFinished);
+      };
+
+      return reader.readAsArrayBuffer(entry.value[1]);
     }
 
-    return data;
+    if (jsUtil.getTypeOf(entry.value[1]) === 'String') {
+      result.buffers.push(base64.fromArrayBuffer(textEncoder.encode(entry.value[1]).buffer));
+      result.names.push(entry.value[0]);
+      result.fileNames.push(null);
+      result.types.push('text/plain');
+
+      return processFormDataIterator(iterator, textEncoder, result, onFinished)
+    }
+
+    // skip items which are not supported
+    processFormDataIterator(iterator, textEncoder, result, onFinished);
   }
 
   function handleMissingCallbacks(successFn, failFn) {

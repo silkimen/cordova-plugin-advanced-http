@@ -33,6 +33,7 @@ const helpers = {
   setJsonSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('json')); },
   setUtf8StringSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('utf8')); },
   setUrlEncodedSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('urlencoded')); },
+  setMultipartSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('multipart')); },
   disableFollowingRedirect: function (resolve) { resolve(cordova.plugin.http.setFollowRedirect(false)); },
   enableFollowingRedirect: function(resolve) { resolve(cordova.plugin.http.setFollowRedirect(true)); },
   getWithXhr: function (done, url, type) {
@@ -789,8 +790,29 @@ const tests = [
       result.data.status.should.be.equal(418);
       result.data.error.should.be.equal("\n    -=[ teapot ]=-\n\n       _...._\n     .'  _ _ `.\n    | .\"` ^ `\". _,\n    \\_;`\"---\"`|//\n      |       ;/\n      \\_     _/\n        `\"\"\"`\n");
     }
-  }
-  // @TODO: not ready yet
+  },
+
+  // TODO: not ready yet
+  // {
+  //   description: 'should serialize FormData instance correctly when it contains string value',
+  //   expected: 'resolved: {"status": 200, ...',
+  //   before: helpers.setMultipartSerializer,
+  //   func: function (resolve, reject) {
+  //     var formData = new FormData();
+  //     formData.append('myString', 'This is a test!');
+
+  //     var url = 'https://httpbin.org/anything';
+  //     var options = { method: 'post', data: formData };
+  //     cordova.plugin.http.sendRequest(url, options, resolve, reject);
+  //   },
+  //   validationFunc: function (driver, result) {
+  //     console.log(result.data);
+  //     result.type.should.be.equal('resolved');
+  //     result.data.status.should.be.equal(200);
+  //   }
+  // }
+
+  // TODO: not ready yet
   // {
   //   description: 'should authenticate correctly when client cert auth is configured with a PKCS12 container',
   //   expected: 'resolved: {"status": 200, ...',

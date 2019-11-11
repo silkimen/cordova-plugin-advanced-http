@@ -1,7 +1,9 @@
 package com.silkimen.cordovahttp;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -19,9 +21,11 @@ import com.silkimen.http.TLSConfiguration;
 
 import org.apache.cordova.CallbackContext;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Base64;
 import android.util.Log;
 
 abstract class CordovaHttpBase implements Runnable {
@@ -120,7 +124,7 @@ abstract class CordovaHttpBase implements Runnable {
     request.readTimeout(this.timeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
-    request.setConnectionFactory(new OkConnectionFactory());
+    HttpRequest.setConnectionFactory(new OkConnectionFactory());
 
     if (this.tlsConfiguration.getHostnameVerifier() != null) {
       request.setHostnameVerifier(this.tlsConfiguration.getHostnameVerifier());
@@ -141,6 +145,8 @@ abstract class CordovaHttpBase implements Runnable {
       request.contentType("text/plain", "UTF-8");
     } else if ("urlencoded".equals(this.serializer)) {
       // intentionally left blank, because content type is set in HttpRequest.form()
+    } else if ("multipart".equals(this.serializer)) {
+      request.contentType("multipart/form-data");
     }
   }
 
@@ -155,6 +161,22 @@ abstract class CordovaHttpBase implements Runnable {
       request.send(((JSONObject) this.data).getString("text"));
     } else if ("urlencoded".equals(this.serializer)) {
       request.form(JsonUtils.getObjectMap((JSONObject) this.data));
+    } else if ("multipart".equals(this.serializer)) {
+      JSONArray buffers = ((JSONObject) this.data).getJSONArray("buffers");
+      JSONArray names = ((JSONObject) this.data).getJSONArray("names");
+      JSONArray fileNames = ((JSONObject) this.data).getJSONArray("fileNames");
+      JSONArray types = ((JSONObject) this.data).getJSONArray("types");
+
+      for (int i = 0; i < buffers.length(); ++i) {
+        byte[] bytes = Base64.decode(buffers.getString(i), Base64.DEFAULT);
+        String name = names.getString(i);
+
+        if (fileNames.isNull(i)) {
+          request.part(name, new String(bytes, "UTF-8"));
+        } else {
+          request.part(name, fileNames.getString(i), types.getString(i), new ByteArrayInputStream(bytes));
+        }
+      }
     }
   }
 

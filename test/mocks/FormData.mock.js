@@ -1,6 +1,17 @@
+const BlobMock = require('./Blob.mock');
+const FileMock = require('./File.mock');
+
 module.exports = class FormDataMock {
-  append() {
-    throw new Error('Not implemented in FormDataMock.');
+  constructor() {
+    this.map = new Map();
+  }
+
+  append(name, value, filename) {
+    if (value instanceof BlobMock) {
+      this.map.set(name, new FileMock(value, filename))
+    } else {
+      this.map.set(name, value);
+    }
   }
 
   delete() {
@@ -8,34 +19,34 @@ module.exports = class FormDataMock {
   }
 
   entries() {
-    throw new Error('Not implemented in FormDataMock.');
+    return this.map.entries();
   }
 
-  forEach() {
-    throw new Error('Not implemented in FormDataMock.');
+  forEach(cb) {
+    return this.map.forEach(cb);
   }
 
-  get() {
-    throw new Error('Not implemented in FormDataMock.');
+  get(key) {
+    return this.map.get(key);
   }
 
   getAll() {
     throw new Error('Not implemented in FormDataMock.');
   }
 
-  has() {
-    throw new Error('Not implemented in FormDataMock.');
+  has(key) {
+    return this.map.has(key);
   }
 
   keys() {
-    throw new Error('Not implemented in FormDataMock.');
+    return this.map.keys();
   }
 
-  set() {
-    throw new Error('Not implemented in FormDataMock.');
+  set(key, value) {
+    return this.map.set(key, value);
   }
 
   values() {
-    throw new Error('Not implemented in FormDataMock.');
+    return this.map.values();
   }
 };
