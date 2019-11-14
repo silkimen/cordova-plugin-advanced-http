@@ -1,4 +1,8 @@
-exports.configure = driver => {
+module.exports = { setupLogging };
+
+function setupLogging(driver) {
+  require('colors');
+
   driver.on('status', info => {
     console.log(info.cyan);
   });
@@ -10,4 +14,4 @@ exports.configure = driver => {
   driver.on('http', (meth, path, data) => {
     console.log(' > ' + meth.magenta, path, (data || '').grey);
   });
-};
+}

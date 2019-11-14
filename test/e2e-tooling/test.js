@@ -1,100 +1,101 @@
 const wd = require('wd');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const apps = require('./helpers/apps');
-const caps = Object.assign({}, require('./helpers/caps'));
-const serverConfig = require('./helpers/server');
+const logging = require('./logging');
+const capsConfig = require('./caps');
+const serverConfig = require('./server');
 const testDefinitions = require('../e2e-specs');
-const pkgjson = require('../../package.json');
 
 chai.use(chaiAsPromised);
 chaiAsPromised.transferPromiseness = wd.transferPromiseness;
 global.should = chai.should();
 
-require('colors');
-
-describe('Advanced HTTP', function() {
+describe('Advanced HTTP e2e test suite', function () {
+  const isSauceLabs = !!process.env.SAUCE_USERNAME;
+  const isVerbose = process.argv.includes('--verbose');
   const isDevice = process.argv.includes('--device');
   const isAndroid = process.argv.includes('--android');
-  const targetInfo = { isDevice, isAndroid };
 
-  let driver = null;
+  const targetInfo = { isSauceLabs, isDevice, isAndroid };
+  const environment = isSauceLabs ? 'saucelabs' : 'local';
+
+  let driver;
   let allPassed = true;
 
   this.timeout(900000);
 
-  const getCaps = appName => {
-    const desiredOs = isAndroid ? 'android' : 'ios';
-    const desiredCaps = caps[desiredOs + (isDevice ? 'Device' : 'Emulator')];
-    const desiredApp = apps[desiredOs + appName];
+  before(async function () {
+    driver = await wd.promiseChainRemote(serverConfig.getServer(environment));
 
-    desiredCaps.name = pkgjson.name + ` (${desiredOs})`;
-    desiredCaps.app = desiredApp;
+    if (isVerbose) {
+      logging.setupLogging(driver);
+    }
 
-    return desiredCaps;
-  };
-
-  const validateTestIndex = number => driver
-    .elementById('descriptionLbl')
-    .text()
-    .then(text => parseInt(text.match(/(\d+):/)[1], 10))
-    .should.eventually.become(number, 'Test index is not matching!');
-
-  const validateTestTitle = testTitle => driver
-    .elementById('descriptionLbl')
-    .text()
-    .then(text => text.match(/\d+:\ (.*)/)[1])
-    .should.eventually.become(testTitle, 'Test description is not matching!');
-
-  const waitToBeFinished = timeout => new Promise((resolve, reject) => {
-    const timeoutTimestamp = Date.now() + timeout;
-    const checkIfFinished = () => driver
-      .elementById('statusInput')
-      .getValue()
-      .then(value => {
-        if (value === 'finished') {
-          resolve();
-        } else if (Date.now() > timeoutTimestamp) {
-          reject(new Error('Test function timed out!'));
-        } else {
-          setTimeout(checkIfFinished, 500);
-        }
-      });
-
-    checkIfFinished();
+    await driver.init(
+      capsConfig.getCaps(
+        environment,
+        isAndroid ? 'android' : 'ios',
+        isDevice ? 'device' : 'emulator'
+      )
+    );
   });
 
-  const validateResult = testDefinition => driver
-    .safeExecute('app.lastResult')
-    .then(result => testDefinition.validationFunc(driver, result, targetInfo));
-
-  const clickNext = () => driver
-    .elementById('nextBtn')
-    .click()
-    .sleep(1000);
-
-  before(() => {
-    driver = wd.promiseChainRemote(serverConfig);
-    require('./helpers/logging').configure(driver);
-
-    return driver.init(getCaps('TestApp'));
+  after(async function () {
+    await driver.quit().finally(
+      () => isSauceLabs && driver.sauceJobStatus(allPassed)
+    );
   });
-
-  after(() => driver
-    .quit()
-    .finally(function () {
-      if (process.env.SAUCE_USERNAME) {
-        return driver.sauceJobStatus(allPassed);
-      }
-    }));
 
   testDefinitions.tests.forEach((definition, index) => {
-    it(index + ': ' + definition.description, function() {
-      return clickNext()
-        .then(() => validateTestIndex(index))
-        .then(() => validateTestTitle(definition.description))
-        .then(() => waitToBeFinished(definition.timeout || 10000))
-        .then(() => validateResult(definition))
-      });
+    it(index + ': ' + definition.description, function () {
+      return clickNext(driver)
+        .then(() => validateTestIndex(driver, index))
+        .then(() => validateTestTitle(driver, definition.description))
+        .then(() => waitToBeFinished(driver, definition.timeout || 10000))
+        .then(() => validateResult(driver, definition.validationFunc, targetInfo))
+    });
   });
 });
+
+async function clickNext(driver) {
+  await driver.elementById('nextBtn').click().sleep(1000);
+}
+
+async function validateTestIndex(driver, testIndex) {
+  const description = await driver.elementById('descriptionLbl').text();
+  const index = parseInt(description.match(/(\d+):/)[1], 10);
+
+  index.should.be.equal(testIndex, 'Test index is not matching!');
+}
+
+async function validateTestTitle(driver, testTitle) {
+  const description = await driver.elementById('descriptionLbl').text();
+  const title = description.match(/\d+:\ (.*)/)[1];
+
+  title.should.be.equal(testTitle, 'Test description is not matching!');
+}
+
+async function waitToBeFinished(driver, timeout) {
+  const timeoutTimestamp = Date.now() + timeout;
+
+  while (true) {
+    if (await driver.elementById('statusInput').getValue() === 'finished') {
+      return true;
+    }
+
+    if (Date.now() > timeoutTimestamp) {
+      throw new Error('Test function timed out!');
+    }
+
+    await sleep(500);
+  }
+}
+
+async function validateResult(driver, validationFunc, targetInfo) {
+  const result = await driver.safeExecute('app.lastResult');
+  validationFunc(driver, result, targetInfo);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
