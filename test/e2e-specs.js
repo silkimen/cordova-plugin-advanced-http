@@ -75,6 +75,13 @@ const helpers = {
     }
 
     return hash;
+  },
+  checkResult: function (result, expected) {
+    if (result.type === 'throwed' && expected !== 'throwed') {
+      throw new Error('Expected function not to throw: ' + result.message);
+    }
+
+    result.type.should.be.equal(expected);
   }
 };
 
@@ -791,26 +798,50 @@ const tests = [
       result.data.error.should.be.equal("\n    -=[ teapot ]=-\n\n       _...._\n     .'  _ _ `.\n    | .\"` ^ `\". _,\n    \\_;`\"---\"`|//\n      |       ;/\n      \\_     _/\n        `\"\"\"`\n");
     }
   },
+  {
+    description: 'should serialize FormData instance correctly when it contains string value',
+    expected: 'resolved: {"status": 200, ...',
+    before: helpers.setMultipartSerializer,
+    func: function (resolve, reject) {
+      var formData = new FormData();
+      formData.append('myString', 'This is a test!');
 
-  // TODO: not ready yet
-  // {
-  //   description: 'should serialize FormData instance correctly when it contains string value',
-  //   expected: 'resolved: {"status": 200, ...',
-  //   before: helpers.setMultipartSerializer,
-  //   func: function (resolve, reject) {
-  //     var formData = new FormData();
-  //     formData.append('myString', 'This is a test!');
+      var url = 'https://httpbin.org/anything';
+      var options = { method: 'post', data: formData };
+      cordova.plugin.http.sendRequest(url, options, resolve, reject);
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'resolved');
+      result.data.status.should.be.equal(200);
+      JSON.parse(result.data.data).form.should.be.eql({ myString: 'This is a test!' });
+    }
+  },
+  {
+    description: 'should serialize FormData instance correctly when it contains blob value',
+    expected: 'resolved: {"status": 200, ...',
+    before: helpers.setMultipartSerializer,
+    func: function (resolve, reject) {
+      helpers.getWithXhr(function(blob) {
+        var formData = new FormData();
+        formData.append('CordovaLogo', blob);
 
-  //     var url = 'https://httpbin.org/anything';
-  //     var options = { method: 'post', data: formData };
-  //     cordova.plugin.http.sendRequest(url, options, resolve, reject);
-  //   },
-  //   validationFunc: function (driver, result) {
-  //     console.log(result.data);
-  //     result.type.should.be.equal('resolved');
-  //     result.data.status.should.be.equal(200);
-  //   }
-  // }
+        var url = 'https://httpbin.org/anything';
+        var options = { method: 'post', data: formData };
+        cordova.plugin.http.sendRequest(url, options, resolve, reject);
+      }, './res/cordova_logo.png', 'blob');
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'resolved');
+      result.data.status.should.be.equal(200);
+
+      // httpbin.org encodes posted binaries in base64 and echoes them back
+      // therefore we need to check for base64 string with mime type prefix
+      const fs = require('fs');
+      const rawLogo = fs.readFileSync('./test/e2e-app-template/www/res/cordova_logo.png');
+      const b64Logo = rawLogo.toString('base64');
+      JSON.parse(result.data.data).files.CordovaLogo.should.be.equal('data:image/png;base64,' + b64Logo);
+    }
+  }
 
   // TODO: not ready yet
   // {

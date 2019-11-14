@@ -5,6 +5,7 @@ const should = chai.should();
 
 const BlobMock = require('./mocks/Blob.mock');
 const ConsoleMock = require('./mocks/Console.mock');
+const FileMock = require('./mocks/File.mock');
 const FileReaderMock = require('./mocks/FileReader.mock');
 const FormDataMock = require('./mocks/FormData.mock');
 
@@ -518,6 +519,7 @@ describe('Common helpers', function () {
   describe('processData()', function () {
     const mockWindow = {
       Blob: BlobMock,
+      File: FileMock,
       FileReader: FileReaderMock,
       FormData: FormDataMock,
       TextEncoder: util.TextEncoder,
