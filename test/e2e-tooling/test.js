@@ -46,15 +46,34 @@ describe('Advanced HTTP e2e test suite', function () {
     );
   });
 
-  testDefinitions.tests.forEach((definition, index) => {
-    it(index + ': ' + definition.description, function () {
-      return clickNext(driver)
-        .then(() => validateTestIndex(driver, index))
-        .then(() => validateTestTitle(driver, definition.description))
-        .then(() => waitToBeFinished(driver, definition.timeout || 10000))
-        .then(() => validateResult(driver, definition.validationFunc, targetInfo))
+  const defineTestForMocha = (test, index) => {
+    it(index + ': ' + test.description, async () => {
+      await clickNext(driver);
+      await validateTestIndex(driver, index);
+      await validateTestTitle(driver, test.description);
+      await waitToBeFinished(driver, test.timeout || 10000);
+      await validateResult(driver, test.validationFunc, targetInfo);
     });
+  };
+
+  const onlyFlaggedTests = [];
+  const enabledTests = [];
+
+  testDefinitions.tests.forEach(test => {
+    if (test.only) {
+      onlyFlaggedTests.push(test);
+    }
+
+    if (!test.disabled) {
+      enabledTests.push(test);
+    }
   });
+
+  if (onlyFlaggedTests.length) {
+    onlyFlaggedTests.forEach(defineTestForMocha);
+  } else {
+    enabledTests.forEach(defineTestForMocha);
+  }
 });
 
 async function clickNext(driver) {

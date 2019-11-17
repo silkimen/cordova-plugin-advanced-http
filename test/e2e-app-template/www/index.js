@@ -3,8 +3,25 @@ const app = {
 
   lastResult: null,
 
+  testsFlaggedToRun: [],
+
   initialize: function () {
     document.getElementById('nextBtn').addEventListener('click', app.onNextBtnClick);
+
+    var onlyFlaggedTests = [];
+    var enabledTests = [];
+  
+    tests.forEach(function (test) {
+      if (test.only) {
+        onlyFlaggedTests.push(test);
+      }
+  
+      if (!test.disabled) {
+        enabledTests.push(test);
+      }
+    });
+
+    app.testsFlaggedToRun = onlyFlaggedTests.length ? onlyFlaggedTests : enabledTests;
   },
 
   printResult: function (prefix, content) {
@@ -47,9 +64,9 @@ const app = {
     cb(app.lastResult);
   },
 
-  runTest: function (index) {
+  runTest: function (tests, index) {
     const testDefinition = tests[index];
-    const titleText = app.testIndex + ': ' + testDefinition.description;
+    const titleText = index + ': ' + testDefinition.description;
     const expectedText = 'expected - ' + testDefinition.expected;
 
     document.getElementById('statusInput').value = 'running';
@@ -130,8 +147,8 @@ const app = {
   onNextBtnClick: function () {
     app.testIndex += 1;
 
-    if (app.testIndex < tests.length) {
-      app.runTest(app.testIndex);
+    if (app.testIndex < app.testsFlaggedToRun.length) {
+      app.runTest(app.testsFlaggedToRun, app.testIndex);
     } else {
       app.onFinishedAllTests();
     }

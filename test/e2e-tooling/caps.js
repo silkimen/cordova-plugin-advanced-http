@@ -7,20 +7,23 @@ const configs = {
   localIosDevice: {
     platformName: 'iOS',
     platformVersion: '10.3',
-    deviceName: 'iPhone 6',
+    automationName: 'XCUITest',
+    deviceName: 'iPhone 8',
     autoWebview: true,
     app: path.resolve('temp/platforms/ios/build/emulator/HttpDemo.app')
   },
   localIosEmulator: {
     platformName: 'iOS',
-    platformVersion: '11.0',
-    deviceName: 'iPhone Simulator',
+    platformVersion: '13.2',
+    automationName: 'XCUITest',
+    deviceName: 'iPhone 8',
     autoWebview: true,
     app: path.resolve('temp/platforms/ios/build/emulator/HttpDemo.app')
   },
   localAndroidEmulator: {
     platformName: 'Android',
     platformVersion: '9',
+    automationName: 'XCUITest',
     deviceName: 'Android Emulator',
     autoWebview: true,
     fullReset: true,

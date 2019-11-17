@@ -799,6 +799,7 @@ const tests = [
     }
   },
   {
+    disabled: true,
     description: 'should serialize FormData instance correctly when it contains string value',
     expected: 'resolved: {"status": 200, ...',
     before: helpers.setMultipartSerializer,
@@ -817,6 +818,7 @@ const tests = [
     }
   },
   {
+    disabled: true,
     description: 'should serialize FormData instance correctly when it contains blob value',
     expected: 'resolved: {"status": 200, ...',
     before: helpers.setMultipartSerializer,
