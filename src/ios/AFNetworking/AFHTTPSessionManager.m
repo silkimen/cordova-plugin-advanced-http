@@ -284,12 +284,12 @@
 }
 
 - (NSURLSessionDataTask *)uploadTaskWithHTTPMethod:(NSString *)method
-                     URLString:(NSString *)URLString
-                    parameters:(id)parameters
-     constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block
-                      progress:(nullable void (^)(NSProgress * _Nonnull))uploadProgress
-                       success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
-                       failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
+                                         URLString:(NSString *)URLString
+                                        parameters:(id)parameters
+                         constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block
+                                          progress:(nullable void (^)(NSProgress * _Nonnull))uploadProgress
+                                           success:(void (^)(NSURLSessionDataTask *task, id responseObject))success
+                                           failure:(void (^)(NSURLSessionDataTask *task, NSError *error))failure
 {
     NSError *serializationError = nil;
     NSMutableURLRequest *request = [self.requestSerializer multipartFormRequestWithMethod:method URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString] parameters:parameters constructingBodyWithBlock:block error:&serializationError];
@@ -314,6 +314,34 @@
             }
         }
     }];
+
+    [task resume];
+
+    return task;
+}
+
+- (NSURLSessionDataTask *)uploadTaskWithHTTPMethod:(NSString *)method
+                                        URLString:(NSString *)URLString
+                                       parameters:(id)parameters
+                                         progress:(void (^)(NSProgress * _Nonnull))uploadProgress
+                                          success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
+                                          failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure
+{
+    NSURLSessionDataTask *dataTask = [self dataTaskWithHTTPMethod:method URLString:URLString parameters:parameters uploadProgress:uploadProgress downloadProgress:nil success:success failure:failure];
+
+    [dataTask resume];
+
+    return dataTask;
+}
+
+- (NSURLSessionDataTask *)downloadTaskWithHTTPMethod:(NSString *)method
+                                           URLString:(NSString *)URLString
+                                          parameters:(id)parameters
+                                            progress:(nullable void (^)(NSProgress * _Nonnull))downloadProgress
+                                             success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
+                                             failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure
+{
+    NSURLSessionDataTask *task = [self dataTaskWithHTTPMethod:method URLString:URLString parameters:parameters uploadProgress:nil downloadProgress:downloadProgress success:success failure:failure];
 
     [task resume];
 

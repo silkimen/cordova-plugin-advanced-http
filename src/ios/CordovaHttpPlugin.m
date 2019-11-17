@@ -164,7 +164,13 @@
     @try {
         void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+            
+            // no 'body' for HEAD request, omitting 'data'
+            if ([method isEqualToString:@"HEAD"]) {
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
+            } else {
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+            }
             
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -180,14 +186,7 @@
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
         
-        if ([method isEqualToString:@"GET"]) {
-            [manager GET:url parameters:nil progress: nil success:onSuccess failure:onFailure];
-        } else if ([method isEqualToString:@"DELETE"]) {
-            [manager DELETE:url parameters:nil success:onSuccess failure:onFailure];
-        } else {
-            // no 'body' for HEAD request, omitting 'data'
-            [manager HEAD:url parameters:nil success:^(NSURLSessionTask *task) { onSuccess(task, nil); } failure:onFailure];
-        }
+        [manager downloadTaskWithHTTPMethod:method URLString:url parameters:nil progress:nil success:onSuccess failure:onFailure];
     }
     @catch (NSException *exception) {
         [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
@@ -270,13 +269,7 @@
         if ([serializerName isEqualToString:@"multipart"]) {
             [manager uploadTaskWithHTTPMethod:method URLString:url parameters:nil constructingBodyWithBlock:constructBody progress:nil success:onSuccess failure:onFailure];
         } else {
-            if ([method isEqualToString:@"POST"]) {
-                [manager POST:url parameters:data progress:nil success:onSuccess failure:onFailure];
-            } else if ([serializerName isEqualToString:@"PUT"]) {
-                [manager PUT:url parameters:data success:onSuccess failure:onFailure];
-            } else {
-                [manager PATCH:url parameters:data success:onSuccess failure:onFailure];
-            }
+            [manager uploadTaskWithHTTPMethod:method URLString:url parameters:data progress:nil success:onSuccess failure:onFailure];
         }
     }
     @catch (NSException *exception) {
