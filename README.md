@@ -92,10 +92,13 @@ You can choose one of these:
 * `urlencoded`: send data as url encoded content in body (content type "application/x-www-form-urlencoded")
 * `json`: send data as JSON encoded content in body (content type "application/json")
 * `utf8`: send data as plain UTF8 encoded string in body (content type "plain/text")
+* `multipart`: send FormData objects as multipart content in body (content type "multipart/form-data")
 
 This defaults to `urlencoded`. You can also override the default content type headers by specifying your own headers (see [setHeader](#setHeader)).
 
-__Caution__: `urlencoded` does not support serializing deep structures whereas `json` does.
+:warning: `urlencoded` does not support serializing deep structures whereas `json` does.
+
+:warning: `multipart` depends on several Web API standards which need to be supported in your web view. Check out https://github.com/silkimen/cordova-plugin-advanced-http/wiki/Web-APIs-required-for-Multipart-requests for more info.
 
 ### setRequestTimeout
 Set how long to wait for a request to respond, in seconds.
@@ -175,15 +178,6 @@ This function was deprecated in 2.0.9. Use ["setFollowRedirect"](#setFollowRedir
 
 ### setSSLCertMode (deprecated)
 This function was deprecated in 2.0.8. Use ["setServerTrustMode"](#setServerTrustMode) instead.
-
-### enableSSLPinning (obsolete)
-This function was removed in 2.0.0. Use ["setServerTrustMode"](#setServerTrustMode) to enable SSL pinning (mode "pinned").
-
-### acceptAllCerts (obsolete)
-This function was removed in 2.0.0. Use ["setServerTrustMode"](#setServerTrustMode) to disable checking certs (mode "nocheck").
-
-### validateDomainName (obsolete)
-This function was removed in v1.6.2. Domain name validation is disabled automatically when you set server trust mode to "nocheck".
 
 ### removeCookies
 Remove all cookies associated with a given URL.

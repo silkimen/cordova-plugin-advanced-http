@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0
+
+- Feature #101: Support "multipart/form-data" requests (thanks SDA SE Open Industry Solutions)
+
 ## 2.2.0
 
 - Feature #239: add enumeration style object for error codes
