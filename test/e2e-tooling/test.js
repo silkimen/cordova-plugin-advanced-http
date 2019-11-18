@@ -22,7 +22,8 @@ describe('Advanced HTTP e2e test suite', function () {
   let driver;
   let allPassed = true;
 
-  this.timeout(900000);
+  this.timeout(15000);
+  this.slow(4000);
 
   before(async function () {
     driver = await wd.promiseChainRemote(serverConfig.getServer(environment));
