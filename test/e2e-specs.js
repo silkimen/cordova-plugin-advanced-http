@@ -799,12 +799,12 @@ const tests = [
     }
   },
   {
-    disabled: true,
     description: 'should serialize FormData instance correctly when it contains string value',
     expected: 'resolved: {"status": 200, ...',
     before: helpers.setMultipartSerializer,
     func: function (resolve, reject) {
-      var formData = new FormData();
+      var ponyfills = cordova.plugin.http.ponyfills;
+      var formData = new ponyfills.FormData();
       formData.append('myString', 'This is a test!');
 
       var url = 'https://httpbin.org/anything';
@@ -818,13 +818,13 @@ const tests = [
     }
   },
   {
-    disabled: true,
     description: 'should serialize FormData instance correctly when it contains blob value',
     expected: 'resolved: {"status": 200, ...',
     before: helpers.setMultipartSerializer,
     func: function (resolve, reject) {
+      var ponyfills = cordova.plugin.http.ponyfills;
       helpers.getWithXhr(function(blob) {
-        var formData = new FormData();
+        var formData = new ponyfills.FormData();
         formData.append('CordovaLogo', blob);
 
         var url = 'https://httpbin.org/anything';

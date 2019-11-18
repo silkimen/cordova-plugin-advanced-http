@@ -2,7 +2,7 @@ module.exports = function init(global, console, messages) {
   var interface = {
     checkBlobApi: checkBlobApi,
     checkFileReaderApi: checkFileReaderApi,
-    checkFormDataApi: checkFormDataApi,
+    checkFormDataInstance: checkFormDataInstance,
     checkTextEncoderApi: checkTextEncoderApi,
     logWarnings: logWarnings,
   };
@@ -29,8 +29,8 @@ module.exports = function init(global, console, messages) {
     }
   }
 
-  function checkFormDataApi() {
-    if (!global.FormData || !global.FormData.prototype || !global.FormData.prototype.entries) {
+  function checkFormDataInstance(instance) {
+    if (!instance || !instance.entries) {
       throw new Error(messages.MISSING_FORMDATA_ENTRIES_API);
     }
   }

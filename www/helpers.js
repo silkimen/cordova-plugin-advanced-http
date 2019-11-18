@@ -1,4 +1,4 @@
-module.exports = function init(global, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator) {
+module.exports = function init(global, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator, ponyfills) {
   var validSerializers = ['urlencoded', 'json', 'utf8', 'multipart'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
   var validClientAuthModes = ['none', 'systemstore', 'buffer'];
@@ -370,24 +370,30 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     }
   }
 
-  function getAllowedInstanceType(dataSerializer) {
-    return dataSerializer === 'multipart' ? 'FormData' : null;
+  function getAllowedInstanceTypes(dataSerializer) {
+    return dataSerializer === 'multipart' ? ['FormData'] : null;
   }
 
   function processData(data, dataSerializer, cb) {
     var currentDataType = jsUtil.getTypeOf(data);
     var allowedDataTypes = getAllowedDataTypes(dataSerializer);
-    var allowedInstanceType = getAllowedInstanceType(dataSerializer);
+    var allowedInstanceTypes = getAllowedInstanceTypes(dataSerializer);
 
-    if (allowedInstanceType && !global[allowedInstanceType]) {
-      throw new Error(messages.INSTANCE_TYPE_NOT_SUPPORTED + ' ' + allowedInstanceType);
+    if (allowedInstanceTypes) {
+      var isCorrectInstanceType = false;
+
+      allowedInstanceTypes.forEach(function(type) {
+        if ((global[type] && data instanceof global[type]) || (ponyfills[type] && data instanceof ponyfills[type])) {
+          isCorrectInstanceType = true;
+        }
+      });
+
+      if (!isCorrectInstanceType) {
+        throw new Error(messages.INSTANCE_TYPE_MISMATCH_DATA + ' ' + allowedInstanceTypes.join(', '));
+      }
     }
 
-    if (allowedInstanceType && !(data instanceof global[allowedInstanceType])) {
-      throw new Error(messages.INSTANCE_TYPE_MISMATCH_DATA + ' ' + allowedInstanceType);
-    }
-
-    if (!allowedInstanceType && allowedDataTypes.indexOf(currentDataType) === -1) {
+    if (!allowedInstanceTypes && allowedDataTypes.indexOf(currentDataType) === -1) {
       throw new Error(messages.TYPE_MISMATCH_DATA + ' ' + allowedDataTypes.join(', '));
     }
 
@@ -404,8 +410,8 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   function processFormData(data, cb) {
     dependencyValidator.checkBlobApi();
     dependencyValidator.checkFileReaderApi();
-    dependencyValidator.checkFormDataApi();
     dependencyValidator.checkTextEncoderApi();
+    dependencyValidator.checkFormDataInstance(data);
 
     var textEncoder = new global.TextEncoder('utf8');
     var iterator = data.entries();

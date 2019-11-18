@@ -529,7 +529,7 @@ describe('Common helpers', function () {
     const jsUtil = require('../www/js-util');
     const messages = require('../www/messages');
     const dependencyValidator = require('../www/dependency-validator')(mockWindow, null, messages);
-    const helpers = require('../www/helpers')(mockWindow, jsUtil, null, messages, base64, null, dependencyValidator);
+    const helpers = require('../www/helpers')(mockWindow, jsUtil, null, messages, base64, null, dependencyValidator, {});
 
     const testString = 'Test String öäüß 👍😉';
     const testStringBase64 = Buffer.from(testString).toString('base64');
@@ -538,11 +538,6 @@ describe('Common helpers', function () {
       (() => helpers.processData('myString', 'urlencoded')).should.throw(messages.TYPE_MISMATCH_DATA);
       (() => helpers.processData('myString', 'json')).should.throw(messages.TYPE_MISMATCH_DATA);
       (() => helpers.processData({}, 'utf8')).should.throw(messages.TYPE_MISMATCH_DATA);
-    });
-
-    it('throws an error when needed Web API is not available', () => {
-      const helpers = require('../www/helpers')({}, jsUtil, null, messages, null, null);
-      (() => helpers.processData(null, 'multipart')).should.throw(`${messages.INSTANCE_TYPE_NOT_SUPPORTED} FormData`);
     });
 
     it('throws an error when given data does not match allowed instance types', () => {
@@ -640,12 +635,12 @@ describe('Dependency Validator', function () {
     });
   });
 
-  describe('checkFormDataApi()', function () {
-    it('throws an error if FormData.entries() API is not supported', function () {
+  describe('checkFormDataInstance()', function () {
+    it('throws an error if FormData.entries() is not supported on given instance', function () {
       const console = new ConsoleMock();
       const validator = require('../www/dependency-validator')({ FormData: {}}, console, messages);
 
-      (() => validator.checkFormDataApi()).should.throw(messages.MISSING_FORMDATA_ENTRIES_API);
+      (() => validator.checkFormDataInstance({})).should.throw(messages.MISSING_FORMDATA_ENTRIES_API);
     });
   });
 
@@ -655,6 +650,97 @@ describe('Dependency Validator', function () {
       const validator = require('../www/dependency-validator')({}, console, messages);
 
       (() => validator.checkTextEncoderApi()).should.throw(messages.MISSING_TEXT_ENCODER_API);
+    });
+  });
+});
+
+describe('Ponyfills', function () {
+  const mockWindow = {
+    Blob: BlobMock,
+    File: FileMock,
+  };
+
+  const init = require('../www/ponyfills');
+  init.debug = true;
+  const ponyfills = init(mockWindow);
+
+  describe('Iterator', function () {
+    it('exposes interface correctly', () => {
+      const iterator = new ponyfills.Iterator([]);
+      iterator.next.should.be.a('function');
+    });
+
+    describe('next()', function () {
+      it('returns iteration object correctly when list is empty', () => {
+        const iterator = new ponyfills.Iterator([]);
+        iterator.next().should.be.eql({ done: true, value: undefined });
+      });
+  
+      it('returns iteration object correctly when end posititon of list is not reached yet', () => {
+        const iterator = new ponyfills.Iterator([['first', 'this is the first item']]);
+        iterator.next().should.be.eql({ done: false, value: ['first', 'this is the first item'] });
+      });
+  
+      it('returns iteration object correctly when end posititon of list is already reached', () => {
+        const iterator = new ponyfills.Iterator([['first', 'this is the first item']]);
+        iterator.next();
+        iterator.next().should.be.eql({ done: true, value: undefined });
+      });
+    });
+  });
+
+  describe('FormData', function () {
+    it('exposes interface correctly', () => {
+      const formData = new ponyfills.FormData();
+
+      formData.append.should.be.a('function');
+      formData.entries.should.be.a('function');
+    });
+
+    describe('append()', function () {
+      it('appends string value correctly', () => {
+        const formData = new ponyfills.FormData();
+
+        formData.append('test', 'myTestString');
+        formData.__items[0].should.be.eql(['test', 'myTestString']);
+      });
+
+      it('appends numeric value correctly', () => {
+        const formData = new ponyfills.FormData();
+
+        formData.append('test', 10);
+        formData.__items[0].should.be.eql(['test', '10']);
+        formData.__items[0][1].should.be.a('string');
+      });
+
+      it('appends Blob value correctly', () => {
+        const formData = new ponyfills.FormData();
+        const blob = new BlobMock(['another test'], { type: 'text/plain' });
+
+        formData.append('myBlob', blob, 'myFileName.txt');
+        formData.__items[0].should.be.eql(['myBlob', blob]);
+        formData.__items[0][1].name.should.be.equal('myFileName.txt');
+        formData.__items[0][1].lastModifiedDate.should.be.a('Date');
+      });
+
+      it('appends File value correctly', () => {
+        const formData = new ponyfills.FormData();
+        const blob = new BlobMock(['another test'], { type: 'text/plain' });
+        const file = new FileMock(blob, 'myFileName.txt');
+
+        formData.append('myFile', file, 'myOverriddenFileName.txt');
+        formData.__items[0].should.be.eql(['myFile', file]);
+        formData.__items[0][1].name.should.be.equal('myFileName.txt');
+        formData.__items[0][1].lastModifiedDate.should.be.eql(file.lastModifiedDate);
+      });
+    });
+
+    describe('entries()', function () {
+      it('returns an iterator correctly', () => {
+        const formData = new ponyfills.FormData();
+
+        formData.entries().should.be.an.instanceof(ponyfills.Iterator);
+      })
     });
   });
 });

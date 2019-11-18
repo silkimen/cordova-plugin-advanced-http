@@ -17,6 +17,7 @@
   <js-module src="www/local-storage-store.js" name="local-storage-store"/>
   <js-module src="www/lodash.js" name="lodash"/>
   <js-module src="www/messages.js" name="messages"/>
+  <js-module src="www/ponyfills.js" name="ponyfills"/>
   <js-module src="www/public-interface.js" name="public-interface"/>
   <js-module src="www/umd-tough-cookie.js" name="tough-cookie"/>
   <js-module src="www/url-util.js" name="url-util"/>

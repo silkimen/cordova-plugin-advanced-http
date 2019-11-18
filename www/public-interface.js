@@ -1,4 +1,4 @@
-module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes) {
+module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes, ponyfills) {
   var publicInterface = {
     getBasicAuthHeader: getBasicAuthHeader,
     useBasicAuth: useBasicAuth,
@@ -29,7 +29,8 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     head: head,
     uploadFile: uploadFile,
     downloadFile: downloadFile,
-    ErrorCode: errorCodes
+    ErrorCode: errorCodes,
+    ponyfills: ponyfills
   };
 
   function getBasicAuthHeader(username, password) {

@@ -15,9 +15,10 @@ var lodash = require(pluginId + '.lodash');
 var WebStorageCookieStore = require(pluginId + '.local-storage-store')(ToughCookie, lodash);
 var cookieHandler = require(pluginId + '.cookie-handler')(window.localStorage, ToughCookie, WebStorageCookieStore);
 var dependencyValidator = require(pluginId + '.dependency-validator')(window, window.console, messages);
-var helpers = require(pluginId + '.helpers')(window, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator);
+var ponyfills = require(pluginId + '.ponyfills')(window);
+var helpers = require(pluginId + '.helpers')(window, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator, ponyfills);
 var urlUtil = require(pluginId + '.url-util')(jsUtil);
-var publicInterface = require(pluginId + '.public-interface')(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes);
+var publicInterface = require(pluginId + '.public-interface')(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes, ponyfills);
 
 dependencyValidator.logWarnings();
 

@@ -22,8 +22,7 @@ const configs = {
   },
   localAndroidEmulator: {
     platformName: 'Android',
-    platformVersion: '9',
-    automationName: 'XCUITest',
+    platformVersion: '5',
     deviceName: 'Android Emulator',
     autoWebview: true,
     fullReset: true,
