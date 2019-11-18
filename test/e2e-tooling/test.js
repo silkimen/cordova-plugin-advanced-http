@@ -26,6 +26,9 @@ describe('Advanced HTTP e2e test suite', function () {
   this.slow(4000);
 
   before(async function () {
+    // connecting to saucelabs can take some time
+    this.timeout(300000);
+
     driver = await wd.promiseChainRemote(serverConfig.getServer(environment));
 
     if (isVerbose) {
