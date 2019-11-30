@@ -4,6 +4,9 @@
 
 - Feature #101: Support "multipart/form-data" requests (thanks SDA SE Open Industry Solutions)
 
+#### Important information
+This feature depends on several Web APIs. See https://github.com/silkimen/cordova-plugin-advanced-http/wiki/Web-APIs-required-for-Multipart-requests for more info.
+
 ## 2.2.0
 
 - Feature #239: add enumeration style object for error codes
