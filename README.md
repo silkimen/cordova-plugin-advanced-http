@@ -14,9 +14,9 @@ This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordo
 
 ## Advantages over Javascript requests
 
- - Background threading - all requests are done in a background thread.
- - Handling of HTTP code 401 - read more at [Issue CB-2415](https://issues.apache.org/jira/browse/CB-2415).
- - SSL Pinning
+ - SSL / TLS Pinning
+ - CORS restrictions do not apply
+ - Handling of HTTP code 401 - read more at [Issue CB-2415](https://issues.apache.org/jira/browse/CB-2415)
 
 ## Updates
 
@@ -384,6 +384,7 @@ Following features are *not* supported:
 * Pinning SSL certificate
 * Disabling SSL certificate check
 * Disabling transparently following redirects (HTTP codes 3xx)
+* Circumventing CORS restrictions
 
 ## Libraries
 
