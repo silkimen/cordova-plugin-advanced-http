@@ -396,6 +396,16 @@ This plugin utilizes some awesome open source libraries:
 
 We made a few modifications to the networking libraries.
 
+## CI Builds & E2E Testing
+
+This plugin uses amazing cloud services to maintain quality. CI Builds and E2E testing are powered by:
+
+* [GitHub Actions](https://github.com/features/actions)
+* [Travis CI](https://travis-ci.org/)
+* [BrowserStack](https://www.browserstack.com/)
+* [Sauce Labs](https://saucelabs.com/)
+* [httpbin.org](https://httpbin.org/)
+
 ## Contribute & Develop
 
 We've set up a separate document for our [contribution guidelines](CONTRIBUTING.md).
