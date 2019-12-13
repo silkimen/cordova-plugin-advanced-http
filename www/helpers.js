@@ -474,7 +474,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     options = options || {};
 
     return {
-      data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data,
+      data: options.data,
       filePath: options.filePath,
       followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
       headers: checkHeadersObject(options.headers || {}),
