@@ -27,7 +27,7 @@ matrix:
     - npm run testjs &&
       npm run updatecert &&
       scripts/build-test-app.sh --ios --emulator &&
-      scripts/upload-artifact.sh --ios &&
+      scripts/upload-saucelabs.sh --ios &&
       scripts/test-app.sh --ios --emulator;
 
   - name: "Android Build & Test"
@@ -55,5 +55,5 @@ matrix:
     - npm run testjs &&
       npm run updatecert &&
       scripts/build-test-app.sh --android --emulator &&
-      scripts/upload-artifact.sh --android &&
+      scripts/upload-saucelabs.sh --android &&
       scripts/test-app.sh --android --emulator;

@@ -56,11 +56,28 @@ const configs = {
     deviceName: 'Android Emulator',
     autoWebview: true,
     app: 'sauce-storage:HttpDemo.apk'
+  },
+
+  // testing on BrowserStack
+  browserstackIosDevice: {
+    device: 'iPhone 7',
+    os_version: '10',
+    project: 'HTTP Test App',
+    autoWebview: true,
+    app: 'HttpTestAppAndroid'
+  },
+  browserstackAndroidDevice: {
+    device: 'Google Nexus 9',
+    os_version: '5.1',
+    project: 'HTTP Test App',
+    autoWebview: true,
+    app: 'HttpTestAppAndroid'
   }
 };
 
 function getCaps(environment, os, runtime) {
   const key = environment.toLowerCase() + capitalize(os) + capitalize(runtime);
+  console.log(key);
   const caps = configs[key];
 
   caps.name = `cordova-plugin-advanced-http (${os})`;

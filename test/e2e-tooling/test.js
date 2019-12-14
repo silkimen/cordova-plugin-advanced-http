@@ -12,12 +12,13 @@ global.should = chai.should();
 
 describe('Advanced HTTP e2e test suite', function () {
   const isSauceLabs = !!process.env.SAUCE_USERNAME;
+  const isBrowserStack = !!process.env.BROWSERSTACK_USERNAME;
   const isVerbose = process.argv.includes('--verbose');
   const isDevice = process.argv.includes('--device');
   const isAndroid = process.argv.includes('--android');
 
-  const targetInfo = { isSauceLabs, isDevice, isAndroid };
-  const environment = isSauceLabs ? 'saucelabs' : 'local';
+  const targetInfo = { isSauceLabs, isBrowserStack, isDevice, isAndroid };
+  const environment = isSauceLabs ? 'saucelabs' : isBrowserStack ? 'browserstack' : 'local';
 
   let driver;
   let allPassed = true;

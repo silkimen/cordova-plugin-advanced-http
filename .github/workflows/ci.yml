@@ -36,6 +36,9 @@ jobs:
 
   build-android:
     runs-on: ubuntu-latest
+    env:
+      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
     steps:
     - uses: actions/checkout@v1
     - name: Install Node.js ${{ env.nodejs }}
@@ -53,4 +56,8 @@ jobs:
     - name: Add workaround for mipsel reference
       run: sudo mkdir -p $ANDROID_HOME/ndk-bundle/toolchains/mips64el-linux-android-4.9/prebuilt/linux-x86_64
     - name: Build test app
-      run: scripts/build-test-app.sh --android --emulator
+      run: scripts/build-test-app.sh --android --device
+    - name: Upload artifact to BrowserStack
+      run: scripts/upload-browserstack.sh --android
+    - name: Run e2e tests
+      run: scripts/test-app.sh --android --device
