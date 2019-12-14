@@ -146,7 +146,7 @@ module.exports = function init(ToughCookie, _) {
 
     Object.keys(store).forEach(function (domain) {
       Object.keys(store[domain]).forEach(function (path) {
-        Array.protype.push.apply(cookies, _.values(store[domain][path]));
+        Array.prototype.push.apply(cookies, _.values(store[domain][path]));
       });
     });
 
