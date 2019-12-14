@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1
+
+- Fixed #275: getAllCookies() is broken because of a typo (thanks ath0mas)
+
 ## 2.3.0
 
 - Feature #101: Support "multipart/form-data" requests (thanks SDA SE Open Industry Solutions)
