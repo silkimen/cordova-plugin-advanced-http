@@ -58,6 +58,8 @@ jobs:
     - name: Build test app
       run: scripts/build-test-app.sh --android --device
     - name: Upload artifact to BrowserStack
+      if: env.BROWSERSTACK_USERNAME != ''
       run: scripts/upload-browserstack.sh --android
     - name: Run e2e tests
+      if: env.BROWSERSTACK_USERNAME != ''
       run: scripts/test-app.sh --android --device

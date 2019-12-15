@@ -77,7 +77,6 @@ const configs = {
 
 function getCaps(environment, os, runtime) {
   const key = environment.toLowerCase() + capitalize(os) + capitalize(runtime);
-  console.log(key);
   const caps = configs[key];
 
   caps.name = `cordova-plugin-advanced-http (${os})`;
