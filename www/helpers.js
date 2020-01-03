@@ -1,5 +1,5 @@
 module.exports = function init(global, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator, ponyfills) {
-  var validSerializers = ['urlencoded', 'json', 'utf8', 'multipart'];
+  var validSerializers = ['urlencoded', 'json', 'utf8', 'multipart', 'arraybuffer'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
   var validClientAuthModes = ['none', 'systemstore', 'buffer'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
@@ -365,6 +365,8 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
         return ['Object'];
       case 'json':
         return ['Array', 'Object'];
+      case 'arraybuffer':
+        return ['ArrayBuffer'];
       default:
         return [];
     }

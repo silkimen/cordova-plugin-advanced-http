@@ -147,6 +147,8 @@ abstract class CordovaHttpBase implements Runnable {
       // intentionally left blank, because content type is set in HttpRequest.form()
     } else if ("multipart".equals(this.serializer)) {
       request.contentType("multipart/form-data");
+    } else if ("arraybuffer".equals(this.serializer)) {
+      // intentionally left blank, because content type should be explicitly set by user
     }
   }
 
@@ -177,6 +179,9 @@ abstract class CordovaHttpBase implements Runnable {
           request.part(name, fileNames.getString(i), types.getString(i), new ByteArrayInputStream(bytes));
         }
       }
+    } else if ("arraybuffer".equals(this.serializer)) {
+      // this.data is a Base64-encoded java.lang.String
+      request.send(Base64.decode((String)this.data, Base64.DEFAULT));
     }
   }
 
