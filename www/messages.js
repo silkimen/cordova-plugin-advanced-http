@@ -25,6 +25,7 @@ module.exports = {
   MISSING_TEXT_ENCODER_API: 'advanced-http: TextEncoder API is not supported in this webview. If you want to use "multipart/form-data" requests, you need to load a polyfill library before loading this plugin. Check out https://github.com/silkimen/cordova-plugin-advanced-http/wiki/Web-APIs-required-for-Multipart-requests for more info.',
   POST_PROCESSING_FAILED: 'advanced-http: an error occured during post processing response:',
   TYPE_MISMATCH_DATA: 'advanced-http: "data" option is configured to support only following data types:',
+  TYPE_MISMATCH_DATA_PROVIDED: '. You provided the data type:',
   TYPE_MISMATCH_FILE_PATHS: 'advanced-http: "filePaths" option needs to be an string array, <filePaths: string[]>',
   TYPE_MISMATCH_HEADERS: 'advanced-http: "headers" option needs to be an dictionary style object with string values, <headers: {[key: string]: string}>',
   TYPE_MISMATCH_NAMES: 'advanced-http: "names" option needs to be an string array, <names: string[]>',

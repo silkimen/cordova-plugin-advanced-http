@@ -394,7 +394,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     }
 
     if (!allowedInstanceTypes && allowedDataTypes.indexOf(currentDataType) === -1) {
-      throw new Error(messages.TYPE_MISMATCH_DATA + ' ' + allowedDataTypes.join(', '));
+      throw new Error(messages.TYPE_MISMATCH_DATA + ' ' + allowedDataTypes.join(', ') + messages.TYPE_MISMATCH_DATA_PROVIDED + ' ' + currentDataType);
     }
 
     switch (dataSerializer) {
