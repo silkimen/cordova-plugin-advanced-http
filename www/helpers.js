@@ -1,5 +1,5 @@
 module.exports = function init(global, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator, ponyfills) {
-  var validSerializers = ['urlencoded', 'json', 'utf8', 'multipart'];
+  var validSerializers = ['urlencoded', 'json', 'utf8', 'raw', 'multipart'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
   var validClientAuthModes = ['none', 'systemstore', 'buffer'];
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
@@ -365,6 +365,8 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
         return ['Object'];
       case 'json':
         return ['Array', 'Object'];
+      case 'raw':
+        return ['Uint8Array', 'ArrayBuffer'];
       default:
         return [];
     }
@@ -400,6 +402,8 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     switch (dataSerializer) {
       case 'utf8':
         return cb({ text: data });
+      case 'raw':
+        return cb(currentDataType === 'Uint8Array' ? data.buffer : data);
       case 'multipart':
         return processFormData(data, cb);
       default:
