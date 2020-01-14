@@ -1,5 +1,6 @@
 #import "CordovaHttpPlugin.h"
 #import "CDVFile.h"
+#import "BinaryRequestSerializer.h"
 #import "BinaryResponseSerializer.h"
 #import "TextResponseSerializer.h"
 #import "TextRequestSerializer.h"
@@ -31,6 +32,8 @@
         manager.requestSerializer = [AFJSONRequestSerializer serializer];
     } else if ([serializerName isEqualToString:@"utf8"]) {
         manager.requestSerializer = [TextRequestSerializer serializer];
+    } else if ([serializerName isEqualToString:@"raw"]) {
+        manager.requestSerializer = [BinaryRequestSerializer serializer];
     } else {
         manager.requestSerializer = [AFHTTPRequestSerializer serializer];
     }
