@@ -95,6 +95,7 @@ You can choose one of these:
 * `json`: send data as JSON encoded content in body (content type "application/json")
 * `utf8`: send data as plain UTF8 encoded string in body (content type "plain/text")
 * `multipart`: send FormData objects as multipart content in body (content type "multipart/form-data")
+* `raw`: send data as is, without any processing. Data should be `Uint8Array` or `ArrayBuffer`.
 
 This defaults to `urlencoded`. You can also override the default content type headers by specifying your own headers (see [setHeader](#setHeader)).
 
