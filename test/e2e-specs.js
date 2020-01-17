@@ -843,7 +843,34 @@ const tests = [
       const b64Logo = rawLogo.toString('base64');
       JSON.parse(result.data.data).files.CordovaLogo.should.be.equal('data:image/png;base64,' + b64Logo);
     }
-  }
+  },
+  {
+    description: 'should send raw byte array correctly (POST)',
+    expected: 'resolved: {"isArrayBuffer:true,"data":[1,2,3,4,5,6,7],"byteLength":7}',
+    func: function (resolve, reject) {
+      var url = 'http://httpbin.org/anything';
+      var options = { 
+        method: 'post',
+        serializer: 'raw',
+        data: new Uint8Array([1,2,3,4,5,6,7]),
+        responseType: 'arraybuffer'
+      };
+      var success = function (response) {
+        resolve({
+          isArrayBuffer: response.data.constructor === ArrayBuffer,
+          data: new Uint8Array(response.data),
+          byteLength: response.data.byteLength
+        });
+      };
+      cordova.plugin.http.sendRequest(url, options, success, reject);
+    },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.isArrayBuffer.should.be.equal(true);
+      result.data.should.be.eql(new Uint8Array([1,2,3,4,5,6,7]));
+      result.data.byteLength.should.be.equal(7);
+    }
+  },
 
   // TODO: not ready yet
   // {
