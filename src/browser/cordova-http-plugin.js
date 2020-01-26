@@ -160,6 +160,11 @@ function sendRequest(method, withData, opts, success, failure) {
       setDefaultContentType(headers, 'application/x-www-form-urlencoded');
       processedData = serializeParams(data);
       break;
+
+    case 'raw':
+      setDefaultContentType(headers, 'application/octet-stream');
+      processedData = data;
+      break;
   }
 
   xhr.timeout = timeout * 1000;
