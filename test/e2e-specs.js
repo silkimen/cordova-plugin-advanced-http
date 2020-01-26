@@ -34,6 +34,7 @@ const helpers = {
   setUtf8StringSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('utf8')); },
   setUrlEncodedSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('urlencoded')); },
   setMultipartSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('multipart')); },
+  setRawSerializer: function(resolve) { resolve(cordova.plugin.http.setDataSerializer('raw')); },
   disableFollowingRedirect: function (resolve) { resolve(cordova.plugin.http.setFollowRedirect(false)); },
   enableFollowingRedirect: function(resolve) { resolve(cordova.plugin.http.setFollowRedirect(true)); },
   getWithXhr: function (done, url, type) {
@@ -845,30 +846,27 @@ const tests = [
     }
   },
   {
-    description: 'should send raw byte array correctly (POST)',
-    expected: 'resolved: {"isArrayBuffer:true,"data":[1,2,3,4,5,6,7],"byteLength":7}',
+    description: 'should send raw byte array correctly (POST) #291',
+    expected: 'resolved: {"status":200,"data:application/octet-stream;base64,iVBORw0KGgoAAAANSUhEUg ...',
+    before: helpers.setRawSerializer,
     func: function (resolve, reject) {
-      var url = 'http://httpbin.org/anything';
-      var options = { 
-        method: 'post',
-        serializer: 'raw',
-        data: new Uint8Array([1,2,3,4,5,6,7]),
-        responseType: 'arraybuffer'
-      };
-      var success = function (response) {
-        resolve({
-          isArrayBuffer: response.data.constructor === ArrayBuffer,
-          data: new Uint8Array(response.data),
-          byteLength: response.data.byteLength
-        });
-      };
-      cordova.plugin.http.sendRequest(url, options, success, reject);
+      helpers.getWithXhr(function(buffer) {
+        cordova.plugin.http.post('http://httpbin.org/anything', buffer, {}, resolve, reject);
+      }, './res/cordova_logo.png', 'arraybuffer');
     },
     validationFunc: function (driver, result) {
-      result.type.should.be.equal('resolved');
-      result.data.isArrayBuffer.should.be.equal(true);
-      result.data.should.be.eql(new Uint8Array([1,2,3,4,5,6,7]));
-      result.data.byteLength.should.be.equal(7);
+      helpers.checkResult(result, 'resolved');
+      result.data.status.should.be.equal(200);
+
+      // httpbin.org encodes posted binaries in base64 and echoes them back
+      // therefore we need to check for base64 string with mime type prefix
+      const fs = require('fs');
+      const rawLogo = fs.readFileSync('./test/e2e-app-template/www/res/cordova_logo.png');
+      const b64Logo = rawLogo.toString('base64');
+      const parsed = JSON.parse(result.data.data);
+
+      parsed.headers['Content-Type'].should.be.equal('application/octet-stream');
+      parsed.data.should.be.equal('data:application/octet-stream;base64,' + b64Logo);
     }
   },
 
