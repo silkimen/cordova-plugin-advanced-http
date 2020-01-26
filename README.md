@@ -91,10 +91,21 @@ cordova.plugin.http.setDataSerializer('urlencoded');
 ```
 
 You can choose one of these:
-* `urlencoded`: send data as url encoded content in body (content type "application/x-www-form-urlencoded")
-* `json`: send data as JSON encoded content in body (content type "application/json")
-* `utf8`: send data as plain UTF8 encoded string in body (content type "plain/text")
-* `multipart`: send FormData objects as multipart content in body (content type "multipart/form-data")
+* `urlencoded`: send data as url encoded content in body
+  * default content type "application/x-www-form-urlencoded"
+  * data must be an dictionary style `Object`
+* `json`: send data as JSON encoded content in body
+  * default content type "application/json"
+  * data must be an `Array` or an dictionary style `Object`
+* `utf8`: send data as plain UTF8 encoded string in body
+  * default content type "plain/text"
+  * data must be a `String`
+* `multipart`: send FormData objects as multipart content in body
+  * default content type "multipart/form-data"
+  * data must be an `FormData` instance
+* `raw`: send data as is, without any processing
+  * default content type "application/octet-stream"
+  * data must be an `Uint8Array` or an `ArrayBuffer`
 
 This defaults to `urlencoded`. You can also override the default content type headers by specifying your own headers (see [setHeader](#setHeader)).
 

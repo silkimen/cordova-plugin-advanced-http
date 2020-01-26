@@ -589,6 +589,15 @@ describe('Common helpers', function () {
         cb();
       });
     });
+
+    it('processes data correctly when serializer "raw" is configured', (cb) => {
+      const byteArray = new Uint8Array([1,2,3]);
+      helpers.processData(byteArray, 'raw', (data) => {
+        data.should.be.a('ArrayBuffer');
+        data.should.be.equal(byteArray.buffer);
+        cb();
+      })
+    });
   });
 });
 

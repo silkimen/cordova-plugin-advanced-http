@@ -143,6 +143,8 @@ abstract class CordovaHttpBase implements Runnable {
       request.contentType("application/json", "UTF-8");
     } else if ("utf8".equals(this.serializer)) {
       request.contentType("text/plain", "UTF-8");
+    } else if ("raw".equals(this.serializer)) {
+      request.contentType("application/octet-stream");
     } else if ("urlencoded".equals(this.serializer)) {
       // intentionally left blank, because content type is set in HttpRequest.form()
     } else if ("multipart".equals(this.serializer)) {
@@ -159,6 +161,8 @@ abstract class CordovaHttpBase implements Runnable {
       request.send(this.data.toString());
     } else if ("utf8".equals(this.serializer)) {
       request.send(((JSONObject) this.data).getString("text"));
+    } else if ("raw".equals(this.serializer)) {
+      request.send(Base64.decode((String)this.data, Base64.DEFAULT));
     } else if ("urlencoded".equals(this.serializer)) {
       request.form(JsonUtils.getObjectMap((JSONObject) this.data));
     } else if ("multipart".equals(this.serializer)) {
