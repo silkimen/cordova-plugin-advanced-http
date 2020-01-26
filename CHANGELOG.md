@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0
+
+- Feature #291: add support for sending 'raw' requests (thanks to jachstet-sea and chuchuva)
+
 ## 2.3.1
 
 - Fixed #275: getAllCookies() is broken because of a typo (thanks ath0mas)
