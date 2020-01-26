@@ -29,6 +29,10 @@
     }];
 
     if (parameters) {
+        if (![mutableRequest valueForHTTPHeaderField:@"Content-Type"]) {
+            [mutableRequest setValue:@"application/octet-stream" forHTTPHeaderField:@"Content-Type"];
+        }
+
         [mutableRequest setHTTPBody: parameters];
     }
 
