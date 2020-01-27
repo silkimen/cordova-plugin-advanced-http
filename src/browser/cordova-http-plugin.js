@@ -171,8 +171,17 @@ function sendRequest(method, withData, opts, success, failure) {
   xhr.responseType = responseType;
   setHeaders(xhr, headers);
 
-  xhr.onerror = xhr.ontimeout = function () {
+  xhr.onerror = function () {
     return failure(createXhrFailureObject(xhr));
+  };
+
+  xhr.ontimeout = function () { 
+    return failure({
+      status: -4,
+      error: 'Request timed out',
+      url: url,
+      headers: {}
+    });
   };
 
   xhr.onload = function () {
