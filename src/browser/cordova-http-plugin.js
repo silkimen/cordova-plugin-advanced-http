@@ -37,6 +37,39 @@ function serializeParams(params) {
   }).join('&');
 }
 
+function decodeB64(dataString) {
+  var binarString = atob(dataString);
+  var bytes = new Uint8Array(binarString.length);
+
+  for (var i = 0; i < binarString.length; ++i) {
+      bytes[i] = binarString.charCodeAt(i);
+  }
+
+  return bytes.buffer;
+}
+
+function processMultipartData(data) {
+  if (!data) return null;
+
+  var fd = new FormData();
+
+  for (var i = 0; i < data.buffers.length; ++i) {
+    var buffer = data.buffers[i];
+    var name = data.names[i];
+    var fileName = data.fileNames[i];
+    var type = data.types[i];
+
+    if (fileName) {
+      fd.append(name, new Blob([decodeB64(buffer)], {type: type}), fileName);
+    } else {
+      // we assume it's plain text if no filename was given
+      fd.append(name, atob(buffer));
+    }
+  }
+
+  return fd;
+}
+
 function deserializeResponseHeaders(headers) {
   var headerMap = {};
   var arr = headers.trim().split(/[\r\n]+/);
@@ -159,6 +192,18 @@ function sendRequest(method, withData, opts, success, failure) {
     case 'urlencoded':
       setDefaultContentType(headers, 'application/x-www-form-urlencoded');
       processedData = serializeParams(data);
+      break;
+
+    case 'multipart':
+      const contentType = getHeaderValue(headers, 'Content-Type');
+      
+      // intentionally don't set a default content type
+      // it's set by the browser together with the content disposition string
+      if (contentType) {
+        headers['Content-Type'] = contentType;
+      }
+
+      processedData = processMultipartData(data);
       break;
 
     case 'raw':
