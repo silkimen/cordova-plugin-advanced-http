@@ -57,6 +57,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
       return this.executeHttpRequestWithoutData(action, args, callbackContext);
     } else if ("delete".equals(action)) {
       return this.executeHttpRequestWithoutData(action, args, callbackContext);
+    } else if ("options".equals(action)) {
+      return this.executeHttpRequestWithoutData(action, args, callbackContext);
     } else if ("post".equals(action)) {
       return this.executeHttpRequestWithData(action, args, callbackContext);
     } else if ("put".equals(action)) {
