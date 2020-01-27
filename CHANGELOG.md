@@ -3,6 +3,7 @@
 ## 2.4.0
 
 - Feature #291: add support for sending 'raw' requests (thanks to jachstet-sea and chuchuva)
+- Feature #155: add OPTIONS method
 
 ## 2.3.1
 

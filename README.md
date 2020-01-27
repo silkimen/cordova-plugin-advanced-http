@@ -207,7 +207,7 @@ Execute a HTTP request.  Takes a URL and an options object. This is the internal
 The options object contains following keys:
 
 * `method`: HTTP method to be used, defaults to `get`, needs to be one of the following values:
-  * `get`, `post`, `put`, `patch`, `head`, `delete`, `upload`, `download`
+  * `get`, `post`, `put`, `patch`, `head`, `delete`, `options`, `upload`, `download`
 * `data`: payload to be send to the server (only applicable on `post`, `put` or `patch` methods)
 * `params`: query params to be appended to the URL (only applicable on `get`, `head`, `delete`, `upload` or `download` methods)
 * `serializer`: data serializer to be used (only applicable on `post`, `put` or `patch` methods), defaults to global serializer value, see [setDataSerializer](#setDataSerializer) for supported values
@@ -342,6 +342,9 @@ Execute a DELETE request.  Takes a URL, parameters, and headers.  See the [post]
 
 ### head<a name="head"></a>
 Execute a HEAD request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
+
+### options<a name="options"></a>
+Execute a OPTIONS request.  Takes a URL, parameters, and headers.  See the [post](#post) documentation for details on what is returned on success and failure.
 
 ### uploadFile<a name="uploadFile"></a>
 Uploads one or more file(s) saved on the device.  Takes a URL, parameters, headers, filePath(s), and the name(s) of the parameter to pass the file along as.  See the [post](#post) documentation for details on what is returned on success and failure.
