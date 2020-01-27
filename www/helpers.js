@@ -2,7 +2,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   var validSerializers = ['urlencoded', 'json', 'utf8', 'raw', 'multipart'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
   var validClientAuthModes = ['none', 'systemstore', 'buffer'];
-  var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'upload', 'download'];
+  var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'options', 'upload', 'download'];
   var validResponseTypes = ['text', 'json', 'arraybuffer', 'blob'];
 
   var interface = {

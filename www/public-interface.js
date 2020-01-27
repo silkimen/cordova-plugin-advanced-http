@@ -22,11 +22,12 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     setClientAuthMode: setClientAuthMode,
     sendRequest: sendRequest,
     post: post,
-    get: get,
     put: put,
     patch: patch,
+    get: get,
     delete: del,
     head: head,
+    options: options,
     uploadFile: uploadFile,
     downloadFile: downloadFile,
     ErrorCode: errorCodes,
@@ -172,10 +173,6 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     return publicInterface.sendRequest(url, { method: 'post', data: data, headers: headers }, success, failure);
   };
 
-  function get(url, params, headers, success, failure) {
-    return publicInterface.sendRequest(url, { method: 'get', params: params, headers: headers }, success, failure);
-  };
-
   function put(url, data, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'put', data: data, headers: headers }, success, failure);
   }
@@ -184,6 +181,10 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     return publicInterface.sendRequest(url, { method: 'patch', data: data, headers: headers }, success, failure);
   }
 
+  function get(url, params, headers, success, failure) {
+    return publicInterface.sendRequest(url, { method: 'get', params: params, headers: headers }, success, failure);
+  };
+
   function del(url, params, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'delete', params: params, headers: headers }, success, failure);
   }
@@ -191,6 +192,10 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
   function head(url, params, headers, success, failure) {
     return publicInterface.sendRequest(url, { method: 'head', params: params, headers: headers }, success, failure);
   }
+
+  function options(url, params, headers, success, failure) {
+    return publicInterface.sendRequest(url, { method: 'options', params: params, headers: headers }, success, failure);
+  };
 
   function uploadFile(url, params, headers, filePath, name, success, failure) {
     return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name }, success, failure);
