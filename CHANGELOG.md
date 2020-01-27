@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1
+
+- Fixed #296: multipart requests are not serialized on browser platform
+
 ## 2.4.0
 
 - Feature #291: add support for sending 'raw' requests (thanks to jachstet-sea and chuchuva)
