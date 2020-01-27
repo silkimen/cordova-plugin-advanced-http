@@ -869,6 +869,27 @@ const tests = [
       parsed.data.should.be.equal('data:application/octet-stream;base64,' + b64Logo);
     }
   },
+  {
+    description: 'should perform an OPTIONS request correctly #155',
+    expected: 'resolved: {"status":200,"headers":{"allow":"GET, PUT, DELETE, HEAD, PATCH, TRACE, POST, OPTIONS" ...',
+    func: function (resolve, reject) { cordova.plugin.http.options('http://httpbin.org/anything', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.status.should.be.equal(200);
+
+      result.data.headers.should.be.an('object');
+      result.data.headers.allow.should.include('GET');
+      result.data.headers.allow.should.include('PUT');
+      result.data.headers.allow.should.include('DELETE');
+      result.data.headers.allow.should.include('HEAD');
+      result.data.headers.allow.should.include('PATCH');
+      result.data.headers.allow.should.include('TRACE');
+      result.data.headers.allow.should.include('POST');
+      result.data.headers.allow.should.include('OPTIONS');
+
+      result.data.headers['access-control-allow-origin'].should.be.equal('*');
+    }
+  },
 
   // TODO: not ready yet
   // {
