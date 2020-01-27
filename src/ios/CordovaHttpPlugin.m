@@ -302,6 +302,18 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)post:(CDVInvokedUrlCommand*)command {
+    [self executeRequestWithData: command withMethod:@"POST"];
+}
+
+- (void)put:(CDVInvokedUrlCommand*)command {
+    [self executeRequestWithData: command withMethod:@"PUT"];
+}
+
+- (void)patch:(CDVInvokedUrlCommand*)command {
+    [self executeRequestWithData: command withMethod:@"PATCH"];
+}
+
 - (void)get:(CDVInvokedUrlCommand*)command {
     [self executeRequestWithoutData: command withMethod:@"GET"];
 }
@@ -314,16 +326,8 @@
     [self executeRequestWithoutData: command withMethod:@"HEAD"];
 }
 
-- (void)post:(CDVInvokedUrlCommand*)command {
-    [self executeRequestWithData: command withMethod:@"POST"];
-}
-
-- (void)put:(CDVInvokedUrlCommand*)command {
-    [self executeRequestWithData: command withMethod:@"PUT"];
-}
-
-- (void)patch:(CDVInvokedUrlCommand*)command {
-    [self executeRequestWithData: command withMethod:@"PATCH"];
+- (void)options:(CDVInvokedUrlCommand*)command {
+    [self executeRequestWithoutData: command withMethod:@"OPTIONS"];
 }
 
 - (void)uploadFiles:(CDVInvokedUrlCommand*)command {
