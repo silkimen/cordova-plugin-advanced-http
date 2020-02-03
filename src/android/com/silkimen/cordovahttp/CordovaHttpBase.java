@@ -193,7 +193,7 @@ abstract class CordovaHttpBase implements Runnable {
     response.setHeaders(request.headers());
 
     if (request.code() >= 200 && request.code() < 300) {
-      if ("text".equals(this.responseType)) {
+      if ("text".equals(this.responseType) || "json".equals(this.responseType)) {
         String decoded = HttpBodyDecoder.decodeBody(outputStream.toByteArray(), request.charset());
         response.setBody(decoded);
       } else {

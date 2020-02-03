@@ -3,6 +3,7 @@
 ## 2.4.1
 
 - Fixed #296: multipart requests are not serialized on browser platform
+- Fixed #301: data is not decoded correctly when responseType is "json" (thanks antikalk)
 
 ## 2.4.0
 

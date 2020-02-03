@@ -62,7 +62,7 @@
 }
 
 - (void)setResponseSerializer:(NSString*)responseType forManager:(AFHTTPSessionManager*)manager {
-    if ([responseType isEqualToString: @"text"]) {
+    if ([responseType isEqualToString: @"text"] || [responseType isEqualToString: @"json"]) {
         manager.responseSerializer = [TextResponseSerializer serializer];
     } else {
         manager.responseSerializer = [BinaryResponseSerializer serializer];
