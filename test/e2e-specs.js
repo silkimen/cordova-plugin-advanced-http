@@ -464,7 +464,7 @@ const tests = [
     }
   },
   {
-    description: 'should not send any cookies after running "clearCookies" (GET) #59',
+    description: 'should not send programmatically set cookies after running "clearCookies" (GET) #59',
     expected: 'resolved: {"status": 200, "data": "{\"headers\": {\"Cookie\": \"\"...',
     func: function (resolve, reject) {
       cordova.plugin.http.setCookie('http://httpbin.org/get', 'myCookie=myValue');
@@ -944,6 +944,26 @@ const tests = [
         myNullValue: 'null',
         myUndefinedValue: 'undefined'
       });
+    }
+  },
+  {
+    only: true,
+    description: 'should not send any cookies after running "clearCookies" (GET) #248',
+    expected: 'resolved: {"status": 200, "data": "{\"cookies\":{}} ...',
+    before: helpers.disableFollowingRedirect,
+    func: function (resolve, reject) {
+      cordova.plugin.http.get('https://httpbin.org/cookies/set?myCookieKey=myCookieValue', {}, {}, function() {
+        cordova.plugin.http.clearCookies();
+        cordova.plugin.http.get('https://httpbin.org/cookies', {}, {}, resolve, reject);
+      }, function() {
+        cordova.plugin.http.clearCookies();
+        cordova.plugin.http.get('https://httpbin.org/cookies', {}, {}, resolve, reject);
+      });
+    },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.status.should.be.equal(200);
+      JSON.parse(result.data.data).cookies.should.be.eql({});
     }
   },
 
