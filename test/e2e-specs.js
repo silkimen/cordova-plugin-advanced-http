@@ -947,7 +947,6 @@ const tests = [
     }
   },
   {
-    only: true,
     description: 'should not send any cookies after running "clearCookies" (GET) #248',
     expected: 'resolved: {"status": 200, "data": "{\"cookies\":{}} ...',
     before: helpers.disableFollowingRedirect,
