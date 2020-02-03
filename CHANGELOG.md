@@ -4,6 +4,7 @@
 
 - Fixed #296: multipart requests are not serialized on browser platform
 - Fixed #301: data is not decoded correctly when responseType is "json" (thanks antikalk)
+- Fixed #300: FormData object containing null or undefined value is not serialized correctly
 
 ## 2.4.0
 

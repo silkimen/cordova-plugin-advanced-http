@@ -923,6 +923,29 @@ const tests = [
       });
     }
   },
+  {
+    description: 'should serialize FormData instance correctly when it contains null or undefined value #300',
+    expected: 'resolved: {"status":200, ...',
+    before: helpers.setMultipartSerializer,
+    func: function (resolve, reject) {
+      var ponyfills = cordova.plugin.http.ponyfills;
+      var formData = new ponyfills.FormData();
+      formData.append('myNullValue', null);
+      formData.append('myUndefinedValue', undefined);
+
+      var url = 'https://httpbin.org/anything';
+      var options = { method: 'post', data: formData };
+      cordova.plugin.http.sendRequest(url, options, resolve, reject);
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'resolved');
+      result.data.status.should.be.equal(200);
+      JSON.parse(result.data.data).form.should.be.eql({
+        myNullValue: 'null',
+        myUndefinedValue: 'undefined'
+      });
+    }
+  },
 
   // TODO: not ready yet
   // {
