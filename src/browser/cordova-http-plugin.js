@@ -203,7 +203,11 @@ function sendRequest(method, withData, opts, success, failure) {
         headers['Content-Type'] = contentType;
       }
 
-      processedData = processMultipartData(data);
+      if (data instanceof FormData) {
+        processedData = data;
+      } else {
+        processedData = processMultipartData(data);
+      }
       break;
 
     case 'raw':
