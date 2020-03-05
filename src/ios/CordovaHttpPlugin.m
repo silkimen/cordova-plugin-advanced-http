@@ -21,6 +21,7 @@
 
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
+    NSURLCredential *x509Credential;
 }
 
 - (void)pluginInitialize {
@@ -37,6 +38,22 @@
     } else {
         manager.requestSerializer = [AFHTTPRequestSerializer serializer];
     }
+}
+
+- (void)setupClientCertAuth:(AFHTTPSessionManager*)manager {
+  [manager setSessionDidReceiveAuthenticationChallengeBlock:^NSURLSessionAuthChallengeDisposition(NSURLSession * _Nonnull session, NSURLAuthenticationChallenge * _Nonnull challenge, NSURLCredential * _Nullable __autoreleasing * _Nullable credential) {
+
+      if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodClientCertificate]) {
+        if (self->x509Credential) {
+            *credential = self->x509Credential;
+            return NSURLSessionAuthChallengeUseCredential;
+        } else {
+            return NSURLSessionAuthChallengePerformDefaultHandling;
+        }
+    }
+    
+    return NSURLSessionAuthChallengePerformDefaultHandling;
+  }];
 }
 
 - (void)setRequestHeaders:(NSDictionary*)headers forManager:(AFHTTPSessionManager*)manager {
@@ -156,6 +173,7 @@
     NSString *responseType = [command.arguments objectAtIndex:4];
 
     [self setRequestSerializer: @"default" forManager: manager];
+    [self setupClientCertAuth: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
@@ -210,6 +228,7 @@
     NSString *responseType = [command.arguments objectAtIndex:6];
 
     [self setRequestSerializer: serializerName forManager: manager];
+    [self setupClientCertAuth: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
@@ -299,6 +318,51 @@
     }
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)setClientAuthMode:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult;
+    NSString *mode = [command.arguments objectAtIndex:0];
+    
+    if ([mode isEqualToString:@"none"]) {
+      x509Credential = nil;
+      pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    }
+  
+    if ([mode isEqualToString:@"systemstore"]) {
+      NSString *alias = [command.arguments objectAtIndex:1];
+      
+      // TODO
+      
+      pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"mode 'systemstore' not supported on iOS"];
+    }
+  
+    if ([mode isEqualToString:@"buffer"]) {
+        CFDataRef container = (__bridge CFDataRef) [command.arguments objectAtIndex:2];
+        CFStringRef password = (__bridge CFStringRef) [command.arguments objectAtIndex:3];
+      
+        const void *keys[] = { kSecImportExportPassphrase };
+        const void *values[] = { password };
+      
+        CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
+        CFArrayRef items;
+        OSStatus securityError = SecPKCS12Import(container, options, &items);
+        CFRelease(options);
+
+        if (securityError != noErr) {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        } else {
+            CFDictionaryRef identityDict = CFArrayGetValueAtIndex(items, 0);
+            SecIdentityRef identity = (SecIdentityRef)CFDictionaryGetValue(identityDict, kSecImportItemIdentity);
+
+            self->x509Credential = [NSURLCredential credentialWithIdentity:identity certificates: nil persistence:NSURLCredentialPersistenceForSession];
+            CFRelease(items);
+          
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        }
+    }
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

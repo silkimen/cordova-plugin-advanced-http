@@ -946,18 +946,16 @@ const tests = [
       });
     }
   },
-
-  // TODO: not ready yet
-  // {
-  //   description: 'should authenticate correctly when client cert auth is configured with a PKCS12 container',
-  //   expected: 'resolved: {"status": 200, ...',
-  //   before: helpers.setBufferClientAuthMode,
-  //   func: function (resolve, reject) { cordova.plugin.http.get('https://client.badssl.com/', {}, {}, resolve, reject); },
-  //   validationFunc: function (driver, result) {
-  //     result.type.should.be.equal('resolved');
-  //     result.data.data.should.include('TLS handshake');
-  //   }
-  // }
+  {
+    description: 'should authenticate correctly when client cert auth is configured with a PKCS12 container',
+    expected: 'resolved: {"status": 200, ...',
+    before: helpers.setBufferClientAuthMode,
+    func: function (resolve, reject) { cordova.plugin.http.get('https://client.badssl.com/', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.include('TLS handshake');
+    }
+  }
 ];
 
 if (typeof module !== 'undefined' && module.exports) {
