@@ -40,20 +40,31 @@
     }
 }
 
-- (void)setupClientCertAuth:(AFHTTPSessionManager*)manager {
-  [manager setSessionDidReceiveAuthenticationChallengeBlock:^NSURLSessionAuthChallengeDisposition(NSURLSession * _Nonnull session, NSURLAuthenticationChallenge * _Nonnull challenge, NSURLCredential * _Nullable __autoreleasing * _Nullable credential) {
+- (void)setupAuthChallengeBlock:(AFHTTPSessionManager*)manager {
+    [manager setSessionDidReceiveAuthenticationChallengeBlock:^NSURLSessionAuthChallengeDisposition(
+        NSURLSession * _Nonnull session,
+        NSURLAuthenticationChallenge * _Nonnull challenge,
+        NSURLCredential * _Nullable __autoreleasing * _Nullable credential
+    ) {
+        if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodServerTrust]) {
+            *credential = [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust];
 
-      if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodClientCertificate]) {
-        if (self->x509Credential) {
+            if (![self->securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
+                return NSURLSessionAuthChallengeRejectProtectionSpace;
+            }
+            
+            if (credential) {
+                return NSURLSessionAuthChallengeUseCredential;
+            }
+        }
+
+        if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodClientCertificate] && self->x509Credential) {
             *credential = self->x509Credential;
             return NSURLSessionAuthChallengeUseCredential;
-        } else {
-            return NSURLSessionAuthChallengePerformDefaultHandling;
         }
-    }
-    
-    return NSURLSessionAuthChallengePerformDefaultHandling;
-  }];
+        
+        return NSURLSessionAuthChallengePerformDefaultHandling;
+    }];
 }
 
 - (void)setRequestHeaders:(NSDictionary*)headers forManager:(AFHTTPSessionManager*)manager {
@@ -164,7 +175,6 @@
 
 - (void)executeRequestWithoutData:(CDVInvokedUrlCommand*)command withMethod:(NSString*) method {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];
@@ -173,7 +183,7 @@
     NSString *responseType = [command.arguments objectAtIndex:4];
 
     [self setRequestSerializer: @"default" forManager: manager];
-    [self setupClientCertAuth: manager];
+    [self setupAuthChallengeBlock: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
@@ -217,7 +227,6 @@
 
 - (void)executeRequestWithData:(CDVInvokedUrlCommand*)command withMethod:(NSString*)method {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *data = [command.arguments objectAtIndex:1];
@@ -228,7 +237,7 @@
     NSString *responseType = [command.arguments objectAtIndex:6];
 
     [self setRequestSerializer: serializerName forManager: manager];
-    [self setupClientCertAuth: manager];
+    [self setupAuthChallengeBlock: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
@@ -335,7 +344,7 @@
       
       // TODO
       
-      pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"mode 'systemstore' not supported on iOS"];
+      pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"mode 'systemstore' is not supported on iOS"];
     }
   
     if ([mode isEqualToString:@"buffer"]) {
@@ -396,7 +405,6 @@
 
 - (void)uploadFiles:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];
@@ -407,6 +415,7 @@
     NSString *responseType = [command.arguments objectAtIndex:6];
 
     [self setRequestHeaders: headers forManager: manager];
+    [self setupAuthChallengeBlock: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
     [self setResponseSerializer:responseType forManager:manager];
@@ -456,7 +465,6 @@
 
 - (void)downloadFile:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    manager.securityPolicy = securityPolicy;
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
 
     NSString *url = [command.arguments objectAtIndex:0];
@@ -466,6 +474,7 @@
     bool followRedirect = [[command.arguments objectAtIndex:4] boolValue];
 
     [self setRequestHeaders: headers forManager: manager];
+    [self setupAuthChallengeBlock: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
 
