@@ -209,6 +209,16 @@
     bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
     NSString *responseType = [command.arguments objectAtIndex:6];
 
+    // iterate over values and convert doubles in post body to decimal number
+    for (NSString* key in data) {
+        id value = data[key];
+        if (strcmp([value objCType], @encode(double)) == 0) {
+            double dbl = [[data objectForKey:key] doubleValue];
+            NSDecimalNumber *decimalNumber = [NSDecimalNumber numberWithDouble:dbl];
+            [data setValue:decimalNumber forKey:key];
+        }
+    }
+
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
