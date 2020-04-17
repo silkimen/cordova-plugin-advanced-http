@@ -167,28 +167,28 @@
     @try {
         void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            
+
             // no 'body' for HEAD request, omitting 'data'
             if ([method isEqualToString:@"HEAD"]) {
                 [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
             } else {
                 [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
             }
-            
+
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
-        
+
         void (^onFailure)(NSURLSessionTask *, NSError *) = ^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
-            
+
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
-        
+
         [manager downloadTaskWithHTTPMethod:method URLString:url parameters:nil progress:nil success:onSuccess failure:onFailure];
     }
     @catch (NSException *exception) {
@@ -197,12 +197,30 @@
     }
 }
 
+- (NSDictionary *)parseDictionary:(NSDictionary*)dict {
+    for (NSString* key in [dict allKeys]) {
+        @try {
+            id value = dict[key];
+            if ([value isKindOfClass:[NSDictionary class]]) {
+                [dict setValue:[self parseDictionary: value] forKey:key];
+            } else if (strcmp([value objCType], @encode(double)) == 0) {
+                double dbl = [[dict objectForKey:key] doubleValue];
+                NSDecimalNumber *decimalNumber = [NSDecimalNumber numberWithDouble:dbl];
+                [dict setValue:decimalNumber forKey:key];
+            }
+        } @catch ( NSException *e ) {
+            // do nothing
+        }
+    }
+    return dict;
+}
+
 - (void)executeRequestWithData:(CDVInvokedUrlCommand*)command withMethod:(NSString*)method {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
-    NSMutableDictionary *data = [command.arguments objectAtIndex:1];
+    NSDictionary *data = [command.arguments objectAtIndex:1];
     NSString *serializerName = [command.arguments objectAtIndex:2];
     NSDictionary *headers = [command.arguments objectAtIndex:3];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
@@ -210,18 +228,7 @@
     NSString *responseType = [command.arguments objectAtIndex:6];
 
     // iterate over values and convert doubles in post body to decimal number
-    for (NSString* key in [data allKeys]) {
-        @try {
-            id value = data[key];
-            if (strcmp([value objCType], @encode(double)) == 0) {
-                double dbl = [[data objectForKey:key] doubleValue];
-                NSDecimalNumber *decimalNumber = [NSDecimalNumber numberWithDouble:dbl];
-                [data setObject:decimalNumber forKey:key];
-            }
-        } @catch ( NSException *e ) {
-            // do nothing
-        }
-    }
+    data = [self parseDictionary: data];
 
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
@@ -231,29 +238,29 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
-    
+
     @try {
         void (^constructBody)(id<AFMultipartFormData>) = ^(id<AFMultipartFormData> formData) {
             NSArray *buffers = [data mutableArrayValueForKey:@"buffers"];
             NSArray *fileNames = [data mutableArrayValueForKey:@"fileNames"];
             NSArray *names = [data mutableArrayValueForKey:@"names"];
             NSArray *types = [data mutableArrayValueForKey:@"types"];
-            
+
             NSError *error;
-            
+
             for (int i = 0; i < [buffers count]; ++i) {
                 NSData *decodedBuffer = [[NSData alloc] initWithBase64EncodedString:[buffers objectAtIndex:i] options:0];
                 NSString *fileName = [fileNames objectAtIndex:i];
                 NSString *partName = [names objectAtIndex:i];
                 NSString *partType = [types objectAtIndex:i];
-                
+
                 if (![fileName isEqual:[NSNull null]]) {
                     [formData appendPartWithFileData:decodedBuffer name:partName fileName:fileName mimeType:partType];
                 } else {
                     [formData appendPartWithFormData:decodedBuffer name:[names objectAtIndex:i]];
                 }
             }
-            
+
             if (error) {
                 NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
                 [dictionary setObject:[NSNumber numberWithInt:400] forKey:@"status"];
@@ -264,25 +271,25 @@
                 return;
             }
         };
-        
+
         void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
-            
+
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
-        
+
         void (^onFailure)(NSURLSessionTask *, NSError *) = ^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
-            
+
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
-        
+
         if ([serializerName isEqualToString:@"multipart"]) {
             [manager uploadTaskWithHTTPMethod:method URLString:url parameters:nil constructingBodyWithBlock:constructBody progress:nil success:onSuccess failure:onFailure];
         } else {
