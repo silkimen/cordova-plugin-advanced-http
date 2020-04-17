@@ -202,7 +202,7 @@
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
-    NSDictionary *data = [command.arguments objectAtIndex:1];
+    NSMutableDictionary *data = [command.arguments objectAtIndex:1];
     NSString *serializerName = [command.arguments objectAtIndex:2];
     NSDictionary *headers = [command.arguments objectAtIndex:3];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
@@ -210,12 +210,16 @@
     NSString *responseType = [command.arguments objectAtIndex:6];
 
     // iterate over values and convert doubles in post body to decimal number
-    for (NSString* key in data) {
-        id value = data[key];
-        if (strcmp([value objCType], @encode(double)) == 0) {
-            double dbl = [[data objectForKey:key] doubleValue];
-            NSDecimalNumber *decimalNumber = [NSDecimalNumber numberWithDouble:dbl];
-            [data setValue:decimalNumber forKey:key];
+    for (NSString* key in [data allKeys]) {
+        @try {
+            id value = data[key];
+            if (strcmp([value objCType], @encode(double)) == 0) {
+                double dbl = [[data objectForKey:key] doubleValue];
+                NSDecimalNumber *decimalNumber = [NSDecimalNumber numberWithDouble:dbl];
+                [data setObject:decimalNumber forKey:key];
+            }
+        } @catch ( NSException *e ) {
+            // do nothing
         }
     }
 
