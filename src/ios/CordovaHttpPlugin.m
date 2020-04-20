@@ -203,9 +203,9 @@
             id value = dict[key];
             if ([value isKindOfClass:[NSDictionary class]]) {
                 [dict setValue:[self parseDictionary: value] forKey:key];
-            } else if (strcmp([value objCType], @encode(double)) == 0) {
+            } else if ([value isKindOfClass:[NSNumber class]] && strcmp([value objCType], @encode(double)) == 0) {
                 double dbl = [[dict objectForKey:key] doubleValue];
-                NSDecimalNumber *decimalNumber = [NSDecimalNumber numberWithDouble:dbl];
+                NSDecimalNumber *decimalNumber = (NSDecimalNumber*) [NSDecimalNumber numberWithDouble:dbl];
                 [dict setValue:decimalNumber forKey:key];
             }
         } @catch ( NSException *e ) {
