@@ -198,19 +198,21 @@
 }
 
 - (NSDictionary *)parseDictionary:(NSDictionary*)dict {
-    for (NSString* key in [dict allKeys]) {
-        @try {
-            id value = dict[key];
-            if ([value isKindOfClass:[NSDictionary class]]) {
-                [dict setValue:[self parseDictionary: value] forKey:key];
-            } else if ([value isKindOfClass:[NSNumber class]] && strcmp([value objCType], @encode(double)) == 0) {
-                double dbl = [[dict objectForKey:key] doubleValue];
-                NSDecimalNumber *decimalNumber = (NSDecimalNumber*) [NSDecimalNumber numberWithDouble:dbl];
-                [dict setValue:decimalNumber forKey:key];
-            }
-        } @catch ( NSException *e ) {
-            // do nothing
-        }
+     if ([dict isKindOfClass:[NSDictionary class] ]) {
+      for (NSString* key in [dict allKeys]) {
+          @try {
+              id value = dict[key];
+              if ([value isKindOfClass:[NSDictionary class]]) {
+                  [dict setValue:[self parseDictionary: value] forKey:key];
+              } else if ([value isKindOfClass:[NSNumber class]] && strcmp([value objCType], @encode(double)) == 0) {
+                  double dbl = [[dict objectForKey:key] doubleValue];
+                  NSDecimalNumber *decimalNumber = (NSDecimalNumber*) [NSDecimalNumber numberWithDouble:dbl];
+                  [dict setValue:decimalNumber forKey:key];
+              }
+          } @catch ( NSException *e ) {
+              // do nothing
+          }
+      }
     }
     return dict;
 }
