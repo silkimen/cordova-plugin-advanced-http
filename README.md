@@ -114,7 +114,7 @@ This defaults to `urlencoded`. You can also override the default content type he
 :warning: `multipart` depends on several Web API standards which need to be supported in your web view. Check out https://github.com/silkimen/cordova-plugin-advanced-http/wiki/Web-APIs-required-for-Multipart-requests for more info.
 
 ### setRequestTimeout
-Set how long to wait for a request to respond, in seconds.
+Set the "read" timeout in seconds. This is the timeout interval to use when waiting for additional data.
 
 ```js
 cordova.plugin.http.setRequestTimeout(5.0);
