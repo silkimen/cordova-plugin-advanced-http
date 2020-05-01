@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.0
+
+- Feature #56: add support for X.509 client certificate based authentication
+
 ## 2.4.1
 
 - Fixed #296: multipart requests are not serialized on browser platform
