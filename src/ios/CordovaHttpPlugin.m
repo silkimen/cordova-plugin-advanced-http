@@ -264,7 +264,10 @@
                 if (![fileName isEqual:[NSNull null]]) {
                     [formData appendPartWithFileData:decodedBuffer name:partName fileName:fileName mimeType:partType];
                 } else {
-                    [formData appendPartWithFormData:decodedBuffer name:[names objectAtIndex:i]];
+                    NSMutableDictionary *mutableHeaders = [NSMutableDictionary dictionary];
+                    [mutableHeaders setValue:[NSString stringWithFormat:@"form-data; name=\"%@\"", partName] forKey:@"Content-Disposition"];
+                    [mutableHeaders setValue:partType forKey:@"Content-Type"];
+                    [formData appendPartWithHeaders:mutableHeaders body:decodedBuffer];
                 }
             }
             

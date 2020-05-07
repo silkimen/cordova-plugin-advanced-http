@@ -455,7 +455,12 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
       result.buffers.push(base64.fromArrayBuffer(textEncoder.encode(entry.value[1]).buffer));
       result.names.push(entry.value[0]);
       result.fileNames.push(null);
-      result.types.push('text/plain');
+      try {
+        JSON.parse(entry.value[1]);
+        result.types.push('application/json');
+      } catch (error) {
+        result.types.push('text/plain');
+      }
 
       return processFormDataIterator(iterator, textEncoder, result, onFinished)
     }
