@@ -176,7 +176,7 @@ abstract class CordovaHttpBase implements Runnable {
         String name = names.getString(i);
 
         if (fileNames.isNull(i)) {
-          request.part(name, new String(bytes, "UTF-8"));
+          request.part(name, null, types.getString(i), new String(bytes, "UTF-8"));
         } else {
           request.part(name, fileNames.getString(i), types.getString(i), new ByteArrayInputStream(bytes));
         }
