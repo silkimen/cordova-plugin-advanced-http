@@ -292,26 +292,27 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
         return success(response);
       }
 
+      if (!response.data) {
+        return success(response);
+      }
+
       try {
-        // to allow empty responses: only post process data if it is set
-        if (response.data) {
-          // json
-          if (responseType === validResponseTypes[1]) {
-            response.data = JSON.parse(response.data);
-          }
-  
-          // arraybuffer
-          else if (responseType === validResponseTypes[2]) {
-            response.data = base64.toArrayBuffer(response.data);
-          }
-  
-          // blob
-          else if (responseType === validResponseTypes[3]) {
-            var buffer = base64.toArrayBuffer(response.data);
-            var type = response.headers['content-type'] || '';
-            var blob = new Blob([ buffer ], { type: type });
-            response.data = blob;
-          }
+        // json
+        if (responseType === validResponseTypes[1]) {
+          response.data = JSON.parse(response.data);
+        }
+
+        // arraybuffer
+        else if (responseType === validResponseTypes[2]) {
+          response.data = base64.toArrayBuffer(response.data);
+        }
+
+        // blob
+        else if (responseType === validResponseTypes[3]) {
+          var buffer = base64.toArrayBuffer(response.data);
+          var type = response.headers['content-type'] || '';
+          var blob = new Blob([ buffer ], { type: type });
+          response.data = blob;
         }
 
         success(response);
