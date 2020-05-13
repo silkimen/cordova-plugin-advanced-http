@@ -444,6 +444,17 @@ describe('Common helpers', function () {
       handler({ data: JSON.stringify(fakeData) });
     });
 
+    it('handles empty "json" response correctly', () => {
+      const emptyData = "";
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, null, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'json',
+        response => should.equal(null, response.data)
+      );
+
+      handler({ data: emptyData });
+    });
+
     it('handles response type "arraybuffer" correctly', () => {
       const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
       const handler = helpers.injectRawResponseHandler(
@@ -452,6 +463,16 @@ describe('Common helpers', function () {
       );
 
       handler({ data: 'myString' });
+    });
+
+    it('handles empty "arraybuffer" response correctly', () => {
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'arraybuffer',
+        response => should.equal(null, response.data)
+      );
+
+      handler({ data: '' });
     });
 
     it('handles response type "blob" correctly', () => {
@@ -466,6 +487,18 @@ describe('Common helpers', function () {
       );
 
       handler({ data: 'myString', headers: { 'content-type': 'fakeType'} });
+    });
+
+    it('handles empty "blob" response correctly', () => {
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'blob',
+        (response) => {
+          should.equal(null, response.data)
+        }
+      );
+
+      handler({ data: '', headers: { 'content-type': 'fakeType'} });
     });
 
     it('calls failure callback when post-processing fails', () => {
