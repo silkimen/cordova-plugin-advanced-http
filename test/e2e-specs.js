@@ -890,6 +890,17 @@ const tests = [
       result.data.headers['access-control-allow-origin'].should.be.equal('*');
     }
   },
+  {
+    description: 'should allow empty response body even though responseType is set #334',
+    expected: 'resolved: {"status":200, ...',
+    func: function (resolve, reject) { cordova.plugin.http.get('https://httpbin.org/status/200', {}, {
+      'responseType': 'json'
+    }, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      should.equal(null, result.data.data);
+    }
+  },
 
   // TODO: not ready yet
   // {
