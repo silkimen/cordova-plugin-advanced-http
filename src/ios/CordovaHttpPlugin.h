@@ -5,6 +5,7 @@
 @interface CordovaHttpPlugin : CDVPlugin
 
 - (void)setServerTrustMode:(CDVInvokedUrlCommand*)command;
+- (void)setClientAuthMode:(CDVInvokedUrlCommand*)command;
 - (void)post:(CDVInvokedUrlCommand*)command;
 - (void)put:(CDVInvokedUrlCommand*)command;
 - (void)patch:(CDVInvokedUrlCommand*)command;

@@ -18,7 +18,7 @@ module.exports = function init(global) {
       value.lastModifiedDate = new Date();
       value.name = filename || '';
     } else {
-      value = value.toString ? value.toString() : value;
+      value = String(value);
     }
 
     this.__items.push([ name, value ]);

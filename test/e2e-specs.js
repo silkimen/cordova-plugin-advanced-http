@@ -3,7 +3,7 @@ const hooks = {
     cordova.plugin.http.clearCookies();
 
     helpers.enableFollowingRedirect(function() {
-      // server trust mode is not supported on brpwser platform
+      // server trust mode is not supported on browser platform
       if (cordova.platformId === 'browser') {
         return resolve();
       }
@@ -787,7 +787,7 @@ const tests = [
   },
   {
     description: 'should decode error body even if response type is "arraybuffer"',
-    expected: 'rejected: {"status": 418, ...',
+    expected: 'rejected: {"status":418, ...',
     func: function (resolve, reject) {
       var url = 'https://httpbin.org/status/418';
       var options = { method: 'get', responseType: 'arraybuffer' };
@@ -801,7 +801,7 @@ const tests = [
   },
   {
     description: 'should serialize FormData instance correctly when it contains string value',
-    expected: 'resolved: {"status": 200, ...',
+    expected: 'resolved: {"status":200, ...',
     before: helpers.setMultipartSerializer,
     func: function (resolve, reject) {
       var ponyfills = cordova.plugin.http.ponyfills;
@@ -820,7 +820,7 @@ const tests = [
   },
   {
     description: 'should serialize FormData instance correctly when it contains blob value',
-    expected: 'resolved: {"status": 200, ...',
+    expected: 'resolved: {"status":200, ...',
     before: helpers.setMultipartSerializer,
     func: function (resolve, reject) {
       var ponyfills = cordova.plugin.http.ponyfills;
@@ -901,18 +901,72 @@ const tests = [
       should.equal(null, result.data.data);
     }
   },
+  {
+    description: 'should decode JSON data correctly when response type is "json" #301',
+    expected: 'resolved: {"status":200,"data":{"slideshow": ... ',
+    func: function (resolve, reject) {
+      var url = 'https://httpbin.org/json';
+      var options = { method: 'get', responseType: 'json' };
+      cordova.plugin.http.sendRequest(url, options, resolve, reject);
+    },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.status.should.be.equal(200);
+      result.data.data.should.be.an('object');
+      result.data.data.slideshow.should.be.eql({
+        author: 'Yours Truly', 
+        date: 'date of publication', 
+        slides: [
+          {
+            title: 'Wake up to WonderWidgets!', 
+            type: 'all'
+          }, 
+          {
+            items: [
+              'Why <em>WonderWidgets</em> are great',
+              'Who <em>buys</em> WonderWidgets'
+            ], 
+            title: 'Overview', 
+            type: 'all'
+          }
+        ], 
+        title: 'Sample Slide Show'
+      });
+    }
+  },
+  {
+    description: 'should serialize FormData instance correctly when it contains null or undefined value #300',
+    expected: 'resolved: {"status":200, ...',
+    before: helpers.setMultipartSerializer,
+    func: function (resolve, reject) {
+      var ponyfills = cordova.plugin.http.ponyfills;
+      var formData = new ponyfills.FormData();
+      formData.append('myNullValue', null);
+      formData.append('myUndefinedValue', undefined);
 
-  // TODO: not ready yet
-  // {
-  //   description: 'should authenticate correctly when client cert auth is configured with a PKCS12 container',
-  //   expected: 'resolved: {"status": 200, ...',
-  //   before: helpers.setBufferClientAuthMode,
-  //   func: function (resolve, reject) { cordova.plugin.http.get('https://client.badssl.com/', {}, {}, resolve, reject); },
-  //   validationFunc: function (driver, result) {
-  //     result.type.should.be.equal('resolved');
-  //     result.data.data.should.include('TLS handshake');
-  //   }
-  // }
+      var url = 'https://httpbin.org/anything';
+      var options = { method: 'post', data: formData };
+      cordova.plugin.http.sendRequest(url, options, resolve, reject);
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'resolved');
+      result.data.status.should.be.equal(200);
+      JSON.parse(result.data.data).form.should.be.eql({
+        myNullValue: 'null',
+        myUndefinedValue: 'undefined'
+      });
+    }
+  },
+  {
+    description: 'should authenticate correctly when client cert auth is configured with a PKCS12 container',
+    expected: 'resolved: {"status": 200, ...',
+    before: helpers.setBufferClientAuthMode,
+    func: function (resolve, reject) { cordova.plugin.http.get('https://client.badssl.com/', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.data.should.include('TLS handshake');
+    }
+  }
 ];
 
 if (typeof module !== 'undefined' && module.exports) {
