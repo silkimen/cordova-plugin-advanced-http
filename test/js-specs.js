@@ -449,7 +449,7 @@ describe('Common helpers', function () {
       const helpers = require('../www/helpers')(null, jsUtil, null, messages, null, errorCodes);
       const handler = helpers.injectRawResponseHandler(
         'json',
-        response => should.equal(null, response.data)
+        response => should.equal('', response.data)
       );
 
       handler({ data: emptyData });
@@ -469,7 +469,7 @@ describe('Common helpers', function () {
       const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
       const handler = helpers.injectRawResponseHandler(
         'arraybuffer',
-        response => should.equal(null, response.data)
+        response => should.equal('', response.data)
       );
 
       handler({ data: '' });
@@ -494,7 +494,7 @@ describe('Common helpers', function () {
       const handler = helpers.injectRawResponseHandler(
         'blob',
         (response) => {
-          should.equal(null, response.data)
+          should.equal('', response.data)
         }
       );
 
