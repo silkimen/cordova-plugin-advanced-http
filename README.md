@@ -16,6 +16,7 @@ This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordo
 
  - SSL / TLS Pinning
  - CORS restrictions do not apply
+ - X.509 client certificate based authentication
  - Handling of HTTP code 401 - read more at [Issue CB-2415](https://issues.apache.org/jira/browse/CB-2415)
 
 ## Updates
@@ -114,7 +115,7 @@ This defaults to `urlencoded`. You can also override the default content type he
 :warning: `multipart` depends on several Web API standards which need to be supported in your web view. Check out https://github.com/silkimen/cordova-plugin-advanced-http/wiki/Web-APIs-required-for-Multipart-requests for more info.
 
 ### setRequestTimeout
-Set how long to wait for a request to respond, in seconds.
+Set the "read" timeout in seconds. This is the timeout interval to use when waiting for additional data.
 
 ```js
 cordova.plugin.http.setRequestTimeout(5.0);
@@ -184,6 +185,29 @@ cordova.plugin.http.setServerTrustMode('nocheck', function() {
 }, function() {
   console.log('error :(');
 });
+```
+
+### setClientAuthMode<a name="setClientAuthMode"></a>
+Configure X.509 client certificate authentication. Takes mode and options. `mode` being one of following values:
+
+* `none`: disable client certificate authentication
+* `systemstore` (only on Android): use client certificate installed in the Android system store; user will be presented with a list of all installed certificates
+* `buffer`: use given client certificate; you will need to provide an options object:
+  * `rawPkcs`: ArrayBuffer containing raw PKCS12 container with client certificate and private key
+  * `pkcsPassword`: password of the PKCS container
+
+```js
+  // enable client auth using PKCS12 container given in ArrayBuffer `myPkcs12ArrayBuffer`
+  cordova.plugin.http.setClientAuthMode('buffer', {
+    rawPkcs: myPkcs12ArrayBuffer,
+    pkcsPassword: 'mySecretPassword'
+  }, success, fail);
+
+  // enable client auth using certificate in system store (only on Android)
+  cordova.plugin.http.setClientAuthMode('systemstore', {}, success, fail);
+
+  // disable client auth
+  cordova.plugin.http.setClientAuthMode('none', {}, success, fail);
 ```
 
 ### disableRedirect (deprecated)

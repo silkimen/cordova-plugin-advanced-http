@@ -67,8 +67,8 @@ const configs = {
     app: 'HttpTestAppAndroid'
   },
   browserstackAndroidDevice: {
-    device: 'Google Nexus 9',
-    os_version: '5.1',
+    device: 'Google Nexus 6',
+    os_version: '5.0',
     project: 'HTTP Test App',
     autoWebview: true,
     app: 'HttpTestAppAndroid'
