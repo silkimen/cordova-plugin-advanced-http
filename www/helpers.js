@@ -293,6 +293,8 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
       }
 
       if (!response.data) {
+        // return null as data if response data is not set
+        response.data = null;
         return success(response);
       }
 

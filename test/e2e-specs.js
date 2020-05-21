@@ -898,7 +898,7 @@ const tests = [
     }, resolve, reject); },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('resolved');
-      should.equal('', result.data.data);
+      should.equal(null, result.data.data);
     }
   },
   {
