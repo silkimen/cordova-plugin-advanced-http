@@ -2,7 +2,7 @@ const hooks = {
   onBeforeEachTest: function (resolve, reject) {
     cordova.plugin.http.clearCookies();
 
-    helpers.enableFollowingRedirect(function() {
+    helpers.enableFollowingRedirect(function () {
       // server trust mode is not supported on browser platform
       if (cordova.platformId === 'browser') {
         return resolve();
@@ -23,7 +23,7 @@ const helpers = {
   setPinnedServerTrustMode: function (resolve, reject) { cordova.plugin.http.setServerTrustMode('pinned', resolve, reject); },
   setNoneClientAuthMode: function (resolve, reject) { cordova.plugin.http.setClientAuthMode('none', resolve, reject); },
   setBufferClientAuthMode: function (resolve, reject) {
-    helpers.getWithXhr(function(pkcs) {
+    helpers.getWithXhr(function (pkcs) {
       cordova.plugin.http.setClientAuthMode('buffer', {
         rawPkcs: pkcs,
         pkcsPassword: 'badssl.com'
@@ -34,9 +34,9 @@ const helpers = {
   setUtf8StringSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('utf8')); },
   setUrlEncodedSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('urlencoded')); },
   setMultipartSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('multipart')); },
-  setRawSerializer: function(resolve) { resolve(cordova.plugin.http.setDataSerializer('raw')); },
+  setRawSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('raw')); },
   disableFollowingRedirect: function (resolve) { resolve(cordova.plugin.http.setFollowRedirect(false)); },
-  enableFollowingRedirect: function(resolve) { resolve(cordova.plugin.http.setFollowRedirect(true)); },
+  enableFollowingRedirect: function (resolve) { resolve(cordova.plugin.http.setFollowRedirect(true)); },
   getWithXhr: function (done, url, type) {
     var xhr = new XMLHttpRequest();
 
@@ -71,7 +71,7 @@ const helpers = {
     var byteArray = new Uint8Array(buffer);
 
     for (var i = 0; i < byteArray.length; i++) {
-      hash  = ((hash << 5) - hash) + byteArray[i];
+      hash = ((hash << 5) - hash) + byteArray[i];
       hash |= 0; // Convert to 32bit integer
     }
 
@@ -300,7 +300,7 @@ const tests = [
   {
     description: 'should not follow 302 redirect when following redirects is disabled',
     expected: 'rejected: {"status": 302, ...',
-    before: function(resolve, reject) { cordova.plugin.http.disableRedirect(true, resolve, reject)},
+    before: function (resolve, reject) { cordova.plugin.http.disableRedirect(true, resolve, reject) },
     func: function (resolve, reject) { cordova.plugin.http.get('http://httpbin.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('rejected');
@@ -374,7 +374,7 @@ const tests = [
       var targetUrl = 'http://httpbin.org/post';
 
       helpers.writeToFile(function () {
-        helpers.writeToFile(function() {
+        helpers.writeToFile(function () {
           cordova.plugin.http.uploadFile(targetUrl, {}, {}, [sourcePath, sourcePath2], [fileName, fileName2], resolve, reject);
         }, fileName2, fileContent2);
       }, fileName, fileContent);
@@ -824,7 +824,7 @@ const tests = [
     before: helpers.setMultipartSerializer,
     func: function (resolve, reject) {
       var ponyfills = cordova.plugin.http.ponyfills;
-      helpers.getWithXhr(function(blob) {
+      helpers.getWithXhr(function (blob) {
         var formData = new ponyfills.FormData();
         formData.append('CordovaLogo', blob);
 
@@ -850,7 +850,7 @@ const tests = [
     expected: 'resolved: {"status":200,"data:application/octet-stream;base64,iVBORw0KGgoAAAANSUhEUg ...',
     before: helpers.setRawSerializer,
     func: function (resolve, reject) {
-      helpers.getWithXhr(function(buffer) {
+      helpers.getWithXhr(function (buffer) {
         cordova.plugin.http.post('http://httpbin.org/anything', buffer, {}, resolve, reject);
       }, './res/cordova_logo.png', 'arraybuffer');
     },
@@ -893,9 +893,11 @@ const tests = [
   {
     description: 'should allow empty response body even though responseType is set #334',
     expected: 'resolved: {"status":200, ...',
-    func: function (resolve, reject) { cordova.plugin.http.get('https://httpbin.org/status/200', {}, {
-      'responseType': 'json'
-    }, resolve, reject); },
+    func: function (resolve, reject) {
+      var url = 'https://httpbin.org/status/200';
+      var options = { method: 'get', responseType: 'json' };
+      cordova.plugin.http.sendRequest(url, options, resolve, reject);
+    },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('resolved');
       should.equal(null, result.data.data);
@@ -914,22 +916,22 @@ const tests = [
       result.data.status.should.be.equal(200);
       result.data.data.should.be.an('object');
       result.data.data.slideshow.should.be.eql({
-        author: 'Yours Truly', 
-        date: 'date of publication', 
+        author: 'Yours Truly',
+        date: 'date of publication',
         slides: [
           {
-            title: 'Wake up to WonderWidgets!', 
+            title: 'Wake up to WonderWidgets!',
             type: 'all'
-          }, 
+          },
           {
             items: [
               'Why <em>WonderWidgets</em> are great',
               'Who <em>buys</em> WonderWidgets'
-            ], 
-            title: 'Overview', 
+            ],
+            title: 'Overview',
             type: 'all'
           }
-        ], 
+        ],
         title: 'Sample Slide Show'
       });
     }
