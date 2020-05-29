@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.5.1
+
+- Fixed #334: empty JSON response triggers error even though request is successful (thanks antikalk)
+- Fixed #248: clearCookies() does not work on iOS
+
+## 2.5.0
+
+- Feature #56: add support for X.509 client certificate based authentication
+
 ## 2.4.1
 
 - Fixed #296: multipart requests are not serialized on browser platform
