@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.1
+
+- Fixed #334: empty JSON response triggers error even though request is successful (thanks antikalk)
+
 ## 2.5.0
 
 - Feature #56: add support for X.509 client certificate based authentication
