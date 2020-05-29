@@ -3,6 +3,7 @@
 ## 2.5.1
 
 - Fixed #334: empty JSON response triggers error even though request is successful (thanks antikalk)
+- Fixed #248: clearCookies() does not work on iOS
 
 ## 2.5.0
 
