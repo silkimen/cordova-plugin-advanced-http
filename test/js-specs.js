@@ -419,7 +419,7 @@ describe('Common helpers', function () {
         response => response.data.should.be.equal('fakeData')
       );
 
-     handler({ data: 'fakeData' });
+      handler({ data: 'fakeData' });
     });
 
     it('does not change response data if response type is "text"', () => {
@@ -444,6 +444,17 @@ describe('Common helpers', function () {
       handler({ data: JSON.stringify(fakeData) });
     });
 
+    it('handles empty "json" response correctly', () => {
+      const emptyData = "";
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, null, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'json',
+        response => should.equal(undefined, response.data)
+      );
+
+      handler({ data: emptyData });
+    });
+
     it('handles response type "arraybuffer" correctly', () => {
       const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
       const handler = helpers.injectRawResponseHandler(
@@ -452,6 +463,16 @@ describe('Common helpers', function () {
       );
 
       handler({ data: 'myString' });
+    });
+
+    it('handles empty "arraybuffer" response correctly', () => {
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'arraybuffer',
+        response => should.equal(null, response.data)
+      );
+
+      handler({ data: '' });
     });
 
     it('handles response type "blob" correctly', () => {
@@ -465,7 +486,19 @@ describe('Common helpers', function () {
         }
       );
 
-      handler({ data: 'myString', headers: { 'content-type': 'fakeType'} });
+      handler({ data: 'myString', headers: { 'content-type': 'fakeType' } });
+    });
+
+    it('handles empty "blob" response correctly', () => {
+      const helpers = require('../www/helpers')(null, jsUtil, null, messages, fakeBase64, errorCodes);
+      const handler = helpers.injectRawResponseHandler(
+        'blob',
+        (response) => {
+          should.equal(null, response.data)
+        }
+      );
+
+      handler({ data: '', headers: { 'content-type': 'fakeType' } });
     });
 
     it('calls failure callback when post-processing fails', () => {
@@ -546,7 +579,7 @@ describe('Common helpers', function () {
 
     it('processes data correctly when serializer "utf8" is configured', (cb) => {
       helpers.processData('myString', 'utf8', (data) => {
-        data.should.be.eql({text: 'myString'});
+        data.should.be.eql({ text: 'myString' });
         cb();
       })
     });
@@ -591,7 +624,7 @@ describe('Common helpers', function () {
     });
 
     it('processes data correctly when serializer "raw" is configured', (cb) => {
-      const byteArray = new Uint8Array([1,2,3]);
+      const byteArray = new Uint8Array([1, 2, 3]);
       helpers.processData(byteArray, 'raw', (data) => {
         data.should.be.a('ArrayBuffer');
         data.should.be.equal(byteArray.buffer);
@@ -647,7 +680,7 @@ describe('Dependency Validator', function () {
   describe('checkFormDataInstance()', function () {
     it('throws an error if FormData.entries() is not supported on given instance', function () {
       const console = new ConsoleMock();
-      const validator = require('../www/dependency-validator')({ FormData: {}}, console, messages);
+      const validator = require('../www/dependency-validator')({ FormData: {} }, console, messages);
 
       (() => validator.checkFormDataInstance({})).should.throw(messages.MISSING_FORMDATA_ENTRIES_API);
     });
@@ -684,12 +717,12 @@ describe('Ponyfills', function () {
         const iterator = new ponyfills.Iterator([]);
         iterator.next().should.be.eql({ done: true, value: undefined });
       });
-  
+
       it('returns iteration object correctly when end posititon of list is not reached yet', () => {
         const iterator = new ponyfills.Iterator([['first', 'this is the first item']]);
         iterator.next().should.be.eql({ done: false, value: ['first', 'this is the first item'] });
       });
-  
+
       it('returns iteration object correctly when end posititon of list is already reached', () => {
         const iterator = new ponyfills.Iterator([['first', 'this is the first item']]);
         iterator.next();
