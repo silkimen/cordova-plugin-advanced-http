@@ -237,9 +237,9 @@ The options object contains following keys:
 * `serializer`: data serializer to be used (only applicable on `post`, `put` or `patch` methods), defaults to global serializer value, see [setDataSerializer](#setDataSerializer) for supported values
 * `responseType`: expected response type, defaults to `text`, needs to be one of the following values:
   * `text`: data is returned as decoded string, use this for all kinds of string responses (e.g. XML, HTML, plain text, etc.)
-  * `json` data is treated as JSON and returned as parsed object
-  * `arraybuffer`: data is returned as [ArrayBuffer instance](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
-  * `blob`: data is returned as [Blob instance](https://developer.mozilla.org/en-US/docs/Web/API/Blob)
+  * `json` data is treated as JSON and returned as parsed object, returns `undefined` when response body is empty
+  * `arraybuffer`: data is returned as [ArrayBuffer instance](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer), returns `null` when response body is empty
+  * `blob`: data is returned as [Blob instance](https://developer.mozilla.org/en-US/docs/Web/API/Blob), returns `null` when response body is empty
 * `timeout`: timeout value for the request in seconds, defaults to global timeout value
 * `followRedirect`: enable or disable automatically following redirects
 * `headers`: headers object (key value pair), will be merged with global values
