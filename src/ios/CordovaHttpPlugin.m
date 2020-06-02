@@ -234,7 +234,10 @@
                   [dict setValue:[self parseDictionary: value] forKey:key];
               } else if ([value isKindOfClass:[NSNumber class]] && strcmp([value objCType], @encode(double)) == 0) {
                   double dbl = [[dict objectForKey:key] doubleValue];
+                  int digits = 10;
                   NSDecimalNumber *decimalNumber = (NSDecimalNumber*) [NSDecimalNumber numberWithDouble:dbl];
+                  NSDecimalNumberHandler *behavior = [NSDecimalNumberHandler decimalNumberHandlerWithRoundingMode:NSRoundPlain scale:digits raiseOnExactness:NO raiseOnOverflow:NO raiseOnUnderflow:NO raiseOnDivideByZero:NO];
+                  decimalNumber = [decimalNumber decimalNumberByRoundingAccordingToBehavior:behavior];
                   [dict setValue:decimalNumber forKey:key];
               }
           } @catch ( NSException *e ) {
