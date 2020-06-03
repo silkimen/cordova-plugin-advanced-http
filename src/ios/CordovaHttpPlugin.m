@@ -52,7 +52,7 @@
             if (![self->securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
                 return NSURLSessionAuthChallengeRejectProtectionSpace;
             }
-            
+
             if (credential) {
                 return NSURLSessionAuthChallengeUseCredential;
             }
@@ -62,7 +62,7 @@
             *credential = self->x509Credential;
             return NSURLSessionAuthChallengeUseCredential;
         }
-        
+
         return NSURLSessionAuthChallengePerformDefaultHandling;
     }];
 }
@@ -234,7 +234,7 @@
                   [dict setValue:[self parseDictionary: value] forKey:key];
               } else if ([value isKindOfClass:[NSNumber class]] && strcmp([value objCType], @encode(double)) == 0) {
                   double dbl = [[dict objectForKey:key] doubleValue];
-                  int digits = 10;
+                  int digits = 5;
                   NSDecimalNumber *decimalNumber = (NSDecimalNumber*) [NSDecimalNumber numberWithDouble:dbl];
                   NSDecimalNumberHandler *behavior = [NSDecimalNumberHandler decimalNumberHandlerWithRoundingMode:NSRoundPlain scale:digits raiseOnExactness:NO raiseOnOverflow:NO raiseOnUnderflow:NO raiseOnDivideByZero:NO];
                   decimalNumber = [decimalNumber decimalNumberByRoundingAccordingToBehavior:behavior];
@@ -359,27 +359,27 @@
 - (void)setClientAuthMode:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString *mode = [command.arguments objectAtIndex:0];
-    
+
     if ([mode isEqualToString:@"none"]) {
       x509Credential = nil;
       pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     }
-  
+
     if ([mode isEqualToString:@"systemstore"]) {
       NSString *alias = [command.arguments objectAtIndex:1];
-      
+
       // TODO
-      
+
       pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"mode 'systemstore' is not supported on iOS"];
     }
-  
+
     if ([mode isEqualToString:@"buffer"]) {
         CFDataRef container = (__bridge CFDataRef) [command.arguments objectAtIndex:2];
         CFStringRef password = (__bridge CFStringRef) [command.arguments objectAtIndex:3];
-      
+
         const void *keys[] = { kSecImportExportPassphrase };
         const void *values[] = { password };
-      
+
         CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
         CFArrayRef items;
         OSStatus securityError = SecPKCS12Import(container, options, &items);
@@ -393,7 +393,7 @@
 
             self->x509Credential = [NSURLCredential credentialWithIdentity:identity certificates: nil persistence:NSURLCredentialPersistenceForSession];
             CFRelease(items);
-          
+
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         }
     }
