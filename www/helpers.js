@@ -295,20 +295,28 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
       try {
         // json
         if (responseType === validResponseTypes[1]) {
-          response.data = JSON.parse(response.data);
+          response.data = response.data === ''
+            ? undefined
+            : JSON.parse(response.data);
         }
 
         // arraybuffer
         else if (responseType === validResponseTypes[2]) {
-          response.data = base64.toArrayBuffer(response.data);
+          response.data = response.data === ''
+            ? null
+            : base64.toArrayBuffer(response.data);
         }
 
         // blob
         else if (responseType === validResponseTypes[3]) {
-          var buffer = base64.toArrayBuffer(response.data);
-          var type = response.headers['content-type'] || '';
-          var blob = new Blob([ buffer ], { type: type });
-          response.data = blob;
+          if (response.data === '') {
+            response.data = null;
+          } else {
+            var buffer = base64.toArrayBuffer(response.data);
+            var type = response.headers['content-type'] || '';
+            var blob = new Blob([buffer], { type: type });
+            response.data = blob;
+          }
         }
 
         success(response);
@@ -384,7 +392,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     if (allowedInstanceTypes) {
       var isCorrectInstanceType = false;
 
-      allowedInstanceTypes.forEach(function(type) {
+      allowedInstanceTypes.forEach(function (type) {
         if ((global[type] && data instanceof global[type]) || (ponyfills[type] && data instanceof ponyfills[type])) {
           isCorrectInstanceType = true;
         }
@@ -440,7 +448,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     if (entry.value[1] instanceof global.Blob || entry.value[1] instanceof global.File) {
       var reader = new global.FileReader();
 
-      reader.onload = function() {
+      reader.onload = function () {
         result.buffers.push(base64.fromArrayBuffer(reader.result));
         result.names.push(entry.value[0]);
         result.fileNames.push(entry.value[1].name || 'blob');
