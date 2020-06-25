@@ -14,10 +14,6 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     setRequestTimeout: setRequestTimeout,
     getFollowRedirect: getFollowRedirect,
     setFollowRedirect: setFollowRedirect,
-    // @DEPRECATED
-    disableRedirect: disableRedirect,
-    // @DEPRECATED
-    setSSLCertMode: setServerTrustMode,
     setServerTrustMode: setServerTrustMode,
     setClientAuthMode: setClientAuthMode,
     sendRequest: sendRequest,
@@ -105,14 +101,6 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     globalConfigs.followRedirect = helpers.checkFollowRedirectValue(follow);
   }
 
-  // @DEPRECATED
-  function disableRedirect(disable, success, failure) {
-    helpers.handleMissingCallbacks(success, failure);
-
-    setFollowRedirect(!disable);
-    success();
-  }
-
   function setServerTrustMode(mode, success, failure) {
     helpers.handleMissingCallbacks(success, failure);
 
@@ -154,7 +142,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
       case 'post':
       case 'put':
       case 'patch':
-        return helpers.processData(options.data, options.serializer, function(data) {
+        return helpers.processData(options.data, options.serializer, function (data) {
           exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout, options.followRedirect, options.responseType]);
         });
       case 'upload':

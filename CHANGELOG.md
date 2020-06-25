@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.0
+
+- :warning: **Breaking Change**: Dropped support for Android < 5.1
+- :warning: **Breaking Change**: Removed "disableRedirect", use "setFollowRedirect" instead
+- :warning: **Breaking Change**: Removed "setSSLCertMode", use "setServerTrustMode" instead
+
 ## 2.5.1
 
 - Fixed #334: empty JSON response triggers error even though request is successful (thanks antikalk)

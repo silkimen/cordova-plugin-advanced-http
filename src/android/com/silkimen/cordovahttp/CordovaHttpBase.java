@@ -16,7 +16,6 @@ import com.silkimen.http.HttpBodyDecoder;
 import com.silkimen.http.HttpRequest;
 import com.silkimen.http.HttpRequest.HttpRequestException;
 import com.silkimen.http.JsonUtils;
-import com.silkimen.http.OkConnectionFactory;
 import com.silkimen.http.TLSConfiguration;
 
 import org.apache.cordova.CallbackContext;
@@ -124,7 +123,6 @@ abstract class CordovaHttpBase implements Runnable {
     request.readTimeout(this.timeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
-    HttpRequest.setConnectionFactory(new OkConnectionFactory());
 
     if (this.tlsConfiguration.getHostnameVerifier() != null) {
       request.setHostnameVerifier(this.tlsConfiguration.getHostnameVerifier());

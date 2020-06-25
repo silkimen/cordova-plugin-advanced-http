@@ -210,12 +210,6 @@ Configure X.509 client certificate authentication. Takes mode and options. `mode
   cordova.plugin.http.setClientAuthMode('none', {}, success, fail);
 ```
 
-### disableRedirect (deprecated)
-This function was deprecated in 2.0.9. Use ["setFollowRedirect"](#setFollowRedirect) instead.
-
-### setSSLCertMode (deprecated)
-This function was deprecated in 2.0.8. Use ["setServerTrustMode"](#setServerTrustMode) instead.
-
 ### removeCookies
 Remove all cookies associated with a given URL.
 
