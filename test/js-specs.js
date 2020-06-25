@@ -49,6 +49,13 @@ describe('Advanced HTTP public interface', function () {
     http.getHeaders('*').myKey.should.equal('myValue');
   });
 
+  it('clears global headers correctly when value is undefined', () => {
+    http.setHeader('*', 'myKey', 'myValue');
+    http.setHeader('*', 'myKey', null);
+    should.equal(undefined, http.getHeaders('*').myKey);
+    Object.keys(http.getHeaders('*')).length.should.be.equal(0);
+  });
+
   it('sets host headers correctly #24', () => {
     http.setHeader('www.google.de', 'myKey', 'myValue');
     http.getHeaders('www.google.de').myKey.should.equal('myValue');

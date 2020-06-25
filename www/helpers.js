@@ -187,7 +187,9 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   }
 
   function checkForInvalidHeaderValue(value) {
-    if (jsUtil.getTypeOf(value) !== 'String') {
+    var type = jsUtil.getTypeOf(value);
+
+    if (type !== 'String' && type !== 'Null') {
       throw new Error(messages.INVALID_HEADER_VALUE);
     }
 

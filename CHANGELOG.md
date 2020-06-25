@@ -2,6 +2,8 @@
 
 ## 3.0.0
 
+- Feature #158: support removing headers which were previously set via "setHeader"
+
 - :warning: **Breaking Change**: Dropped support for Android < 5.1
 - :warning: **Breaking Change**: Removed "disableRedirect", use "setFollowRedirect" instead
 - :warning: **Breaking Change**: Removed "setSSLCertMode", use "setServerTrustMode" instead

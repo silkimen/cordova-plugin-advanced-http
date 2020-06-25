@@ -11,7 +11,7 @@ module.exports = {
   INVALID_DATA_SERIALIZER: 'advanced-http: invalid serializer, supported serializers are:',
   INVALID_DOWNLOAD_FILE_PATH: 'advanced-http: invalid "filePath" value, needs to be a string, <filePath: string>',
   INVALID_FOLLOW_REDIRECT_VALUE: 'advanced-http: invalid follow redirect value, needs to be a boolean value, <followRedirect: boolean>',
-  INVALID_HEADER_VALUE: 'advanced-http: invalid header value, needs to be a string, <header: string>',
+  INVALID_HEADER_VALUE: 'advanced-http: invalid header value, needs to be a string or null, <header: string | null>',
   INVALID_HTTP_METHOD: 'advanced-http: invalid HTTP method, supported methods are:',
   INVALID_RESPONSE_TYPE: 'advanced-http: invalid response type, supported types are:',
   INVALID_SSL_CERT_MODE: 'advanced-http: invalid SSL cert mode, supported modes are:',

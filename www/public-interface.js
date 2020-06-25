@@ -58,7 +58,12 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     helpers.checkForInvalidHeaderValue(value);
 
     globalConfigs.headers[host] = globalConfigs.headers[host] || {};
-    globalConfigs.headers[host][header] = value;
+
+    if (value === null) {
+      delete globalConfigs.headers[host][header];
+    } else {
+      globalConfigs.headers[host][header] = value;
+    }
   }
 
   function getDataSerializer() {
