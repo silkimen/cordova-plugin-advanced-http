@@ -1,5 +1,4 @@
 const chai = require('chai');
-const mock = require('mock-require');
 const util = require('util');
 const should = chai.should();
 

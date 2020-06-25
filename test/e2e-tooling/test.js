@@ -1,13 +1,10 @@
 const wd = require('wd');
 const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const logging = require('./logging');
 const capsConfig = require('./caps');
 const serverConfig = require('./server');
 const testDefinitions = require('../e2e-specs');
 
-chai.use(chaiAsPromised);
-chaiAsPromised.transferPromiseness = wd.transferPromiseness;
 global.should = chai.should();
 
 describe('Advanced HTTP e2e test suite', function () {

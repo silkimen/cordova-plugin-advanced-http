@@ -1,26 +1,26 @@
 {
-    "name": "com.ilkimen.http.demo",
-    "displayName": "HttpDemo",
-    "version": "1.0.0",
-    "description": "A sample Apache Cordova application that demonstrates advanced HTTP plugin.",
-    "main": "index.js",
-    "scripts": {
-        "build": "scripts/build.sh",
-        "test": "npm run build && scripts/test.sh"
-    },
-    "author": "Sefa Ilkimen",
-    "license": "Apache-2.0",
-    "dependencies": {
-        "cordova": "7.0.1",
-        "cordova-android": "7.1.0",
-        "cordova-browser": "5.0.0",
-        "cordova-ios": "5.0.1"
-    },
-    "cordova": {
-        "platforms": [
-            "android",
-            "ios"
-        ]
-    },
-    "devDependencies": {}
+  "name": "com.ilkimen.http.demo",
+  "displayName": "HttpDemo",
+  "version": "1.0.0",
+  "description": "A sample Apache Cordova application that demonstrates advanced HTTP plugin.",
+  "main": "index.js",
+  "scripts": {
+    "build": "scripts/build.sh",
+    "test": "npm run build && scripts/test.sh"
+  },
+  "author": "Sefa Ilkimen",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cordova": "9.0.0",
+    "cordova-android": "8.1.0",
+    "cordova-browser": "6.0.0",
+    "cordova-ios": "5.1.0"
+  },
+  "cordova": {
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "devDependencies": {}
 }
