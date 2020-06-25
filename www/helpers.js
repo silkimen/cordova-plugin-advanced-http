@@ -453,7 +453,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
       reader.onload = function () {
         result.buffers.push(base64.fromArrayBuffer(reader.result));
         result.names.push(entry.value[0]);
-        result.fileNames.push(entry.value[1].name || 'blob');
+        result.fileNames.push(entry.value[1].name !== undefined ? entry.value[1].name : 'blob');
         result.types.push(entry.value[1].type || '');
         processFormDataIterator(iterator, textEncoder, result, onFinished);
       };
