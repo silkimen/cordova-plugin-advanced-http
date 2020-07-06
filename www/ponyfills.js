@@ -16,7 +16,7 @@ module.exports = function init(global) {
     } else if (global.Blob && value instanceof global.Blob) {
       // mimic File instance by adding missing properties
       value.lastModifiedDate = new Date();
-      value.name = filename || '';
+      value.name = fileName !== undefined ? fileName : 'blob';
     } else {
       value = String(value);
     }
