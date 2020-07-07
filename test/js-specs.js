@@ -629,6 +629,44 @@ describe('Common helpers', function () {
       });
     });
 
+    it('processes data correctly when serializer "multipart" is configured and form data contains file value (filename set)', (cb) => {
+      const formData = new FormDataMock();
+      formData.append('myFile', new BlobMock([testString], { type: 'application/octet-stream' }), 'file.name');
+
+      helpers.processData(formData, 'multipart', (data) => {
+        data.buffers.length.should.be.equal(1);
+        data.names.length.should.be.equal(1);
+        data.fileNames.length.should.be.equal(1);
+        data.types.length.should.be.equal(1);
+
+        data.buffers[0].should.be.eql(testStringBase64);
+        data.names[0].should.be.equal('myFile');
+        data.fileNames[0].should.be.equal('file.name');
+        data.types[0].should.be.equal('application/octet-stream');
+
+        cb();
+      });
+    });
+
+    it('processes data correctly when serializer "multipart" is configured and form data contains file value (filename empty)', (cb) => {
+      const formData = new FormDataMock();
+      formData.append('myFile', new BlobMock([testString], { type: 'application/octet-stream' }), '');
+
+      helpers.processData(formData, 'multipart', (data) => {
+        data.buffers.length.should.be.equal(1);
+        data.names.length.should.be.equal(1);
+        data.fileNames.length.should.be.equal(1);
+        data.types.length.should.be.equal(1);
+
+        data.buffers[0].should.be.eql(testStringBase64);
+        data.names[0].should.be.equal('myFile');
+        data.fileNames[0].should.be.equal('');
+        data.types[0].should.be.equal('application/octet-stream');
+
+        cb();
+      });
+    });
+
     it('processes data correctly when serializer "raw" is configured', (cb) => {
       const byteArray = new Uint8Array([1, 2, 3]);
       helpers.processData(byteArray, 'raw', (data) => {
