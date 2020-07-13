@@ -4,6 +4,8 @@
 
 - Feature #158: support removing headers which were previously set via "setHeader"
 
+- Fixed #345: empty file names are not handled correctly (thanks ikosta)
+
 - :warning: **Breaking Change**: Dropped support for Android < 5.1
 - :warning: **Breaking Change**: Removed "disableRedirect", use "setFollowRedirect" instead
 - :warning: **Breaking Change**: Removed "setSSLCertMode", use "setServerTrustMode" instead
