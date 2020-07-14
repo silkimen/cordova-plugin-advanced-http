@@ -1,5 +1,5 @@
 const args = process.argv.slice(2);
-const fs = require('mz/fs');
+const fs = require('fs');
 const path = require('path');
 const xml2js = require('xml2js');
 const xmlPath = path.join(__dirname, '..', 'plugin.xml');
@@ -22,10 +22,12 @@ const stringify = obj => {
   return builder.buildObject(obj);
 };
 
-fs.readFile(xmlPath, 'utf-8')
-  .then(xml => parse(xml))
-  .then(parsed => {
-    parsed.plugin.$.version = args[0];
+const update = async (version) => {
+  const xml = fs.readFileSync(xmlPath, 'utf-8');
+  const parsed = await parse(xml);
 
-    return fs.writeFile(xmlPath, stringify(parsed));
-  });
+  parsed.plugin.$.version = version;
+  fs.writeFileSync(xmlPath, stringify(parsed));
+};
+
+return update(args[0]);
