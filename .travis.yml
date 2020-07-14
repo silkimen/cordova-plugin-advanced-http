@@ -36,9 +36,10 @@ matrix:
 
     android:
       components:
+        - tools
         - platform-tools
         - build-tools-28.0.3
-        - android-27
+        - android-28
         - extra-android-support
         - extra-android-m2repository
         - extra-google-m2repository
@@ -47,6 +48,7 @@ matrix:
     - export LANG=en_US.UTF-8 &&
       curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - &&
       sudo apt-get install -y nodejs
+    - yes | sdkmanager --update
 
     install:
     - npm install
