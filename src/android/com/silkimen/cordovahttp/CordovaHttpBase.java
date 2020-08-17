@@ -79,6 +79,7 @@ abstract class CordovaHttpBase implements Runnable {
       this.prepareRequest(request);
       this.sendBody(request);
       this.processResponse(request, response);
+      request.disconnect();
     } catch (HttpRequestException e) {
       if (e.getCause() instanceof SSLException) {
         response.setStatus(-2);
