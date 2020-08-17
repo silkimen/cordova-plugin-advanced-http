@@ -1,11 +1,14 @@
 # Changelog
 
+## 3.0.1
+
+- Fixed #359: memory leakage leads to app crashes on Android
+
 ## 3.0.0
 
 - Feature #158: support removing headers which were previously set via "setHeader"
 
 - Fixed #345: empty file names are not handled correctly (thanks ikosta)
-- Fixed #359: memory leakage leads to app crashes on Android
 
 - :warning: **Breaking Change**: Dropped support for Android < 5.1
 - :warning: **Breaking Change**: Removed "disableRedirect", use "setFollowRedirect" instead
