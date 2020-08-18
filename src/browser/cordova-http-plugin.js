@@ -20,7 +20,7 @@ function serializePrimitive(key, value) {
 }
 
 function serializeArray(key, values) {
-  return values.map(function(value) {
+  return values.map(function (value) {
     return encodeURIComponent(key) + '[]=' + encodeURIComponent(value);
   }).join('&');
 }
@@ -28,7 +28,7 @@ function serializeArray(key, values) {
 function serializeParams(params) {
   if (params === null) return '';
 
-  return Object.keys(params).map(function(key) {
+  return Object.keys(params).map(function (key) {
     if (jsUtil.getTypeOf(params[key]) === 'Array') {
       return serializeArray(key, params[key]);
     }
@@ -38,11 +38,11 @@ function serializeParams(params) {
 }
 
 function decodeB64(dataString) {
-  var binarString = atob(dataString);
-  var bytes = new Uint8Array(binarString.length);
+  var binaryString = atob(dataString);
+  var bytes = new Uint8Array(binaryString.length);
 
-  for (var i = 0; i < binarString.length; ++i) {
-      bytes[i] = binarString.charCodeAt(i);
+  for (var i = 0; i < binaryString.length; ++i) {
+    bytes[i] = binaryString.charCodeAt(i);
   }
 
   return bytes.buffer;
@@ -60,7 +60,7 @@ function processMultipartData(data) {
     var type = data.types[i];
 
     if (fileName) {
-      fd.append(name, new Blob([decodeB64(buffer)], {type: type}), fileName);
+      fd.append(name, new Blob([decodeB64(buffer)], { type: type }), fileName);
     } else {
       // we assume it's plain text if no filename was given
       fd.append(name, atob(buffer));
@@ -118,7 +118,7 @@ function createXhrFailureObject(xhr) {
 function getHeaderValue(headers, headerName) {
   let result = null;
 
-  Object.keys(headers).forEach(function(key) {
+  Object.keys(headers).forEach(function (key) {
     if (key.toLowerCase() === headerName.toLowerCase()) {
       result = headers[key];
     }
@@ -134,7 +134,7 @@ function setDefaultContentType(headers, contentType) {
 }
 
 function setHeaders(xhr, headers) {
-  Object.keys(headers).forEach(function(key) {
+  Object.keys(headers).forEach(function (key) {
     if (key.toLowerCase() === 'cookie') return;
 
     xhr.setRequestHeader(key, headers[key]);
@@ -196,7 +196,7 @@ function sendRequest(method, withData, opts, success, failure) {
 
     case 'multipart':
       const contentType = getHeaderValue(headers, 'Content-Type');
-      
+
       // intentionally don't set a default content type
       // it's set by the browser together with the content disposition string
       if (contentType) {
@@ -212,15 +212,16 @@ function sendRequest(method, withData, opts, success, failure) {
       break;
   }
 
+  // requesting text instead of JSON because it's parsed in the response handler
+  xhr.responseType = responseType === 'json' ? 'text' : responseType;
   xhr.timeout = timeout * 1000;
-  xhr.responseType = responseType;
   setHeaders(xhr, headers);
 
   xhr.onerror = function () {
     return failure(createXhrFailureObject(xhr));
   };
 
-  xhr.ontimeout = function () { 
+  xhr.ontimeout = function () {
     return failure({
       status: -4,
       error: 'Request timed out',

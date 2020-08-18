@@ -3,6 +3,7 @@
 ## 3.0.1
 
 - Fixed #359: memory leakage leads to app crashes on Android
+- Fixed #355: responseType "json" not working with valid JSON response on browser (thanks millerg6711)
 
 ## 3.0.0
 
