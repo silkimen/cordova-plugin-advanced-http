@@ -132,7 +132,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     return exec(success, failure, 'CordovaHttpPlugin', 'setClientAuthMode', [mode, options.alias, options.rawPkcs, options.pkcsPassword]);
   }
 
-  function sendRequest(url, options, success, failure) {
+  function sendRequest(url, options, success, failure, progress) {
     helpers.handleMissingCallbacks(success, failure);
 
     options = helpers.handleMissingOptions(options, globalConfigs);
@@ -141,14 +141,27 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     var headers = helpers.getMergedHeaders(url, options.headers, globalConfigs.headers);
 
     var onFail = helpers.injectCookieHandler(url, failure);
-    var onSuccess = helpers.injectCookieHandler(url, helpers.injectRawResponseHandler(options.responseType, success, failure));
+    var onSuccess = helpers.injectCookieHandler(url, helpers.injectRawResponseHandler(options.responseType,  (successData) => {
+      if(successData.status){
+          // this is an HTTP response.
+          success(successData);
+      } else if(successData.progressStage) {
+          // this is a progress object. a callback is present.
+          if(progress){
+              progress(successData);
+          }
+      } else {
+          console.error('unhandled successData type!');
+          console.error(successData);
+      }
+    }, failure));
 
     switch (options.method) {
       case 'post':
       case 'put':
       case 'patch':
         return helpers.processData(options.data, options.serializer, function (data) {
-          exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout, options.followRedirect, options.responseType]);
+            exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout, options.followRedirect, options.responseType]);
         });
       case 'upload':
         var fileOptions = helpers.checkUploadFileOptions(options.filePath, options.name);

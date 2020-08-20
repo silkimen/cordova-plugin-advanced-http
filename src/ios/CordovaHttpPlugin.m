@@ -281,9 +281,9 @@
         
         void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
-            
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:NO]];
+            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
@@ -297,10 +297,32 @@
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
         
+        void (^uploadProgress)(NSProgress *) = ^(NSProgress *progress) {
+            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+            [dictionary setValue:@"request" forKey:@"progressStage"];
+            [dictionary setValue:[NSNumber numberWithLongLong:progress.completedUnitCount] forKey:@"loaded"];
+            [dictionary setValue:[NSNumber numberWithLongLong:progress.totalUnitCount] forKey:@"total"];
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
+            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        };
+        
+        void (^downloadProgress)(NSProgress *) = ^(NSProgress *progress) {
+            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+            [dictionary setValue:@"response" forKey:@"progressStage"];
+            [dictionary setValue:[NSNumber numberWithLongLong:progress.completedUnitCount] forKey:@"loaded"];
+            [dictionary setValue:[NSNumber numberWithLongLong:progress.totalUnitCount] forKey:@"total"];
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
+            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        };
+
         if ([serializerName isEqualToString:@"multipart"]) {
+            // NO IDEA HOW TO HANDLE PROGRESS HERE...
             [manager uploadTaskWithHTTPMethod:method URLString:url parameters:nil constructingBodyWithBlock:constructBody progress:nil success:onSuccess failure:onFailure];
         } else {
-            [manager uploadTaskWithHTTPMethod:method URLString:url parameters:data progress:nil success:onSuccess failure:onFailure];
+            NSURLSessionDataTask *task = [manager dataTaskWithHTTPMethod:method URLString:url parameters:data uploadProgress:uploadProgress downloadProgress:downloadProgress success:onSuccess failure:onFailure];
+            [task resume];
         }
     }
     @catch (NSException *exception) {
