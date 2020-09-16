@@ -74,6 +74,7 @@
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpPlugin.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpResponse.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaHttpUpload.java" target-dir="src/com/silkimen/cordovahttp"/>
+    <source-file src="src/android/com/silkimen/cordovahttp/CordovaObservableCallbackContext.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/cordovahttp/CordovaServerTrust.java" target-dir="src/com/silkimen/cordovahttp"/>
     <source-file src="src/android/com/silkimen/http/HttpBodyDecoder.java" target-dir="src/com/silkimen/http"/>
     <source-file src="src/android/com/silkimen/http/HttpRequest.java" target-dir="src/com/silkimen/http"/>

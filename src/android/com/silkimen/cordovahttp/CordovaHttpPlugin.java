@@ -1,6 +1,10 @@
 package com.silkimen.cordovahttp;
 
 import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.Future;
 
 import com.silkimen.http.TLSConfiguration;
 
@@ -17,16 +21,21 @@ import android.util.Base64;
 
 import javax.net.ssl.TrustManagerFactory;
 
-public class CordovaHttpPlugin extends CordovaPlugin {
+public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
   private TLSConfiguration tlsConfiguration;
+
+  private HashMap<Integer, Future<?>> reqMap;
+  private final Object reqMapLock = new Object();
 
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
     super.initialize(cordova, webView);
 
     this.tlsConfiguration = new TLSConfiguration();
+
+    this.reqMap = new HashMap<Integer, Future<?>>();
 
     try {
       KeyStore store = KeyStore.getInstance("AndroidCAStore");
@@ -73,6 +82,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
       return this.setServerTrustMode(args, callbackContext);
     } else if ("setClientAuthMode".equals(action)) {
       return this.setClientAuthMode(args, callbackContext);
+    } else if ("abort".equals(action)) {
+      return this.abort(args, callbackContext);
     } else {
       return false;
     }
@@ -87,10 +98,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     boolean followRedirect = args.getBoolean(3);
     String responseType = args.getString(4);
 
-    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, headers, timeout, followRedirect,
-        responseType, this.tlsConfiguration, callbackContext);
+    Integer reqId = args.getInt(5);
+    CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
-    cordova.getThreadPool().execute(request);
+    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, headers, timeout, followRedirect,
+        responseType, this.tlsConfiguration, observableCallbackContext);
+
+    Future<?> task = cordova.getThreadPool().submit(request);
+    this.addReq(reqId, task, observableCallbackContext);
 
     return true;
   }
@@ -106,10 +121,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     boolean followRedirect = args.getBoolean(5);
     String responseType = args.getString(6);
 
-    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
-        timeout, followRedirect, responseType, this.tlsConfiguration, callbackContext);
+    Integer reqId = args.getInt(7);
+    CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
-    cordova.getThreadPool().execute(request);
+    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
+        timeout, followRedirect, responseType, this.tlsConfiguration, observableCallbackContext);
+
+    Future<?> task = cordova.getThreadPool().submit(request);
+    this.addReq(reqId, task, observableCallbackContext);
 
     return true;
   }
@@ -123,10 +142,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     boolean followRedirect = args.getBoolean(5);
     String responseType = args.getString(6);
 
-    CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePaths, uploadNames, timeout, followRedirect,
-        responseType, this.tlsConfiguration, this.cordova.getActivity().getApplicationContext(), callbackContext);
+    Integer reqId = args.getInt(7);
+    CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
-    cordova.getThreadPool().execute(upload);
+    CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePaths, uploadNames, timeout, followRedirect,
+        responseType, this.tlsConfiguration, this.cordova.getActivity().getApplicationContext(), observableCallbackContext);
+
+    Future<?> task = cordova.getThreadPool().submit(upload);
+    this.addReq(reqId, task, observableCallbackContext);
 
     return true;
   }
@@ -138,10 +161,14 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(3) * 1000;
     boolean followRedirect = args.getBoolean(4);
 
-    CordovaHttpDownload download = new CordovaHttpDownload(url, headers, filePath, timeout, followRedirect,
-        this.tlsConfiguration, callbackContext);
+    Integer reqId = args.getInt(5);
+    CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
-    cordova.getThreadPool().execute(download);
+    CordovaHttpDownload download = new CordovaHttpDownload(url, headers, filePath, timeout, followRedirect,
+        this.tlsConfiguration, observableCallbackContext);
+
+    Future<?> task = cordova.getThreadPool().submit(download);
+    this.addReq(reqId, task, observableCallbackContext);
 
     return true;
   }
@@ -165,5 +192,50 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     cordova.getThreadPool().execute(runnable);
 
     return true;
+  }
+
+  private boolean abort(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+
+    int reqId = args.getInt(0);
+    boolean result = false;
+    // NOTE no synchronized (reqMapLock), since even if the req was already removed from reqMap,
+    //      the worst that would happen calling task.cancel(true) is a result of false
+    //      (i.e. same result as locking & not finding the req in reqMap)
+    Future<?> task = this.reqMap.get(reqId);
+    if (task != null && !task.isDone()) {
+      result = task.cancel(true);
+    }
+    callbackContext.success(new JSONObject().put("aborted", result));
+
+    return true;
+  }
+
+  private void addReq(final Integer reqId, final Future<?> task, final CordovaObservableCallbackContext observableCallbackContext) {
+    synchronized (reqMapLock) {
+      // NOTE there is a small chance that the task may already have tried to remove itself before
+      //      done-status was set (within the request run-thread)
+      //      to prevent that, the synchronized()-lock would need to be set around starting the
+      //      request and adding the entry to reqMap (which seems overkill given that is seems very unlikely)
+      if(!task.isDone()){
+        observableCallbackContext.setObserver(this);
+        this.reqMap.put(reqId, task);
+      }
+    }
+  }
+
+  private void removeReq(final Integer reqId) {
+    synchronized (reqMapLock) {
+      this.reqMap.remove(reqId);
+    }
+  }
+
+  @Override
+  public void update(Observable o, Object arg) {
+    synchronized (reqMapLock) {
+      CordovaObservableCallbackContext c = (CordovaObservableCallbackContext) arg;
+      if (c.getCallbackContext().isFinished()) {
+        removeReq(c.getRequestId());
+      }
+    }
   }
 }
