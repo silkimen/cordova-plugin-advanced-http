@@ -676,6 +676,20 @@ describe('Common helpers', function () {
       })
     });
   });
+
+  describe('nextRequestId()', function () {
+    const helpers = require('../www/helpers')(null, null, null, null, null, null);
+
+    it('returns number requestIds', () => {
+      helpers.nextRequestId().should.be.a('number');
+    });
+
+    it('returns unique requestIds', () => {
+      const ids = [helpers.nextRequestId(), helpers.nextRequestId(), helpers.nextRequestId()];
+      const set = new Set(ids);
+      ids.should.to.deep.equal(Array.from(set));
+    });
+  });
 });
 
 describe('Dependency Validator', function () {
