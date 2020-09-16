@@ -5,6 +5,13 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'options', 'upload', 'download'];
   var validResponseTypes = ['text', 'json', 'arraybuffer', 'blob'];
 
+  var nextRequestId = (function(){
+    var currReqId = 0;
+    return function nextRequestId() {
+        return ++currReqId;
+    }
+  })();
+
   var interface = {
     b64EncodeUnicode: b64EncodeUnicode,
     checkClientAuthMode: checkClientAuthMode,
@@ -24,6 +31,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     injectCookieHandler: injectCookieHandler,
     injectFileEntryHandler: injectFileEntryHandler,
     injectRawResponseHandler: injectRawResponseHandler,
+    nextRequestId: nextRequestId,
   };
 
   // expose all functions for testing purposes

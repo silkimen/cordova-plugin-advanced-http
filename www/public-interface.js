@@ -26,6 +26,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     options: options,
     uploadFile: uploadFile,
     downloadFile: downloadFile,
+    abort: abort,
     ErrorCode: errorCodes,
     ponyfills: ponyfills
   };
@@ -143,23 +144,31 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     var onFail = helpers.injectCookieHandler(url, failure);
     var onSuccess = helpers.injectCookieHandler(url, helpers.injectRawResponseHandler(options.responseType, success, failure));
 
+    var reqId = helpers.nextRequestId();
+
     switch (options.method) {
       case 'post':
       case 'put':
       case 'patch':
-        return helpers.processData(options.data, options.serializer, function (data) {
-          exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout, options.followRedirect, options.responseType]);
+        helpers.processData(options.data, options.serializer, function (data) {
+          exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.timeout, options.followRedirect, options.responseType, reqId]);
         });
+        break;
       case 'upload':
         var fileOptions = helpers.checkUploadFileOptions(options.filePath, options.name);
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.timeout, options.followRedirect, options.responseType]);
+        exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.timeout, options.followRedirect, options.responseType, reqId]);
+        break;
       case 'download':
         var filePath = helpers.checkDownloadFilePath(options.filePath);
         var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));
-        return exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, headers, filePath, options.timeout, options.followRedirect]);
+        exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, headers, filePath, options.timeout, options.followRedirect, reqId]);
+        break;
       default:
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, headers, options.timeout, options.followRedirect, options.responseType]);
+        exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, headers, options.timeout, options.followRedirect, options.responseType, reqId]);
+        break;
     }
+
+    return reqId;
   }
 
   function post(url, data, headers, success, failure) {
@@ -196,6 +205,10 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
 
   function downloadFile(url, params, headers, filePath, success, failure) {
     return publicInterface.sendRequest(url, { method: 'download', params: params, headers: headers, filePath: filePath }, success, failure);
+  }
+
+  function abort(requestId , success, failure) {
+    return exec(success, failure, 'CordovaHttpPlugin', 'abort', [requestId]);
   }
 
   return publicInterface;
