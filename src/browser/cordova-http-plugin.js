@@ -239,7 +239,7 @@ function sendRequest(method, withData, opts, success, failure) {
   xhr.onabort = function () {
     return onFail({
       status: -8,
-      error: 'Request aborted',
+      error: 'Request was aborted',
       url: url,
       headers: {}
     });
