@@ -411,8 +411,6 @@ If the request already has finished, the request will finish normally and the ab
 
 If the request is still in progress, the request's `failure` callback will be invoked with response `{status: -8}`, and the abort call result `{aborted: true}`.
 
-:warning: Not supported on iOS.
-
 ```js
 // start a request and get its requestId
 var requestId = cordova.plugin.http.downloadFile("https://google.com/", {
