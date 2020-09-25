@@ -9,6 +9,8 @@
 
 @interface CordovaHttpPlugin()
 
+- (void)addRequest:(NSNumber*)reqId forTask:(NSURLSessionDataTask*)task;
+- (void)removeRequest:(NSNumber*)reqId;
 - (void)setRequestHeaders:(NSDictionary*)headers forManager:(AFHTTPSessionManager*)manager;
 - (void)handleSuccess:(NSMutableDictionary*)dictionary withResponse:(NSHTTPURLResponse*)response andData:(id)data;
 - (void)handleError:(NSMutableDictionary*)dictionary withResponse:(NSHTTPURLResponse*)response error:(NSError*)error;
@@ -22,10 +24,20 @@
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
     NSURLCredential *x509Credential;
+    NSMutableDictionary *reqDict;
 }
 
 - (void)pluginInitialize {
     securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    reqDict = [NSMutableDictionary dictionary];
+}
+
+- (void)addRequest:(NSNumber*)reqId forTask:(NSURLSessionDataTask*)task {
+    [reqDict setObject:task forKey:reqId];
+}
+
+- (void)removeRequest:(NSNumber*)reqId {
+    [reqDict removeObjectForKey:reqId];
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
@@ -111,14 +123,21 @@
 }
 
 - (void)handleError:(NSMutableDictionary*)dictionary withResponse:(NSHTTPURLResponse*)response error:(NSError*)error {
+    bool aborted = error.code == NSURLErrorCancelled;
+    if(aborted){
+        [dictionary setObject:[NSNumber numberWithInt:-8] forKey:@"status"];
+        [dictionary setObject:@"Request was aborted" forKey:@"error"];
+    }
     if (response != nil) {
         [dictionary setValue:response.URL.absoluteString forKey:@"url"];
-        [dictionary setObject:[NSNumber numberWithInt:(int)response.statusCode] forKey:@"status"];
         [dictionary setObject:[self copyHeaderFields:response.allHeaderFields] forKey:@"headers"];
-        if (error.userInfo[AFNetworkingOperationFailingURLResponseBodyErrorKey]) {
-            [dictionary setObject:error.userInfo[AFNetworkingOperationFailingURLResponseBodyErrorKey] forKey:@"error"];
+        if(!aborted){
+            [dictionary setObject:[NSNumber numberWithInt:(int)response.statusCode] forKey:@"status"];
+            if (error.userInfo[AFNetworkingOperationFailingURLResponseBodyErrorKey]) {
+                [dictionary setObject:error.userInfo[AFNetworkingOperationFailingURLResponseBodyErrorKey] forKey:@"error"];
+            }
         }
-    } else {
+    } else if(!aborted) {
         [dictionary setObject:[self getStatusCode:error] forKey:@"status"];
         [dictionary setObject:[error localizedDescription] forKey:@"error"];
     }
@@ -181,6 +200,7 @@
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:2] doubleValue];
     bool followRedirect = [[command.arguments objectAtIndex:3] boolValue];
     NSString *responseType = [command.arguments objectAtIndex:4];
+    NSNumber *reqId = [command.arguments objectAtIndex:5];
 
     [self setRequestSerializer: @"default" forManager: manager];
     [self setupAuthChallengeBlock: manager];
@@ -194,6 +214,8 @@
 
     @try {
         void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
+            [weakSelf removeRequest:reqId];
+
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
 
             // no 'body' for HEAD request, omitting 'data'
@@ -209,6 +231,8 @@
         };
 
         void (^onFailure)(NSURLSessionTask *, NSError *) = ^(NSURLSessionTask *task, NSError *error) {
+            [weakSelf removeRequest:reqId];
+
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
@@ -217,7 +241,8 @@
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
 
-        [manager downloadTaskWithHTTPMethod:method URLString:url parameters:nil progress:nil success:onSuccess failure:onFailure];
+        NSURLSessionDataTask *task = [manager downloadTaskWithHTTPMethod:method URLString:url parameters:nil progress:nil success:onSuccess failure:onFailure];
+        [self addRequest:reqId forTask:task];
     }
     @catch (NSException *exception) {
         [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
@@ -235,6 +260,7 @@
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
     bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
     NSString *responseType = [command.arguments objectAtIndex:6];
+    NSNumber *reqId = [command.arguments objectAtIndex:7];
 
     [self setRequestSerializer: serializerName forManager: manager];
     [self setupAuthChallengeBlock: manager];
@@ -269,6 +295,8 @@
             }
 
             if (error) {
+                [weakSelf removeRequest:reqId];
+
                 NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
                 [dictionary setObject:[NSNumber numberWithInt:400] forKey:@"status"];
                 [dictionary setObject:@"Could not add part to multipart request body." forKey:@"error"];
@@ -280,6 +308,8 @@
         };
 
         void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
+            [weakSelf removeRequest:reqId];
+
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
@@ -289,6 +319,8 @@
         };
 
         void (^onFailure)(NSURLSessionTask *, NSError *) = ^(NSURLSessionTask *task, NSError *error) {
+            [weakSelf removeRequest:reqId];
+
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
@@ -297,11 +329,13 @@
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
 
+        NSURLSessionDataTask *task;
         if ([serializerName isEqualToString:@"multipart"]) {
-            [manager uploadTaskWithHTTPMethod:method URLString:url parameters:nil constructingBodyWithBlock:constructBody progress:nil success:onSuccess failure:onFailure];
+            task = [manager uploadTaskWithHTTPMethod:method URLString:url parameters:nil constructingBodyWithBlock:constructBody progress:nil success:onSuccess failure:onFailure];
         } else {
-            [manager uploadTaskWithHTTPMethod:method URLString:url parameters:data progress:nil success:onSuccess failure:onFailure];
+            task = [manager uploadTaskWithHTTPMethod:method URLString:url parameters:data progress:nil success:onSuccess failure:onFailure];
         }
+        [self addRequest:reqId forTask:task];
     }
     @catch (NSException *exception) {
         [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
@@ -413,6 +447,7 @@
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
     bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
     NSString *responseType = [command.arguments objectAtIndex:6];
+    NSNumber *reqId = [command.arguments objectAtIndex:7];
 
     [self setRequestHeaders: headers forManager: manager];
     [self setupAuthChallengeBlock: manager];
@@ -424,7 +459,7 @@
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
-        [manager POST:url parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
+        NSURLSessionDataTask *task = [manager POST:url parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
             NSError *error;
             for (int i = 0; i < [filePaths count]; i++) {
                 NSString *filePath = (NSString *) [filePaths objectAtIndex:i];
@@ -433,6 +468,8 @@
                 [formData appendPartWithFileURL:fileURL name:uploadName error:&error];
             }
             if (error) {
+                [weakSelf removeRequest:reqId];
+
                 NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
                 [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
                 [dictionary setObject:@"Could not add file to post body." forKey:@"error"];
@@ -442,6 +479,8 @@
                 return;
             }
         } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
+            [weakSelf removeRequest:reqId];
+
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
@@ -449,6 +488,8 @@
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
+            [weakSelf removeRequest:reqId];
+
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
@@ -456,6 +497,7 @@
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
+        [self addRequest:reqId forTask:task];
     }
     @catch (NSException *exception) {
         [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
@@ -472,6 +514,7 @@
     NSString *filePath = [command.arguments objectAtIndex: 2];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
     bool followRedirect = [[command.arguments objectAtIndex:4] boolValue];
+    NSNumber *reqId = [command.arguments objectAtIndex:5];
 
     [self setRequestHeaders: headers forManager: manager];
     [self setupAuthChallengeBlock: manager];
@@ -486,7 +529,8 @@
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
-        [manager GET:url parameters:nil progress: nil success:^(NSURLSessionTask *task, id responseObject) {
+        NSURLSessionDataTask *task = [manager GET:url parameters:nil progress: nil success:^(NSURLSessionTask *task, id responseObject) {
+            [weakSelf removeRequest:reqId];
             /*
              *
              * Licensed to the Apache Software Foundation (ASF) under one
@@ -547,6 +591,7 @@
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
+            [weakSelf removeRequest:reqId];
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
             [dictionary setObject:@"There was an error downloading the file" forKey:@"error"];
@@ -555,6 +600,7 @@
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
+        [self addRequest:reqId forTask:task];
     }
     @catch (NSException *exception) {
         [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
@@ -563,11 +609,30 @@
 }
 
 - (void)abort:(CDVInvokedUrlCommand*)command {
-    CDVPluginResult* pluginResult;
 
-    // TODO
+    NSNumber *reqId = [command.arguments objectAtIndex:0];
 
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"abort() is not supported on iOS"];
+    CDVPluginResult *pluginResult;
+    bool removed = false;
+    NSURLSessionDataTask *task = [reqDict objectForKey:reqId];
+    if(task){
+        @try{
+            [task cancel];
+            removed = true;
+        } @catch (NSException *exception) {
+            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+            [dictionary setValue:exception.userInfo forKey:@"error"];
+            [dictionary setObject:[NSNumber numberWithInt:-1] forKey:@"status"];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+        }
+    }
+
+    if(!pluginResult){
+        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+        [dictionary setObject:[NSNumber numberWithBool:removed] forKey:@"aborted"];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+    }
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
