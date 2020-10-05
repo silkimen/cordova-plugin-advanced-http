@@ -122,8 +122,9 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     int timeout = args.getInt(4) * 1000;
     boolean followRedirect = args.getBoolean(5);
     String responseType = args.getString(6);
+    String method = args.getString(7);
 
-    CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePaths, uploadNames, timeout, followRedirect,
+    CordovaHttpUpload upload = new CordovaHttpUpload(method, url, headers, filePaths, uploadNames, timeout, followRedirect,
         responseType, this.tlsConfiguration, this.cordova.getActivity().getApplicationContext(), callbackContext);
 
     cordova.getThreadPool().execute(upload);

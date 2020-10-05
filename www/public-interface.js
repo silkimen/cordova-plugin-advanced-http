@@ -152,7 +152,8 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
         });
       case 'upload':
         var fileOptions = helpers.checkUploadFileOptions(options.filePath, options.name);
-        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.timeout, options.followRedirect, options.responseType]);
+        var method = options.upload_method || 'post'
+        return exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.timeout, options.followRedirect, options.responseType, method]);
       case 'download':
         var filePath = helpers.checkDownloadFilePath(options.filePath);
         var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));
@@ -192,6 +193,10 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
 
   function uploadFile(url, params, headers, filePath, name, success, failure) {
     return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name }, success, failure);
+  }
+
+  function uploadFileMethod(method, url, params, headers, filePath, name, success, failure) {
+    return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name, upload_method: method }, success, failure);
   }
 
   function downloadFile(url, params, headers, filePath, success, failure) {

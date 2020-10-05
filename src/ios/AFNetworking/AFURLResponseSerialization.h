@@ -25,6 +25,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
+ Recursively removes `NSNull` values from a JSON object.
+*/
+FOUNDATION_EXPORT id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingOptions readingOptions);
+
+/**
  The `AFURLResponseSerialization` protocol is adopted by an object that decodes data into a more useful object representation, according to details in the server response. Response serializers may additionally perform validation on the incoming response and data.
 
  For example, a JSON response serializer may check for an acceptable status code (`2XX` range) and content type (`application/json`), decoding a valid JSON response into an object.
@@ -56,11 +61,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface AFHTTPResponseSerializer : NSObject <AFURLResponseSerialization>
 
 - (instancetype)init;
-
-/**
- The string encoding used to serialize data received from the server, when no string encoding is specified by the response. `NSUTF8StringEncoding` by default.
- */
-@property (nonatomic, assign) NSStringEncoding stringEncoding;
 
 /**
  Creates and returns a serializer with default configuration.
@@ -111,6 +111,8 @@ NS_ASSUME_NONNULL_BEGIN
  - `application/json`
  - `text/json`
  - `text/javascript`
+
+ In RFC 7159 - Section 8.1, it states that JSON text is required to be encoded in UTF-8, UTF-16, or UTF-32, and the default encoding is UTF-8. NSJSONSerialization provides support for all the encodings listed in the specification, and recommends UTF-8 for efficiency. Using an unsupported encoding will result in serialization error. See the `NSJSONSerialization` documentation for more details.
  */
 @interface AFJSONResponseSerializer : AFHTTPResponseSerializer
 
@@ -166,7 +168,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 
 /**
- Input and output options specifically intended for `NSXMLDocument` objects. For possible values, see the `NSJSONSerialization` documentation section "NSJSONReadingOptions". `0` by default.
+ Input and output options specifically intended for `NSXMLDocument` objects. For possible values, see the `NSXMLDocument` documentation section "Input and Output Options". `0` by default.
  */
 @property (nonatomic, assign) NSUInteger options;
 
@@ -307,11 +309,6 @@ FOUNDATION_EXPORT NSString * const AFURLResponseSerializationErrorDomain;
 FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLResponseErrorKey;
 
 FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLResponseDataErrorKey;
-
-/**
-`AFNetworkingOperationFailingURLResponseBodyErrorKey`
-The corresponding value is an `NSString` containing the decoded error message.
- */
 
 FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLResponseBodyErrorKey;
 

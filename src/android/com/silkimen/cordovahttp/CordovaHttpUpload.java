@@ -26,11 +26,11 @@ class CordovaHttpUpload extends CordovaHttpBase {
   private JSONArray uploadNames;
   private Context applicationContext;
 
-  public CordovaHttpUpload(String url, JSONObject headers, JSONArray filePaths, JSONArray uploadNames, int timeout,
+  public CordovaHttpUpload(String method, String url, JSONObject headers, JSONArray filePaths, JSONArray uploadNames, int timeout,
       boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
       Context applicationContext, CallbackContext callbackContext) {
 
-    super("POST", url, headers, timeout, followRedirects, responseType, tlsConfiguration, callbackContext);
+    super(method, url, headers, timeout, followRedirects, responseType, tlsConfiguration, callbackContext);
     this.filePaths = filePaths;
     this.uploadNames = uploadNames;
     this.applicationContext = applicationContext;

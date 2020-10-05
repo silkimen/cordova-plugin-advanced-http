@@ -52,7 +52,7 @@
             if (![self->securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
                 return NSURLSessionAuthChallengeRejectProtectionSpace;
             }
-            
+
             if (credential) {
                 return NSURLSessionAuthChallengeUseCredential;
             }
@@ -62,7 +62,7 @@
             *credential = self->x509Credential;
             return NSURLSessionAuthChallengeUseCredential;
         }
-        
+
         return NSURLSessionAuthChallengePerformDefaultHandling;
     }];
 }
@@ -195,29 +195,28 @@
     @try {
         void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            
+
             // no 'body' for HEAD request, omitting 'data'
             if ([method isEqualToString:@"HEAD"]) {
                 [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:nil];
             } else {
                 [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
             }
-            
+
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
-        
+
         void (^onFailure)(NSURLSessionTask *, NSError *) = ^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
-            
+
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
-        
-        [manager downloadTaskWithHTTPMethod:method URLString:url parameters:nil progress:nil success:onSuccess failure:onFailure];
+        [manager dataTaskWithHTTPMethod:method URLString:url parameters:nil headers:headers uploadProgress:nil downloadProgress:nil success:onSuccess failure:onFailure];
     }
     @catch (NSException *exception) {
         [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
@@ -245,29 +244,29 @@
 
     CordovaHttpPlugin* __weak weakSelf = self;
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
-    
+
     @try {
         void (^constructBody)(id<AFMultipartFormData>) = ^(id<AFMultipartFormData> formData) {
             NSArray *buffers = [data mutableArrayValueForKey:@"buffers"];
             NSArray *fileNames = [data mutableArrayValueForKey:@"fileNames"];
             NSArray *names = [data mutableArrayValueForKey:@"names"];
             NSArray *types = [data mutableArrayValueForKey:@"types"];
-            
+
             NSError *error;
-            
+
             for (int i = 0; i < [buffers count]; ++i) {
                 NSData *decodedBuffer = [[NSData alloc] initWithBase64EncodedString:[buffers objectAtIndex:i] options:0];
                 NSString *fileName = [fileNames objectAtIndex:i];
                 NSString *partName = [names objectAtIndex:i];
                 NSString *partType = [types objectAtIndex:i];
-                
+
                 if (![fileName isEqual:[NSNull null]]) {
                     [formData appendPartWithFileData:decodedBuffer name:partName fileName:fileName mimeType:partType];
                 } else {
                     [formData appendPartWithFormData:decodedBuffer name:[names objectAtIndex:i]];
                 }
             }
-            
+
             if (error) {
                 NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
                 [dictionary setObject:[NSNumber numberWithInt:400] forKey:@"status"];
@@ -278,29 +277,29 @@
                 return;
             }
         };
-        
+
         void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
-            
+
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
-        
+
         void (^onFailure)(NSURLSessionTask *, NSError *) = ^(NSURLSessionTask *task, NSError *error) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
-            
+
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         };
-        
+
         if ([serializerName isEqualToString:@"multipart"]) {
-            [manager uploadTaskWithHTTPMethod:method URLString:url parameters:nil constructingBodyWithBlock:constructBody progress:nil success:onSuccess failure:onFailure];
+            [manager POST:url parameters:nil headers:headers constructingBodyWithBlock:constructBody progress:nil success:onSuccess failure:onFailure];
         } else {
-            [manager uploadTaskWithHTTPMethod:method URLString:url parameters:data progress:nil success:onSuccess failure:onFailure];
+            [manager dataTaskWithHTTPMethod:method URLString:url parameters:data headers:headers uploadProgress:nil downloadProgress:nil success:onSuccess failure:onFailure];
         }
     }
     @catch (NSException *exception) {
@@ -333,27 +332,26 @@
 - (void)setClientAuthMode:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult;
     NSString *mode = [command.arguments objectAtIndex:0];
-    
+
     if ([mode isEqualToString:@"none"]) {
       x509Credential = nil;
       pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     }
-  
+
     if ([mode isEqualToString:@"systemstore"]) {
       NSString *alias = [command.arguments objectAtIndex:1];
-      
+
       // TODO
-      
       pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"mode 'systemstore' is not supported on iOS"];
     }
-  
+
     if ([mode isEqualToString:@"buffer"]) {
         CFDataRef container = (__bridge CFDataRef) [command.arguments objectAtIndex:2];
         CFStringRef password = (__bridge CFStringRef) [command.arguments objectAtIndex:3];
-      
+
         const void *keys[] = { kSecImportExportPassphrase };
         const void *values[] = { password };
-      
+
         CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
         CFArrayRef items;
         OSStatus securityError = SecPKCS12Import(container, options, &items);
@@ -367,7 +365,7 @@
 
             self->x509Credential = [NSURLCredential credentialWithIdentity:identity certificates: nil persistence:NSURLCredentialPersistenceForSession];
             CFRelease(items);
-          
+
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         }
     }
@@ -413,6 +411,7 @@
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
     bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
     NSString *responseType = [command.arguments objectAtIndex:6];
+    NSString *method = [command.arguments objectAtIndex:7];
 
     [self setRequestHeaders: headers forManager: manager];
     [self setupAuthChallengeBlock: manager];
@@ -424,7 +423,7 @@
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
-        [manager POST:url parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
+        NSMutableURLRequest *request = [[AFHTTPRequestSerializer serializer] multipartFormRequestWithMethod:method URLString:url parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
             NSError *error;
             for (int i = 0; i < [filePaths count]; i++) {
                 NSString *filePath = (NSString *) [filePaths objectAtIndex:i];
@@ -441,21 +440,39 @@
                 [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
                 return;
             }
-        } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+        } error:nil];
+        for (NSString* obj in headers) {
+            [request setValue:headers[obj] forHTTPHeaderField:obj];
+            [[request allHTTPHeaderFields] setValue:headers[obj] forKey:obj];
+        }
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
+        NSURLSessionDataTask *task = [manager dataTaskWithRequest:request uploadProgress:nil downloadProgress:nil completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+            if (error) {
+                NSLog(@"%@", error);
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+                return;
+            }
+
+            // if you want to know what the statusCode was
+            if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+                NSInteger statusCode = [(NSHTTPURLResponse *)response statusCode];
+                NSLog(@"statusCode: %ld", statusCode);
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)response andData:responseObject];
+
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+            }
+
+            NSLog(@"%@", responseObject);
         }];
+        [task resume];
     }
     @catch (NSException *exception) {
         [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
@@ -486,7 +503,7 @@
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
     @try {
-        [manager GET:url parameters:nil progress: nil success:^(NSURLSessionTask *task, id responseObject) {
+        [manager GET:url parameters:nil headers:headers progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
             /*
              *
              * Licensed to the Apache Software Foundation (ASF) under one
