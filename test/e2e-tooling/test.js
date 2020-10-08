@@ -49,11 +49,15 @@ describe('Advanced HTTP e2e test suite', function () {
   });
 
   const defineTestForMocha = (test, index) => {
-    it(index + ': ' + test.description, async () => {
+    it(index + ': ' + test.description, async function() {
       await clickNext(driver);
       await validateTestIndex(driver, index);
       await validateTestTitle(driver, test.description);
       await waitToBeFinished(driver, test.timeout || 10000);
+      var skipped = await checkSkipped(driver);
+      if(skipped){
+        this.skip();
+      }
       await validateResult(driver, test.validationFunc, targetInfo);
     });
   };
@@ -115,6 +119,11 @@ async function waitToBeFinished(driver, timeout) {
 async function validateResult(driver, validationFunc, targetInfo) {
   const result = await driver.safeExecute('app.lastResult');
   validationFunc(driver, result, targetInfo);
+}
+
+async function checkSkipped(driver) {
+  const result = await driver.safeExecute('app.lastResult');
+  return result.type === 'skipped';
 }
 
 function sleep(ms) {
