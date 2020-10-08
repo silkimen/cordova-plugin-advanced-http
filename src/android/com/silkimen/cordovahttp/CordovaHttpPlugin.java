@@ -104,8 +104,7 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, headers, timeout, followRedirect,
         responseType, this.tlsConfiguration, observableCallbackContext);
 
-    Future<?> task = cordova.getThreadPool().submit(request);
-    this.addReq(reqId, task, observableCallbackContext);
+    startRequest(reqId, observableCallbackContext, request);
 
     return true;
   }
@@ -127,8 +126,7 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
         timeout, followRedirect, responseType, this.tlsConfiguration, observableCallbackContext);
 
-    Future<?> task = cordova.getThreadPool().submit(request);
-    this.addReq(reqId, task, observableCallbackContext);
+    startRequest(reqId, observableCallbackContext, request);
 
     return true;
   }
@@ -148,8 +146,7 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePaths, uploadNames, timeout, followRedirect,
         responseType, this.tlsConfiguration, this.cordova.getActivity().getApplicationContext(), observableCallbackContext);
 
-    Future<?> task = cordova.getThreadPool().submit(upload);
-    this.addReq(reqId, task, observableCallbackContext);
+    startRequest(reqId, observableCallbackContext, upload);
 
     return true;
   }
@@ -167,10 +164,17 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     CordovaHttpDownload download = new CordovaHttpDownload(url, headers, filePath, timeout, followRedirect,
         this.tlsConfiguration, observableCallbackContext);
 
-    Future<?> task = cordova.getThreadPool().submit(download);
-    this.addReq(reqId, task, observableCallbackContext);
+    startRequest(reqId, observableCallbackContext, download);
 
     return true;
+  }
+
+  private void startRequest(Integer reqId, CordovaObservableCallbackContext observableCallbackContext, CordovaHttpBase request) {
+    synchronized (reqMapLock) {
+      observableCallbackContext.setObserver(this);
+      Future<?> task = cordova.getThreadPool().submit(request);
+      this.addReq(reqId, task, observableCallbackContext);
+    }
   }
 
   private boolean setServerTrustMode(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
@@ -212,12 +216,7 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
 
   private void addReq(final Integer reqId, final Future<?> task, final CordovaObservableCallbackContext observableCallbackContext) {
     synchronized (reqMapLock) {
-      // NOTE there is a small chance that the task may already have tried to remove itself before
-      //      done-status was set (within the request run-thread)
-      //      to prevent that, the synchronized()-lock would need to be set around starting the
-      //      request and adding the entry to reqMap (which seems overkill given that is seems very unlikely)
       if(!task.isDone()){
-        observableCallbackContext.setObserver(this);
         this.reqMap.put(reqId, task);
       }
     }
