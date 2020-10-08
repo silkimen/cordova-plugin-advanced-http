@@ -20,7 +20,12 @@
     "platforms": [
       "android",
       "ios"
-    ]
+    ],
+    "plugins": {
+      "cordova-plugin-device": {}
+    }
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "cordova-plugin-device": "2.0.3"
+  }
 }

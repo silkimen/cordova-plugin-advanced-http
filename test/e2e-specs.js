@@ -84,6 +84,14 @@ const helpers = {
 
     result.type.should.be.equal(expected);
   },
+  isAbortSupported: function () {
+    if(window.cordova && window.cordova.platformId === 'android'){
+      var version = device.version;//NOTE will throw error if cordova is present without cordova-plugin-device
+      var major = parseInt(/^(\d+)(\.|$)/.exec(version)[1], 10);
+      return isFinite(major) && major >= 6;
+    }
+    return true;
+  },
   getAbortDelay: function () { return 10; },
 };
 
@@ -993,7 +1001,11 @@ const tests = [
     description: 'should be able to abort (POST)',
     expected: 'rejected: {"status":-8, "error": "Request ...}',
     before: helpers.setRawSerializer,
-    func: function (resolve, reject) {
+    func: function (resolve, reject, skip) {
+      if (!helpers.isAbortSupported()) {
+        skip();
+        return;
+      }
       helpers.getWithXhr(function (buffer) {
         var reqId = cordova.plugin.http.post('http://httpbin.org/anything', buffer, {}, resolve, reject);
 
@@ -1011,7 +1023,11 @@ const tests = [
   {
     description: 'should be able to abort (GET)',
     expected: 'rejected: {"status":-8, "error": "Request ...}',
-    func: function (resolve, reject) {
+    func: function (resolve, reject, skip) {
+      if (!helpers.isAbortSupported()) {
+        skip();
+        return;
+      }
       var url = 'https://httpbin.org/image/jpeg';
       var options = { method: 'get', responseType: 'blob' };
       var success = function (response) {
@@ -1035,7 +1051,11 @@ const tests = [
   {
     description: 'should be able to abort downloading a file',
     expected: 'rejected: {"status":-8, "error": "Request ...}',
-    func: function (resolve, reject) {
+    func: function (resolve, reject, skip) {
+      if (!helpers.isAbortSupported()) {
+        skip();
+        return;
+      }
       var sourceUrl = 'http://httpbin.org/xml';
       var targetPath = cordova.file.cacheDirectory + 'test.xml';
 
@@ -1064,7 +1084,11 @@ const tests = [
   {
     description: 'should be able to abort uploading a file',
     expected: 'rejected: {"status":-8, "error": "Request ...}',
-    func: function (resolve, reject) {
+    func: function (resolve, reject, skip) {
+      if (!helpers.isAbortSupported()) {
+        skip();
+        return;
+      }
       var fileName = 'test-file.txt';
       var fileContent = 'I am a dummy file. I am used for testing purposes!';
       var sourcePath = cordova.file.cacheDirectory + fileName;
