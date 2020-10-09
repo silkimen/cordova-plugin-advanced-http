@@ -54,11 +54,12 @@ describe('Advanced HTTP e2e test suite', function () {
       await validateTestIndex(driver, index);
       await validateTestTitle(driver, test.description);
       await waitToBeFinished(driver, test.timeout || 10000);
-      var skipped = await checkSkipped(driver);
+      const skipped = await checkSkipped(driver);
       if(skipped){
         this.skip();
+      } else {
+        await validateResult(driver, test.validationFunc, targetInfo);
       }
-      await validateResult(driver, test.validationFunc, targetInfo);
     });
   };
 
