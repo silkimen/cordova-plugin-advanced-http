@@ -85,8 +85,8 @@ const helpers = {
     result.type.should.be.equal(expected);
   },
   isAbortSupported: function () {
-    if(window.cordova && window.cordova.platformId === 'android'){
-      var version = device.version;//NOTE will throw error if cordova is present without cordova-plugin-device
+    if (window.cordova && window.cordova.platformId === 'android') {
+      var version = device.version; //NOTE will throw error if cordova is present without cordova-plugin-device
       var major = parseInt(/^(\d+)(\.|$)/.exec(version)[1], 10);
       return isFinite(major) && major >= 6;
     }
@@ -1009,7 +1009,7 @@ const tests = [
       helpers.getWithXhr(function (buffer) {
         var reqId = cordova.plugin.http.post('http://httpbin.org/anything', buffer, {}, resolve, reject);
 
-        setTimeout(function(){
+        setTimeout(function () {
           cordova.plugin.http.abort(reqId);
         }, helpers.getAbortDelay());
 
@@ -1039,7 +1039,7 @@ const tests = [
       };
 
       var reqId = cordova.plugin.http.sendRequest(url, options, success, reject);
-      setTimeout(function(){
+      setTimeout(function () {
         cordova.plugin.http.abort(reqId);
       }, helpers.getAbortDelay());
     },
@@ -1071,14 +1071,14 @@ const tests = [
         }, targetPath);
       }, reject);
 
-      setTimeout(function(){
+      setTimeout(function () {
         cordova.plugin.http.abort(reqId);
       }, helpers.getAbortDelay());
 
     },
     validationFunc: function (driver, result) {
-        helpers.checkResult(result, 'rejected');
-        result.data.status.should.be.equal(-8);
+      helpers.checkResult(result, 'rejected');
+      result.data.status.should.be.equal(-8);
     }
   },
   {
@@ -1098,15 +1098,15 @@ const tests = [
 
         var reqId = cordova.plugin.http.uploadFile(targetUrl, {}, {}, sourcePath, fileName, resolve, reject);
 
-        setTimeout(function(){
+        setTimeout(function () {
           cordova.plugin.http.abort(reqId);
         }, helpers.getAbortDelay());
 
       }, fileName, fileContent);
     },
     validationFunc: function (driver, result) {
-        helpers.checkResult(result, 'rejected');
-        result.data.status.should.be.equal(-8);
+      helpers.checkResult(result, 'rejected');
+      result.data.status.should.be.equal(-8);
     }
   },
 ];

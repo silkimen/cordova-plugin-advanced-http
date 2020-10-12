@@ -49,13 +49,15 @@ describe('Advanced HTTP e2e test suite', function () {
   });
 
   const defineTestForMocha = (test, index) => {
-    it(index + ': ' + test.description, async function() {
+    it(index + ': ' + test.description, async function () {
       await clickNext(driver);
       await validateTestIndex(driver, index);
       await validateTestTitle(driver, test.description);
       await waitToBeFinished(driver, test.timeout || 10000);
+
       const skipped = await checkSkipped(driver);
-      if(skipped){
+
+      if (skipped) {
         this.skip();
       } else {
         await validateResult(driver, test.validationFunc, targetInfo);

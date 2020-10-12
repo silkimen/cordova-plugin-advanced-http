@@ -407,9 +407,9 @@ cordova.plugin.http.downloadFile("https://google.com/", {
 ### abort<a name="abort"></a>
 Abort a HTTP request.  Takes the `requestId` which is returned by [sendRequest](#sendRequest) and its shorthand functions ([post](#post), [get](#get), [put](#put), [patch](#patch), [delete](#delete), [head](#head), [uploadFile](#uploadFile) and [downloadFile](#downloadFile)).
 
-If the request already has finished, the request will finish normally and the abort call result will be `{aborted: false}`.
+If the request already has finished, the request will finish normally and the abort call result will be `{ aborted: false }`.
 
-If the request is still in progress, the request's `failure` callback will be invoked with response `{status: -8}`, and the abort call result `{aborted: true}`.
+If the request is still in progress, the request's `failure` callback will be invoked with response `{ status: -8 }`, and the abort call result `{ aborted: true }`.
 
 :warning: Not supported for Android < 6 (API level < 23). For Android 5.1 and below, calling `abort(reqestId)` will have no effect, i.e. the requests will finish as if the request was not cancelled.
 
