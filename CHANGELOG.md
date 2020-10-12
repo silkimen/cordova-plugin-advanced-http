@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.0
+
+- Feature #272: add support for aborting requests (thanks russaa)
+
 ## 3.0.1
 
 - Fixed #359: memory leakage leads to app crashes on Android
