@@ -6,4 +6,5 @@ module.exports = {
   UNSUPPORTED_URL: -5,
   NOT_CONNECTED: -6,
   POST_PROCESSING_FAILED: -7,
+  ABORTED: -8,
 };

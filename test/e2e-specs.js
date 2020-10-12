@@ -83,7 +83,16 @@ const helpers = {
     }
 
     result.type.should.be.equal(expected);
-  }
+  },
+  isAbortSupported: function () {
+    if (window.cordova && window.cordova.platformId === 'android') {
+      var version = device.version; //NOTE will throw error if cordova is present without cordova-plugin-device
+      var major = parseInt(/^(\d+)(\.|$)/.exec(version)[1], 10);
+      return isFinite(major) && major >= 6;
+    }
+    return true;
+  },
+  getAbortDelay: function () { return 10; },
 };
 
 const messageFactory = {
@@ -986,6 +995,118 @@ const tests = [
       result.type.should.be.equal('resolved');
       result.data.status.should.be.equal(200);
       JSON.parse(result.data.data).cookies.should.be.eql({});
+    }
+  },
+  {
+    description: 'should be able to abort (POST)',
+    expected: 'rejected: {"status":-8, "error": "Request ...}',
+    before: helpers.setRawSerializer,
+    func: function (resolve, reject, skip) {
+      if (!helpers.isAbortSupported()) {
+        skip();
+        return;
+      }
+      helpers.getWithXhr(function (buffer) {
+        var reqId = cordova.plugin.http.post('http://httpbin.org/anything', buffer, {}, resolve, reject);
+
+        setTimeout(function () {
+          cordova.plugin.http.abort(reqId);
+        }, helpers.getAbortDelay());
+
+      }, './res/cordova_logo.png', 'arraybuffer');
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'rejected');
+      result.data.status.should.be.equal(-8);
+    }
+  },
+  {
+    description: 'should be able to abort (GET)',
+    expected: 'rejected: {"status":-8, "error": "Request ...}',
+    func: function (resolve, reject, skip) {
+      if (!helpers.isAbortSupported()) {
+        skip();
+        return;
+      }
+      var url = 'https://httpbin.org/image/jpeg';
+      var options = { method: 'get', responseType: 'blob' };
+      var success = function (response) {
+        resolve({
+          isBlob: response.data.constructor === Blob,
+          type: response.data.type,
+          byteLength: response.data.size
+        });
+      };
+
+      var reqId = cordova.plugin.http.sendRequest(url, options, success, reject);
+      setTimeout(function () {
+        cordova.plugin.http.abort(reqId);
+      }, helpers.getAbortDelay());
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'rejected');
+      result.data.status.should.be.equal(-8);
+    }
+  },
+  {
+    description: 'should be able to abort downloading a file',
+    expected: 'rejected: {"status":-8, "error": "Request ...}',
+    func: function (resolve, reject, skip) {
+      if (!helpers.isAbortSupported()) {
+        skip();
+        return;
+      }
+      var sourceUrl = 'http://httpbin.org/xml';
+      var targetPath = cordova.file.cacheDirectory + 'test.xml';
+
+      var reqId = cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function (entry) {
+        helpers.getWithXhr(function (content) {
+          resolve({
+            sourceUrl: sourceUrl,
+            targetPath: targetPath,
+            fullPath: entry.fullPath,
+            name: entry.name,
+            content: content
+          });
+        }, targetPath);
+      }, reject);
+
+      setTimeout(function () {
+        cordova.plugin.http.abort(reqId);
+      }, helpers.getAbortDelay());
+
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'rejected');
+      result.data.status.should.be.equal(-8);
+    }
+  },
+  {
+    description: 'should be able to abort uploading a file',
+    expected: 'rejected: {"status":-8, "error": "Request ...}',
+    func: function (resolve, reject, skip) {
+      if (!helpers.isAbortSupported()) {
+        skip();
+        return;
+      }
+      var fileName = 'test-file.txt';
+      var fileContent = 'I am a dummy file. I am used for testing purposes!';
+      var sourcePath = cordova.file.cacheDirectory + fileName;
+      var targetUrl = 'http://httpbin.org/post';
+
+      helpers.writeToFile(function () {
+
+        var reqId = cordova.plugin.http.uploadFile(targetUrl, {}, {}, sourcePath, fileName, resolve, reject);
+
+        setTimeout(function () {
+          cordova.plugin.http.abort(reqId);
+        }, helpers.getAbortDelay());
+
+      }, fileName, fileContent);
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'rejected');
+      result.data.status.should.be.equal(-8);
     }
   },
 ];

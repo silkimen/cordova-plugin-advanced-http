@@ -17,7 +17,6 @@ import java.net.URI;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -28,7 +27,7 @@ class CordovaHttpUpload extends CordovaHttpBase {
 
   public CordovaHttpUpload(String url, JSONObject headers, JSONArray filePaths, JSONArray uploadNames, int timeout,
       boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
-      Context applicationContext, CallbackContext callbackContext) {
+      Context applicationContext, CordovaObservableCallbackContext callbackContext) {
 
     super("POST", url, headers, timeout, followRedirects, responseType, tlsConfiguration, callbackContext);
     this.filePaths = filePaths;

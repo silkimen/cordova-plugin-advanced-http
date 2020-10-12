@@ -3,6 +3,8 @@ var pluginId = module.id.slice(0, module.id.lastIndexOf('.'));
 var cordovaProxy = require('cordova/exec/proxy');
 var jsUtil = require(pluginId + '.js-util');
 
+var reqMap = {};
+
 function serializeJsonData(data) {
   try {
     return JSON.stringify(data);
@@ -115,6 +117,13 @@ function createXhrFailureObject(xhr) {
   return obj;
 }
 
+function injectRequestIdHandler(reqId, cb) {
+  return function (response) {
+    delete reqMap[reqId];
+    cb(response);
+  }
+}
+
 function getHeaderValue(headers, headerName) {
   let result = null;
 
@@ -142,7 +151,7 @@ function setHeaders(xhr, headers) {
 }
 
 function sendRequest(method, withData, opts, success, failure) {
-  var data, serializer, headers, timeout, followRedirect, responseType;
+  var data, serializer, headers, timeout, followRedirect, responseType, reqId;
   var url = opts[0];
 
   if (withData) {
@@ -152,25 +161,31 @@ function sendRequest(method, withData, opts, success, failure) {
     timeout = opts[4];
     followRedirect = opts[5];
     responseType = opts[6];
+    reqId = opts[7];
   } else {
     headers = opts[1];
     timeout = opts[2];
     followRedirect = opts[3];
     responseType = opts[4];
-
+    reqId = opts[5];
   }
+
+  var onSuccess = injectRequestIdHandler(reqId, success);
+  var onFail = injectRequestIdHandler(reqId, failure);
 
   var processedData = null;
   var xhr = new XMLHttpRequest();
 
+  reqMap[reqId] = xhr;
+
   xhr.open(method, url);
 
   if (headers.Cookie && headers.Cookie.length > 0) {
-    return failure('advanced-http: custom cookies not supported on browser platform');
+    return onFail('advanced-http: custom cookies not supported on browser platform');
   }
 
   if (!followRedirect) {
-    return failure('advanced-http: disabling follow redirect not supported on browser platform');
+    return onFail('advanced-http: disabling follow redirect not supported on browser platform');
   }
 
   switch (serializer) {
@@ -179,7 +194,7 @@ function sendRequest(method, withData, opts, success, failure) {
       processedData = serializeJsonData(data);
 
       if (processedData === null) {
-        return failure('advanced-http: failed serializing data');
+        return onFail('advanced-http: failed serializing data');
       }
 
       break;
@@ -218,11 +233,20 @@ function sendRequest(method, withData, opts, success, failure) {
   setHeaders(xhr, headers);
 
   xhr.onerror = function () {
-    return failure(createXhrFailureObject(xhr));
+    return onFail(createXhrFailureObject(xhr));
+  };
+
+  xhr.onabort = function () {
+    return onFail({
+      status: -8,
+      error: 'Request was aborted',
+      url: url,
+      headers: {}
+    });
   };
 
   xhr.ontimeout = function () {
-    return failure({
+    return onFail({
       status: -4,
       error: 'Request timed out',
       url: url,
@@ -234,13 +258,26 @@ function sendRequest(method, withData, opts, success, failure) {
     if (xhr.readyState !== xhr.DONE) return;
 
     if (xhr.status < 200 || xhr.status > 299) {
-      return failure(createXhrFailureObject(xhr));
+      return onFail(createXhrFailureObject(xhr));
     }
 
-    return success(createXhrSuccessObject(xhr));
+    return onSuccess(createXhrSuccessObject(xhr));
   };
 
   xhr.send(processedData);
+}
+
+function abort(opts, success, failure) {
+  var reqId = opts[0];
+  var result = false;
+
+  var xhr = reqMap[reqId];
+  if(xhr && xhr.readyState !== xhr.DONE){
+    xhr.abort();
+    result = true;
+  }
+
+  success({aborted: result});
 }
 
 var browserInterface = {
@@ -261,6 +298,9 @@ var browserInterface = {
   },
   patch: function (success, failure, opts) {
     return sendRequest('patch', true, opts, success, failure);
+  },
+  abort: function (success, failure, opts) {
+    return abort(opts, success, failure);
   },
   uploadFile: function (success, failure, opts) {
     return failure('advanced-http: function "uploadFile" not supported on browser platform');

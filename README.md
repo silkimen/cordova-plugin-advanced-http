@@ -404,6 +404,46 @@ cordova.plugin.http.downloadFile("https://google.com/", {
 });
 ```
 
+### abort<a name="abort"></a>
+Abort a HTTP request.  Takes the `requestId` which is returned by [sendRequest](#sendRequest) and its shorthand functions ([post](#post), [get](#get), [put](#put), [patch](#patch), [delete](#delete), [head](#head), [uploadFile](#uploadFile) and [downloadFile](#downloadFile)).
+
+If the request already has finished, the request will finish normally and the abort call result will be `{ aborted: false }`.
+
+If the request is still in progress, the request's `failure` callback will be invoked with response `{ status: -8 }`, and the abort call result `{ aborted: true }`.
+
+:warning: Not supported for Android < 6 (API level < 23). For Android 5.1 and below, calling `abort(reqestId)` will have no effect, i.e. the requests will finish as if the request was not cancelled.
+
+```js
+// start a request and get its requestId
+var requestId = cordova.plugin.http.downloadFile("https://google.com/", {
+  id: '12',
+  message: 'test'
+}, { Authorization: 'OAuth2: token' }, 'file:///somepicture.jpg', function(entry) {
+  // prints the filename
+  console.log(entry.name);
+
+  // prints the filePath
+  console.log(entry.fullPath);
+}, function(response) {
+  // if request was actually aborted, failure callback with status -8 will be invoked
+  if(response.status === -8){
+    console.log('download aborted');
+  } else {
+    console.error(response.error);
+  }
+});
+
+//...
+
+// abort request
+cordova.plugin.http.abort(requestId, function(result) {
+  // prints if request was aborted: true | false
+  console.log(result.aborted);
+}, function(response) {
+  console.error(response.error);
+});
+```
+
 ## Browser support<a name="browserSupport"></a>
 
 This plugin supports a very restricted set of functions on the browser platform.
