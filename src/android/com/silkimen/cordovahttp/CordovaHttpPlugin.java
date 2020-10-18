@@ -199,16 +199,17 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
   }
 
   private boolean abort(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-
     int reqId = args.getInt(0);
     boolean result = false;
     // NOTE no synchronized (reqMapLock), since even if the req was already removed from reqMap,
     //      the worst that would happen calling task.cancel(true) is a result of false
     //      (i.e. same result as locking & not finding the req in reqMap)
     Future<?> task = this.reqMap.get(reqId);
+
     if (task != null && !task.isDone()) {
       result = task.cancel(true);
     }
+
     callbackContext.success(new JSONObject().put("aborted", result));
 
     return true;
@@ -216,7 +217,7 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
 
   private void addReq(final Integer reqId, final Future<?> task, final CordovaObservableCallbackContext observableCallbackContext) {
     synchronized (reqMapLock) {
-      if(!task.isDone()){
+      if (!task.isDone()){
         this.reqMap.put(reqId, task);
       }
     }
