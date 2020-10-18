@@ -61,7 +61,7 @@
     "chai": "4.2.0",
     "colors": "1.4.0",
     "cordova": "9.0.0",
-    "mocha": "8.0.1",
+    "mocha": "8.2.0",
     "umd-tough-cookie": "2.4.3",
     "wd": "1.12.1",
     "xml2js": "0.4.23"
