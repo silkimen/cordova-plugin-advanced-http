@@ -154,7 +154,7 @@ abstract class CordovaHttpBase implements Runnable {
     } else if ("urlencoded".equals(this.serializer)) {
       // intentionally left blank, because content type is set in HttpRequest.form()
     } else if ("multipart".equals(this.serializer)) {
-      request.contentType("multipart/form-data");
+      // intentionally left blank, because content type is set in HttpRequest.part()
     }
   }
 

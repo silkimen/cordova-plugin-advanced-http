@@ -1109,6 +1109,25 @@ const tests = [
       result.data.status.should.be.equal(-8);
     }
   },
+  {
+    description: 'should not send malformed request when FormData is empty #372',
+    expected: 'resolved: {"status":200, ...',
+    before: helpers.setMultipartSerializer,
+    func: function (resolve, reject) {
+      var ponyfills = cordova.plugin.http.ponyfills;
+      var formData = new ponyfills.FormData();
+
+      var url = 'http://httpbin.org/anything';
+      var options = { method: 'post', data: formData };
+      cordova.plugin.http.sendRequest(url, options, resolve, reject);
+    },
+    validationFunc: function (driver, result) {
+      helpers.checkResult(result, 'resolved');
+
+      var parsed = JSON.parse(result.data.data);
+      parsed.headers['Content-Type'].should.be.equal('application/x-www-form-urlencoded');
+    }
+  },
 ];
 
 if (typeof module !== 'undefined' && module.exports) {

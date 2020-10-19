@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1
+
+- Fixed #372: malformed empty multipart request on Android
+
 ## 3.1.0
 
 - Feature #272: add support for aborting requests (thanks russaa)
