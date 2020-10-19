@@ -18,7 +18,8 @@ matrix:
     osx_image: xcode10.1
 
     before_install:
-    - export LANG=en_US.UTF-8
+    - export LANG=en_US.UTF-8 &&
+      nvm use 12
 
     install:
     - npm install
@@ -46,7 +47,7 @@ matrix:
 
     before_install:
     - export LANG=en_US.UTF-8 &&
-      curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - &&
+      curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - &&
       sudo apt-get install -y nodejs
     - yes | sdkmanager --update
 
