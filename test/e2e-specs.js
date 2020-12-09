@@ -297,25 +297,25 @@ const tests = [
       JSON.parse(result.data.data).form.should.eql({ test: 'testString' });
     }
   },
-  // {
-  //   description: 'should resolve correct URL after redirect (GET) #33',
-  //   expected: 'resolved: {"status": 200, url: "http://httpbin.org/anything", ...',
-  //   func: function (resolve, reject) { cordova.plugin.http.get('http://httpbin.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
-  //   validationFunc: function (driver, result) {
-  //     result.type.should.be.equal('resolved');
-  //     result.data.url.should.be.equal('http://httpbin.org/anything');
-  //   }
-  // },
-  // {
-  //   description: 'should not follow 302 redirect when following redirects is disabled',
-  //   expected: 'rejected: {"status": 302, ...',
-  //   before: function (resolve, reject) { cordova.plugin.http.disableRedirect(true, resolve, reject) },
-  //   func: function (resolve, reject) { cordova.plugin.http.get('http://httpbin.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
-  //   validationFunc: function (driver, result) {
-  //     result.type.should.be.equal('rejected');
-  //     result.data.status.should.be.equal(302);
-  //   }
-  // },
+  {
+    description: 'should resolve correct URL after redirect (GET) #33',
+    expected: 'resolved: {"status": 200, url: "http://httpbin.org/anything", ...',
+    func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.url.should.be.equal('http://httpbin.org/anything');
+    }
+  },
+  {
+    description: 'should not follow 302 redirect when following redirects is disabled',
+    expected: 'rejected: {"status": 302, ...',
+    before: function (resolve, reject) { cordova.plugin.http.disableRedirect(true, resolve, reject) },
+    func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.status.should.be.equal(302);
+    }
+  },
   {
     description: 'should download a file from given URL to given path in local filesystem',
     expected: 'resolved: {"content": "<?xml version=\'1.0\' encoding=\'us-ascii\'?>\\n\\n<!--  A SAMPLE set of slides  -->" ...',
