@@ -55,7 +55,7 @@ class CordovaServerTrust implements Runnable {
 
     this.noOpVerifier = new HostnameVerifier() {
       public boolean verify(String hostname, SSLSession session) {
-        return true;
+        return false;
       }
     };
   }
