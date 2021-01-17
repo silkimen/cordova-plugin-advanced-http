@@ -309,7 +309,7 @@ const tests = [
   {
     description: 'should not follow 302 redirect when following redirects is disabled',
     expected: 'rejected: {"status": 302, ...',
-    before: function (resolve, reject) { cordova.plugin.http.disableRedirect(true, resolve, reject) },
+    before: function (resolve, reject) { cordova.plugin.http.setFollowRedirect(false); resolve(); },
     func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('rejected');
