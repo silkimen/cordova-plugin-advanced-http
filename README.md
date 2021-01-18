@@ -477,6 +477,7 @@ This plugin uses amazing cloud services to maintain quality. CI Builds and E2E t
 * [BrowserStack](https://www.browserstack.com/)
 * [Sauce Labs](https://saucelabs.com/)
 * [httpbin.org](https://httpbin.org/)
+* [go-httpbin](https://httpbingo.org/)
 
 ### Local Testing
 
