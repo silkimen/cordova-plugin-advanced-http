@@ -20,9 +20,11 @@ class CordovaHttpResponse {
   private String body;
   private byte[] rawData;
   private JSONObject fileEntry;
+  private boolean isRedirect;
   private boolean hasFailed;
   private boolean isFileOperation;
   private boolean isRawResponse;
+  private String redirectUrl;
   private String error;
 
   public void setStatus(int status) {
@@ -51,13 +53,26 @@ class CordovaHttpResponse {
     this.fileEntry = entry;
   }
 
+  public void setRedirectUrl(String redirectUrl) {
+    this.isRedirect = true;
+    this.redirectUrl = redirectUrl;
+  }
+
   public void setErrorMessage(String message) {
     this.hasFailed = true;
     this.error = message;
   }
 
+  public boolean isRedirect() {
+    return this.isRedirect;
+  }
+
   public boolean hasFailed() {
     return this.hasFailed;
+  }
+
+  public String getRedirectUrl() {
+    return this.redirectUrl;
   }
 
   public JSONObject toJSON() throws JSONException {
@@ -70,7 +85,9 @@ class CordovaHttpResponse {
       json.put("headers", new JSONObject(getFilteredHeaders()));
     }
 
-    if (this.hasFailed) {
+    if (this.isRedirect) {
+      json.put("redirect", this.redirectUrl);
+    } else if (this.hasFailed) {
       json.put("error", this.error);
     } else if (this.isFileOperation) {
       json.put("file", this.fileEntry);
