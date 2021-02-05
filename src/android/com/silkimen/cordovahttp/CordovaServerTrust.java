@@ -23,9 +23,6 @@ import javax.net.ssl.X509TrustManager;
 class CordovaServerTrust implements Runnable {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
-  private final TrustManager[] noOpTrustManagers;
-  private final HostnameVerifier noOpVerifier;
-
   private String mode;
   private Activity activity;
   private TLSConfiguration tlsConfiguration;
@@ -39,36 +36,12 @@ class CordovaServerTrust implements Runnable {
     this.tlsConfiguration = configContainer;
     this.callbackContext = callbackContext;
 
-    this.noOpTrustManagers = new TrustManager[] { new X509TrustManager() {
-      public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[0];
-      }
-
-      public void checkClientTrusted(X509Certificate[] chain, String authType) {
-        // intentionally left blank
-      }
-
-      public void checkServerTrusted(X509Certificate[] chain, String authType) {
-        // intentionally left blank
-      }
-    } };
-
-    this.noOpVerifier = new HostnameVerifier() {
-      public boolean verify(String hostname, SSLSession session) {
-        return false;
-      }
-    };
-  }
-
   @Override
   public void run() {
     try {
       if ("legacy".equals(this.mode)) {
         this.tlsConfiguration.setHostnameVerifier(null);
         this.tlsConfiguration.setTrustManagers(null);
-      } else if ("nocheck".equals(this.mode)) {
-        this.tlsConfiguration.setHostnameVerifier(this.noOpVerifier);
-        this.tlsConfiguration.setTrustManagers(this.noOpTrustManagers);
       } else if ("pinned".equals(this.mode)) {
         this.tlsConfiguration.setHostnameVerifier(null);
         this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromBundle("www/certificates")));
