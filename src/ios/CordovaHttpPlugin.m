@@ -151,13 +151,14 @@
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];
-    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:2] doubleValue];
-    bool followRedirect = [[command.arguments objectAtIndex:3] boolValue];
-    NSString *responseType = [command.arguments objectAtIndex:4];
+    NSTimeInterval connectTimeout = [[command.arguments objectAtIndex:2] doubleValue];
+    NSTimeInterval readTimeout = [[command.arguments objectAtIndex:3] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:4] boolValue];
+    NSString *responseType = [command.arguments objectAtIndex:5];
 
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
-    [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setTimeout:readTimeout forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
     [self setResponseSerializer:responseType forManager:manager];
 
@@ -205,13 +206,14 @@
     NSDictionary *data = [command.arguments objectAtIndex:1];
     NSString *serializerName = [command.arguments objectAtIndex:2];
     NSDictionary *headers = [command.arguments objectAtIndex:3];
-    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
-    bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
-    NSString *responseType = [command.arguments objectAtIndex:6];
+    NSTimeInterval connectTimeout = [[command.arguments objectAtIndex:4] doubleValue];
+    NSTimeInterval readTimeout = [[command.arguments objectAtIndex:5] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:6] boolValue];
+    NSString *responseType = [command.arguments objectAtIndex:7];
 
     [self setRequestSerializer: serializerName forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
-    [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setTimeout:readTimeout forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
     [self setResponseSerializer:responseType forManager:manager];
 
@@ -338,12 +340,13 @@
     NSDictionary *headers = [command.arguments objectAtIndex:1];
     NSArray *filePaths = [command.arguments objectAtIndex: 2];
     NSArray *names = [command.arguments objectAtIndex: 3];
-    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:4] doubleValue];
-    bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
-    NSString *responseType = [command.arguments objectAtIndex:6];
+    NSTimeInterval connectTimeout = [[command.arguments objectAtIndex:4] doubleValue];
+    NSTimeInterval readTimeout = [[command.arguments objectAtIndex:5] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:6] boolValue];
+    NSString *responseType = [command.arguments objectAtIndex:7];
 
     [self setRequestHeaders: headers forManager: manager];
-    [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setTimeout:readTimeout forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
     [self setResponseSerializer:responseType forManager:manager];
 
@@ -398,11 +401,12 @@
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];
     NSString *filePath = [command.arguments objectAtIndex: 2];
-    NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
-    bool followRedirect = [[command.arguments objectAtIndex:4] boolValue];
+    NSTimeInterval connectTimeout = [[command.arguments objectAtIndex:3] doubleValue];
+    NSTimeInterval readTimeout = [[command.arguments objectAtIndex:4] doubleValue];
+    bool followRedirect = [[command.arguments objectAtIndex:5] boolValue];
 
     [self setRequestHeaders: headers forManager: manager];
-    [self setTimeout:timeoutInSeconds forManager:manager];
+    [self setTimeout:readTimeout forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
 
     if ([filePath hasPrefix:@"file://"]) {

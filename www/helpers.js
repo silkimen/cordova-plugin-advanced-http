@@ -487,7 +487,9 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
       params: checkParamsObject(options.params || {}),
       responseType: checkResponseType(options.responseType || validResponseTypes[0]),
       serializer: checkSerializer(options.serializer || globals.serializer),
-      timeout: checkTimeoutValue(options.timeout || globals.timeout),
+      connectTimeout: checkTimeoutValue(options.connectTimeout || globals.connectTimeout),
+      readTimeout: checkTimeoutValue(options.readTimeout || globals.readTimeout),
+      timeout: checkTimeoutValue(options.timeout || globals.timeout)
     };
   }
 };

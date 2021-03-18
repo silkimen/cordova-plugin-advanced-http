@@ -37,13 +37,14 @@ abstract class CordovaHttpBase implements Runnable {
   protected String responseType;
   protected Object data;
   protected JSONObject headers;
-  protected int timeout;
+  protected int connectTimeout;
+  protected int readTimeout;
   protected boolean followRedirects;
   protected TLSConfiguration tlsConfiguration;
   protected CallbackContext callbackContext;
 
-  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int timeout,
-      boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
+  public CordovaHttpBase(String method, String url, String serializer, Object data, JSONObject headers, int connectTimeout,
+      int readTimeout, boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
       CallbackContext callbackContext) {
 
     this.method = method;
@@ -51,20 +52,22 @@ abstract class CordovaHttpBase implements Runnable {
     this.serializer = serializer;
     this.data = data;
     this.headers = headers;
-    this.timeout = timeout;
+    this.connectTimeout = connectTimeout;
+    this.readTimeout = readTimeout;
     this.followRedirects = followRedirects;
     this.responseType = responseType;
     this.tlsConfiguration = tlsConfiguration;
     this.callbackContext = callbackContext;
   }
 
-  public CordovaHttpBase(String method, String url, JSONObject headers, int timeout, boolean followRedirects,
+  public CordovaHttpBase(String method, String url, JSONObject headers, int connectTimeout, int readTimeout, boolean followRedirects,
       String responseType, TLSConfiguration tlsConfiguration, CallbackContext callbackContext) {
 
     this.method = method;
     this.url = url;
     this.headers = headers;
-    this.timeout = timeout;
+    this.connectTimeout = connectTimeout;
+    this.readTimeout = readTimeout;
     this.followRedirects = followRedirects;
     this.responseType = responseType;
     this.tlsConfiguration = tlsConfiguration;
@@ -121,8 +124,8 @@ abstract class CordovaHttpBase implements Runnable {
 
   protected void prepareRequest(HttpRequest request) throws JSONException, IOException {
     request.followRedirects(this.followRedirects);
-    request.readTimeout(this.timeout);
-    request.connectTimeout(this.timeout);
+    request.connectTimeout(this.connectTimeout);
+    request.readTimeout(this.readTimeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
     HttpRequest.setConnectionFactory(new OkConnectionFactory());

@@ -142,11 +142,31 @@ describe('Advanced HTTP public interface', function () {
   it('configures global timeout value correctly with given valid value', () => {
     http.setRequestTimeout(10);
     http.getRequestTimeout().should.equal(10);
+    http.getConnectTimeout().should.equal(10);
+    http.getReadTimeout().should.equal(10);
   });
 
   it('throws an Error when you try to configure global timeout with a string', () => {
     (() => { http.setRequestTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
   });
+
+  it('configures connect timeout and read timeout with given valid value', () => {
+    http.setConnectTimeout(10);
+    http.getConnectTimeout().should.equal(10);
+  })
+
+  it('configures connect timeout and read timeout with a string', () => {
+    (() => { http.setConnectTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
+  })
+
+  it('configures read timeout and read timeout with given valid value', () => {
+    http.setReadTimeout(10);
+    http.getReadTimeout().should.equal(10);
+  })
+
+  it('configures read timeout and read timeout with a string', () => {
+    (() => { http.setReadTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
+  })
 
   it('sets global option for following redirects correctly', () => {
     http.setFollowRedirect(false);
@@ -375,6 +395,8 @@ describe('Common helpers', function () {
       serializer: 'urlencoded',
       followRedirect: true,
       timeout: 60.0,
+      connectTimeout: 30.0,
+      readTimeout: 30.0
     }
 
     it('adds missing "followRedirect" option correctly', () => {

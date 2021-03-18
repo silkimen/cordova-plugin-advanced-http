@@ -115,9 +115,22 @@ This defaults to `urlencoded`. You can also override the default content type he
 
 ### setRequestTimeout
 Set how long to wait for a request to respond, in seconds.
-
+For Android, this will set both [connectTimeout](https://developer.android.com/reference/java/net/URLConnection#getConnectTimeout()) and [readTimeout](https://developer.android.com/reference/java/net/URLConnection#setReadTimeout(int)) 
+For iOS, this will set [timeout interval](https://developer.apple.com/documentation/foundation/nsmutableurlrequest/1414063-timeoutinterval)
 ```js
 cordova.plugin.http.setRequestTimeout(5.0);
+```
+
+### setConnectTimeout (Android Only)
+Set connect timeout for Android
+```js
+cordova.plugin.http.setRequestTimeout(5.0);
+```
+
+### setReadTimeout (Android Only)
+Set read timeout for Android
+```js
+cordova.plugin.http.setReadTimeout(5.0); 
 ```
 
 ### setFollowRedirect<a name="setFollowRedirect"></a>
@@ -237,7 +250,6 @@ cordova.plugin.http.sendRequest('https://google.com/', options, function(respons
 }, function(response) {
   // prints 403
   console.log(response.status);
-
   //prints Permission denied
   console.log(response.error);
 });
