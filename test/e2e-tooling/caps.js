@@ -32,7 +32,7 @@ const configs = {
   // testing on SauceLabs
   saucelabsIosDevice: {
     browserName: '',
-    'appium-version': '1.9.1',
+    'appium-version': '1.20.1',
     platformName: 'iOS',
     platformVersion: '14.3',
     deviceName: 'iPhone 6',
@@ -41,7 +41,7 @@ const configs = {
   },
   saucelabsIosEmulator: {
     browserName: '',
-    'appium-version': '1.9.1',
+    'appium-version': '1.20.1',
     platformName: 'iOS',
     platformVersion: '14.3',
     deviceName: 'iPhone Simulator',
@@ -50,7 +50,7 @@ const configs = {
   },
   saucelabsAndroidEmulator: {
     browserName: '',
-    'appium-version': '1.9.1',
+    'appium-version': '1.20.1',
     platformName: 'Android',
     platformVersion: '8.0',
     deviceName: 'Android Emulator',
