@@ -150,21 +150,21 @@ describe('Advanced HTTP public interface', function () {
     (() => { http.setRequestTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
   });
 
-  it('configures connect timeout and read timeout with given valid value', () => {
+  it('configures connect timeout value correctly with given valid value', () => {
     http.setConnectTimeout(10);
     http.getConnectTimeout().should.equal(10);
   })
 
-  it('configures connect timeout and read timeout with a string', () => {
+  it('throws an Error when you try to configure connect timeout with a string', () => {
     (() => { http.setConnectTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
   })
 
-  it('configures read timeout and read timeout with given valid value', () => {
+  it('configures read timeout value correctly with given valid value', () => {
     http.setReadTimeout(10);
     http.getReadTimeout().should.equal(10);
   })
 
-  it('configures read timeout and read timeout with a string', () => {
+  it('throws an Error when you try to configure connect timeout with a string', () => {
     (() => { http.setReadTimeout('myString'); }).should.throw(messages.INVALID_TIMEOUT_VALUE);
   })
 
