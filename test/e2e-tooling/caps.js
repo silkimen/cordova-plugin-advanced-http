@@ -34,7 +34,7 @@ const configs = {
     browserName: '',
     'appium-version': '1.9.1',
     platformName: 'iOS',
-    platformVersion: '10.3',
+    platformVersion: '14.3',
     deviceName: 'iPhone 6',
     autoWebview: true,
     app: 'sauce-storage:HttpDemo.app.zip'
@@ -43,7 +43,7 @@ const configs = {
     browserName: '',
     'appium-version': '1.9.1',
     platformName: 'iOS',
-    platformVersion: '10.3',
+    platformVersion: '14.3',
     deviceName: 'iPhone Simulator',
     autoWebview: true,
     app: 'sauce-storage:HttpDemo.app.zip'
@@ -52,7 +52,7 @@ const configs = {
     browserName: '',
     'appium-version': '1.9.1',
     platformName: 'Android',
-    platformVersion: '5.1',
+    platformVersion: '8.0',
     deviceName: 'Android Emulator',
     autoWebview: true,
     app: 'sauce-storage:HttpDemo.apk'
