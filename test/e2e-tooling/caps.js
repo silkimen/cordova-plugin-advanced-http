@@ -22,7 +22,7 @@ const configs = {
   },
   localAndroidEmulator: {
     platformName: 'Android',
-    platformVersion: '5',
+    platformVersion: '9',
     deviceName: 'Android Emulator',
     autoWebview: true,
     fullReset: true,
