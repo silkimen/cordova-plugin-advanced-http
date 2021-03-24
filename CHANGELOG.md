@@ -3,6 +3,7 @@
 ## 3.1.1
 
 - Fixed #372: malformed empty multipart request on Android
+- Fixed #399: memory leakage leads to app crashes on iOS (thanks avargaskun)
 
 ## 3.1.0
 
