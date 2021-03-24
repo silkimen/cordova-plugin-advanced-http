@@ -909,7 +909,7 @@ const tests = [
     },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('resolved');
-      should.equal(null, result.data.data);
+      should.equal(true, result.data.data === null || result.data.data === undefined);
     }
   },
   {
