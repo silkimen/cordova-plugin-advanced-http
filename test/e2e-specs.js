@@ -92,7 +92,7 @@ const helpers = {
     }
     return true;
   },
-  getAbortDelay: function () { return 10; },
+  getAbortDelay: function () { return 0; },
 };
 
 const messageFactory = {
