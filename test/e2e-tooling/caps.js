@@ -14,7 +14,7 @@ const configs = {
   },
   localIosEmulator: {
     platformName: 'iOS',
-    platformVersion: '13.2',
+    platformVersion: '14.3',
     automationName: 'XCUITest',
     deviceName: 'iPhone 8',
     autoWebview: true,

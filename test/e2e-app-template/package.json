@@ -11,18 +11,23 @@
   "author": "Sefa Ilkimen",
   "license": "Apache-2.0",
   "dependencies": {
-    "cordova": "9.0.0",
-    "cordova-android": "8.1.0",
+    "cordova": "10.0.0",
+    "cordova-android": "9.0.0",
     "cordova-browser": "6.0.0",
-    "cordova-ios": "5.1.0"
+    "cordova-ios": "6.2.0",
+    "cordova-plugin-wkwebview-file-xhr": "3.0.0"
   },
   "cordova": {
     "platforms": [
       "android",
-      "ios"
+      "ios",
+      "browser"
     ],
     "plugins": {
-      "cordova-plugin-device": {}
+      "cordova-plugin-device": {},
+      "cordova-plugin-file": {},
+      "cordova-plugin-advanced-http": {},
+      "cordova-plugin-wkwebview-file-xhr": {}
     }
   },
   "devDependencies": {
