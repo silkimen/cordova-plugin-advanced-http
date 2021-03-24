@@ -15,11 +15,11 @@ matrix:
     language: objective-c
     sudo: false
     os: osx
-    osx_image: xcode10.1
+    osx_image: xcode12.2
 
     before_install:
     - export LANG=en_US.UTF-8 &&
-      nvm use 12
+      nvm use 14
 
     install:
     - npm install
@@ -47,7 +47,7 @@ matrix:
 
     before_install:
     - export LANG=en_US.UTF-8 &&
-      curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - &&
+      curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - &&
       sudo apt-get install -y nodejs
     - yes | sdkmanager --update
 
