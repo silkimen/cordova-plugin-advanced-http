@@ -60,15 +60,15 @@ const configs = {
 
   // testing on BrowserStack
   browserstackIosDevice: {
-    device: 'iPhone 7',
-    os_version: '10',
+    device: 'iPhone 12',
+    os_version: '14',
     project: 'HTTP Test App',
     autoWebview: true,
     app: 'HttpTestAppAndroid'
   },
   browserstackAndroidDevice: {
     device: 'Google Nexus 6',
-    os_version: '5.0',
+    os_version: '6.0',
     project: 'HTTP Test App',
     autoWebview: true,
     app: 'HttpTestAppAndroid'
