@@ -134,6 +134,20 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
   }
 
   function sendRequest(url, options, success, failure) {
+    if (Array.isArray(url)) {
+      if (url.length === 1) {
+        return sendRequest(url[0], options, success, failure);
+      }
+
+      return sendRequest(url[0], options, success, () => {
+        if (url.length > 2) {
+          sendRequest(url.slice(1), options, success, failure);
+        } else {
+          sendRequest(url[1], options, success, failure);
+        }
+      });
+    }
+
     helpers.handleMissingCallbacks(success, failure);
 
     options = helpers.handleMissingOptions(options, globalConfigs);
