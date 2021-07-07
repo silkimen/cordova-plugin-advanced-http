@@ -1121,11 +1121,18 @@ const tests = [
       var options = { method: 'post', data: formData };
       cordova.plugin.http.sendRequest(url, options, resolve, reject);
     },
-    validationFunc: function (driver, result) {
+    validationFunc: function (driver, result, targetInfo) {
       helpers.checkResult(result, 'resolved');
 
       var parsed = JSON.parse(result.data.data);
-      parsed.headers['Content-Type'].should.be.equal('application/x-www-form-urlencoded');
+
+      if (targetInfo.isAndroid) {
+        // boundary should be sent correctly on Android
+        parsed.headers['Content-Type'].should.be.equal('multipart/form-data; boundary=00content0boundary00');
+      } else {
+        // falling back to empty url encoded request on iOS
+        parsed.headers['Content-Type'].should.be.equal('application/x-www-form-urlencoded');
+      }
     }
   },
 ];
