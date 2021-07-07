@@ -86,13 +86,24 @@ const helpers = {
   },
   isAbortSupported: function () {
     if (window.cordova && window.cordova.platformId === 'android') {
-      var version = device.version; //NOTE will throw error if cordova is present without cordova-plugin-device
+      var version = device.version; // NOTE will throw error if cordova is present without cordova-plugin-device
       var major = parseInt(/^(\d+)(\.|$)/.exec(version)[1], 10);
       return isFinite(major) && major >= 6;
     }
     return true;
   },
   getAbortDelay: function () { return 0; },
+  getDemoArrayBuffer: function(size) {
+    var demoText = [73, 39, 109, 32, 97, 32, 100, 117, 109, 109, 121, 32, 102, 105, 108, 101, 33, 32, 73, 39, 109, 32, 117, 115, 101, 100, 32, 102, 111, 114, 32, 116, 101, 115, 116, 105, 110, 103, 32, 112, 117, 114, 112, 111, 115, 101, 115, 46, 32, 82, 97, 110, 100, 111, 109, 32, 100, 97, 116, 97, 32, 105, 115, 32, 102, 111, 108, 108, 111, 119, 105, 110, 103, 58, 32];
+    var buffer = new ArrayBuffer(size);
+    var view = new Uint8Array(buffer);
+
+    for (var i = 0; i < size; ++i) {
+      view[i] = demoText[i];
+    }
+
+    return buffer;
+  },
 };
 
 const messageFactory = {
@@ -1006,14 +1017,14 @@ const tests = [
         skip();
         return;
       }
-      helpers.getWithXhr(function (buffer) {
-        var reqId = cordova.plugin.http.post('http://httpbin.org/anything', buffer, {}, resolve, reject);
 
-        setTimeout(function () {
-          cordova.plugin.http.abort(reqId);
-        }, helpers.getAbortDelay());
+      var targetUrl = 'http://httpbin.org/post';
+      var fileContent = helpers.getDemoArrayBuffer(10000);
+      var reqId = cordova.plugin.http.post(targetUrl, fileContent, {}, resolve, reject);
 
-      }, './res/cordova_logo.png', 'arraybuffer');
+      setTimeout(function () {
+        cordova.plugin.http.abort(reqId);
+      }, helpers.getAbortDelay());
     },
     validationFunc: function (driver, result) {
       helpers.checkResult(result, 'rejected');
@@ -1028,7 +1039,7 @@ const tests = [
         skip();
         return;
       }
-      var url = 'https://httpbin.org/image/jpeg';
+      var url = 'https://httpbin.org/drip?duration=2&numbytes=10&code=200';
       var options = { method: 'get', responseType: 'blob' };
       var success = function (response) {
         resolve({
@@ -1089,8 +1100,10 @@ const tests = [
         skip();
         return;
       }
+
+
       var fileName = 'test-file.txt';
-      var fileContent = 'I am a dummy file. I am used for testing purposes!';
+      var fileContent = helpers.getDemoArrayBuffer(10000);
       var sourcePath = cordova.file.cacheDirectory + fileName;
       var targetUrl = 'http://httpbin.org/post';
 

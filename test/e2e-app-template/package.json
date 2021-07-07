@@ -15,6 +15,7 @@
     "cordova-android": "9.0.0",
     "cordova-browser": "6.0.0",
     "cordova-ios": "6.2.0",
+    "cordova-plugin-device": "2.0.3",
     "cordova-plugin-wkwebview-file-xhr": "3.0.0"
   },
   "cordova": {
