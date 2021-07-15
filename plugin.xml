@@ -8,6 +8,7 @@
     <engine name="cordova" version=">=4.0.0"/>
   </engines>
   <dependency id="cordova-plugin-file" version=">=2.0.0"/>
+  <preference name="AndroidBlacklistTlsProtocols" default="SSLv3,TLSv1"/>
   <js-module src="www/cookie-handler.js" name="cookie-handler"/>
   <js-module src="www/dependency-validator.js" name="dependency-validator"/>
   <js-module src="www/error-codes.js" name="error-codes"/>

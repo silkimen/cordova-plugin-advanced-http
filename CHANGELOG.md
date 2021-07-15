@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.0
+
+- Feature #420: implement blacklist feature to disable SSL/TLS versions on Android (thanks mobisys Mobile Informationssysteme GmbH)
+
 ## 3.1.1
 
 - Fixed #372: malformed empty multipart request on Android

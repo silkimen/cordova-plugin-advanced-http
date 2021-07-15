@@ -47,6 +47,13 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
 
       this.tlsConfiguration.setHostnameVerifier(null);
       this.tlsConfiguration.setTrustManagers(tmf.getTrustManagers());
+
+      if (this.preferences.contains("androidblacklisttlsprotocols")) {
+        this.tlsConfiguration.setBlacklistedProtocols(
+          this.preferences.getString("androidblacklisttlsprotocols", "").split(",")
+        );
+      }
+
     } catch (Exception e) {
       Log.e(TAG, "An error occured while loading system's CA certificates", e);
     }

@@ -13,9 +13,10 @@ import javax.net.ssl.TrustManager;
 import com.silkimen.http.TLSSocketFactory;
 
 public class TLSConfiguration {
-  private TrustManager[] trustManagers;
-  private KeyManager[] keyManagers;
-  private HostnameVerifier hostnameVerifier;
+  private TrustManager[] trustManagers = null;
+  private KeyManager[] keyManagers = null;
+  private HostnameVerifier hostnameVerifier = null;
+  private String[] blacklistedProtocols = {};
 
   private SSLSocketFactory socketFactory;
 
@@ -33,6 +34,11 @@ public class TLSConfiguration {
     this.socketFactory = null;
   }
 
+  public void setBlacklistedProtocols(String[] protocols) {
+    this.blacklistedProtocols = protocols;
+    this.socketFactory = null;
+  }
+
   public HostnameVerifier getHostnameVerifier() {
     return this.hostnameVerifier;
   }
@@ -46,12 +52,7 @@ public class TLSConfiguration {
       SSLContext context = SSLContext.getInstance("TLS");
 
       context.init(this.keyManagers, this.trustManagers, new SecureRandom());
-
-      if (android.os.Build.VERSION.SDK_INT < 20) {
-        this.socketFactory = new TLSSocketFactory(context);
-      } else {
-        this.socketFactory = context.getSocketFactory();
-      }
+      this.socketFactory = new TLSSocketFactory(context, this.blacklistedProtocols);
 
       return this.socketFactory;
     } catch (GeneralSecurityException e) {
