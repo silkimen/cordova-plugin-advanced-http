@@ -34,6 +34,15 @@ phonegap plugin add cordova-plugin-advanced-http
 cordova plugin add cordova-plugin-advanced-http
 ```
 
+### Plugin Preferences
+
+`AndroidBlacklistSecureSocketProtocols`: define a blacklist of secure socket protocols for Android. This preference allows you to disable protocols which are considered unsafe. You need to provide a comma-separated list of protocols ([check Android SSLSocket#protocols docu for protocol names](https://developer.android.com/reference/javax/net/ssl/SSLSocket#protocols)).
+
+e.g. blacklist `SSLv3` and `TLSv1`:
+```xml
+<preference name="AndroidBlacklistSecureSocketProtocols" value="SSLv3,TLSv1" />
+```
+
 ## Usage
 
 ### Plain Cordova

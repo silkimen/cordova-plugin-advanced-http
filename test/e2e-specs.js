@@ -104,9 +104,13 @@ const helpers = {
 
     return buffer;
   },
+  isTlsBlacklistSupported: function () {
+    return window.cordova && window.cordova.platformId === 'android';
+  }
 };
 
 const messageFactory = {
+  handshakeFailed: function() { return 'TLS connection could not be established: javax.net.ssl.SSLHandshakeException: Handshake failed' },
   sslTrustAnchor: function () { return 'TLS connection could not be established: javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.' },
   invalidCertificate: function (domain) { return 'The certificate for this server is invalid. You might be connecting to a server that is pretending to be “' + domain + '” which could put your confidential information at risk.' }
 }
@@ -1014,8 +1018,7 @@ const tests = [
     before: helpers.setRawSerializer,
     func: function (resolve, reject, skip) {
       if (!helpers.isAbortSupported()) {
-        skip();
-        return;
+        return skip();
       }
 
       var targetUrl = 'http://httpbin.org/post';
@@ -1036,8 +1039,7 @@ const tests = [
     expected: 'rejected: {"status":-8, "error": "Request ...}',
     func: function (resolve, reject, skip) {
       if (!helpers.isAbortSupported()) {
-        skip();
-        return;
+        return skip();
       }
       var url = 'https://httpbin.org/drip?duration=2&numbytes=10&code=200';
       var options = { method: 'get', responseType: 'blob' };
@@ -1064,8 +1066,7 @@ const tests = [
     expected: 'rejected: {"status":-8, "error": "Request ...}',
     func: function (resolve, reject, skip) {
       if (!helpers.isAbortSupported()) {
-        skip();
-        return;
+        return skip();
       }
       var sourceUrl = 'http://httpbin.org/xml';
       var targetPath = cordova.file.cacheDirectory + 'test.xml';
@@ -1097,8 +1098,7 @@ const tests = [
     expected: 'rejected: {"status":-8, "error": "Request ...}',
     func: function (resolve, reject, skip) {
       if (!helpers.isAbortSupported()) {
-        skip();
-        return;
+        return skip();
       }
 
 
@@ -1146,6 +1146,21 @@ const tests = [
         // falling back to empty url encoded request on iOS
         parsed.headers['Content-Type'].should.be.equal('application/x-www-form-urlencoded');
       }
+    }
+  },
+  {
+    description: 'should reject connecting to server with blacklisted SSL version #420',
+    expected: 'rejected: {"status":-2, ...',
+    func: function (resolve, reject, skip) {
+      if (!helpers.isTlsBlacklistSupported()) {
+        return skip();
+      }
+
+      cordova.plugin.http.get('https://tls-v1-0.badssl.com:1010/', {}, {}, resolve, reject);
+    },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('rejected');
+      result.data.should.be.eql({ status: -2, error: messageFactory.handshakeFailed() });
     }
   },
 ];
