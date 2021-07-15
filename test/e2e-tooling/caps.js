@@ -64,14 +64,16 @@ const configs = {
     os_version: '14',
     project: 'HTTP Test App',
     autoWebview: true,
-    app: 'HttpTestAppAndroid'
+    app: 'HttpTestAppAndroid',
+    'browserstack.networkLogs': true
   },
   browserstackAndroidDevice: {
     device: 'Google Nexus 6',
     os_version: '6.0',
     project: 'HTTP Test App',
     autoWebview: true,
-    app: 'HttpTestAppAndroid'
+    app: 'HttpTestAppAndroid',
+    'browserstack.networkLogs': true
   }
 };
 
