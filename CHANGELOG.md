@@ -2,7 +2,7 @@
 
 ## 3.2.0
 
-- Feature #420: implement blacklist feature to disable SSL/TLS versions on Android (thanks mobisys Mobile Informationssysteme GmbH)
+- Feature #420: implement blacklist feature to disable SSL/TLS versions on Android (thanks to @MobisysGmbH)
 
 ## 3.1.1
 
