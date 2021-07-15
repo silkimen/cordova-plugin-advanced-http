@@ -105,11 +105,7 @@ const helpers = {
     return buffer;
   },
   isTlsBlacklistSupported: function () {
-    if (window.cordova && window.cordova.platformId === 'android') {
-      return true;
-    }
-
-    return false;
+    return window.cordova && window.cordova.platformId === 'android';
   }
 };
 
