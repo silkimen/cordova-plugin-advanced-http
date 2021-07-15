@@ -10,5 +10,5 @@ fi
 
 printf 'Running e2e tests\n'
 pushd $ROOT
-./node_modules/.bin/mocha ./test/e2e-tooling/test.js "$@"
+./node_modules/.bin/mocha --reporter ./test/e2e-tooling/reporter.js ./test/e2e-tooling/test.js "$@"
 popd

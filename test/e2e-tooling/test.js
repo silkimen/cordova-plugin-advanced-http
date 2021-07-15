@@ -7,6 +7,9 @@ const testDefinitions = require('../e2e-specs');
 
 global.should = chai.should();
 
+let driver;
+let allPassed = true;
+
 describe('Advanced HTTP e2e test suite', function () {
   const isSauceLabs = !!process.env.SAUCE_USERNAME;
   const isBrowserStack = !!process.env.BROWSERSTACK_USERNAME;
@@ -16,9 +19,6 @@ describe('Advanced HTTP e2e test suite', function () {
 
   const targetInfo = { isSauceLabs, isBrowserStack, isDevice, isAndroid };
   const environment = isSauceLabs ? 'saucelabs' : isBrowserStack ? 'browserstack' : 'local';
-
-  let driver;
-  let allPassed = true;
 
   this.timeout(15000);
   this.slow(4000);
@@ -121,7 +121,15 @@ async function waitToBeFinished(driver, timeout) {
 
 async function validateResult(driver, validationFunc, targetInfo) {
   const result = await driver.safeExecute('app.lastResult');
-  validationFunc(driver, result, targetInfo);
+
+  try {
+    validationFunc(driver, result, targetInfo);
+  } catch (error) {
+    allPassed = false;
+    error.details = result;
+
+    throw error;
+  }
 }
 
 async function checkSkipped(driver) {

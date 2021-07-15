@@ -3,5 +3,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">httpbin.org</domain>
+        <domain includeSubdomains="true">httpbingo.org</domain>
+        <domain includeSubdomains="true">www.columbia.edu</domain>
     </domain-config>
 </network-security-config>
