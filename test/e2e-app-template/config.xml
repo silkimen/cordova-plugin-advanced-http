@@ -27,5 +27,5 @@
         <allow-intent href="itms-apps:*" />
     </platform>
     <preference name="AndroidPersistentFileLocation" value="Internal" />
-    <preference name="AndroidBlacklistTlsProtocols" value="SSLv3,TLSv1" />
+    <preference name="AndroidBlacklistSecureSocketProtocols" value="SSLv3,TLSv1" />
 </widget>

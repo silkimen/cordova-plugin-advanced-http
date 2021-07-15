@@ -48,9 +48,9 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
       this.tlsConfiguration.setHostnameVerifier(null);
       this.tlsConfiguration.setTrustManagers(tmf.getTrustManagers());
 
-      if (this.preferences.contains("androidblacklisttlsprotocols")) {
+      if (this.preferences.contains("androidblacklistsecuresocketprotocols")) {
         this.tlsConfiguration.setBlacklistedProtocols(
-          this.preferences.getString("androidblacklisttlsprotocols", "").split(",")
+          this.preferences.getString("androidblacklistsecuresocketprotocols", "").split(",")
         );
       }
 
