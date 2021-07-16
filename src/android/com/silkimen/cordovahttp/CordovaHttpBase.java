@@ -129,6 +129,7 @@ abstract class CordovaHttpBase implements Runnable {
   protected void prepareRequest(HttpRequest request) throws JSONException, IOException {
     request.followRedirects(this.followRedirects);
     request.readTimeout(this.timeout);
+    request.connectTimeout(this.timeout);
     request.acceptCharset("UTF-8");
     request.uncompress(true);
 
