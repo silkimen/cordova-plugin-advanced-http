@@ -65,7 +65,7 @@ const configs = {
     project: 'HTTP Test App',
     autoWebview: true,
     app: 'HttpTestAppAndroid',
-    'browserstack.networkLogs': true
+    'browserstack.networkLogs': false
   },
   browserstackAndroidDevice: {
     device: 'Google Nexus 6',
@@ -73,7 +73,7 @@ const configs = {
     project: 'HTTP Test App',
     autoWebview: true,
     app: 'HttpTestAppAndroid',
-    'browserstack.networkLogs': true
+    'browserstack.networkLogs': false
   }
 };
 
