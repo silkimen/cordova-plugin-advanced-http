@@ -49,7 +49,7 @@ public class TLSConfiguration {
     }
 
     try {
-      SSLContext context = SSLContext.getInstance("TLS");
+      SSLContext context = SSLContext.getInstance("TLSV1.2");
 
       context.init(this.keyManagers, this.trustManagers, new SecureRandom());
       this.socketFactory = new TLSSocketFactory(context, this.blacklistedProtocols);
