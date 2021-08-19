@@ -68,8 +68,8 @@ const configs = {
     'browserstack.networkLogs': false
   },
   browserstackAndroidDevice: {
-    device: 'Google Pixel 3',
-    os_version: '9.0',
+    device: 'Motorola Moto X 2nd Gen',
+    os_version: '6.0',
     project: 'HTTP Test App',
     autoWebview: true,
     app: 'HttpTestAppAndroid',
