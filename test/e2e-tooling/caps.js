@@ -68,7 +68,7 @@ const configs = {
     'browserstack.networkLogs': false
   },
   browserstackAndroidDevice: {
-    device: 'Motorola Moto X 2nd Gen',
+    device: 'Google Nexus 6',
     os_version: '6.0',
     project: 'HTTP Test App',
     autoWebview: true,
