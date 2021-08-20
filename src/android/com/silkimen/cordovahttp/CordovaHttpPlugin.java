@@ -101,15 +101,16 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
 
     String url = args.getString(0);
     JSONObject headers = args.getJSONObject(1);
-    int timeout = args.getInt(2) * 1000;
-    boolean followRedirect = args.getBoolean(3);
-    String responseType = args.getString(4);
+    int connectTimeout = args.getInt(2) * 1000;
+    int readTimeout = args.getInt(3) * 1000;
+    boolean followRedirect = args.getBoolean(4);
+    String responseType = args.getString(5);
+    Integer reqId = args.getInt(6);
 
-    Integer reqId = args.getInt(5);
     CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
-    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, headers, timeout, followRedirect,
-        responseType, this.tlsConfiguration, observableCallbackContext);
+    CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, headers, connectTimeout, readTimeout,
+        followRedirect, responseType, this.tlsConfiguration, observableCallbackContext);
 
     startRequest(reqId, observableCallbackContext, request);
 
@@ -123,15 +124,16 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     Object data = args.get(1);
     String serializer = args.getString(2);
     JSONObject headers = args.getJSONObject(3);
-    int timeout = args.getInt(4) * 1000;
-    boolean followRedirect = args.getBoolean(5);
-    String responseType = args.getString(6);
+    int connectTimeout = args.getInt(4) * 1000;
+    int readTimeout = args.getInt(5) * 1000;
+    boolean followRedirect = args.getBoolean(6);
+    String responseType = args.getString(7);
+    Integer reqId = args.getInt(8);
 
-    Integer reqId = args.getInt(7);
     CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
     CordovaHttpOperation request = new CordovaHttpOperation(method.toUpperCase(), url, serializer, data, headers,
-        timeout, followRedirect, responseType, this.tlsConfiguration, observableCallbackContext);
+        connectTimeout, readTimeout, followRedirect, responseType, this.tlsConfiguration, observableCallbackContext);
 
     startRequest(reqId, observableCallbackContext, request);
 
@@ -143,14 +145,15 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     JSONObject headers = args.getJSONObject(1);
     JSONArray filePaths = args.getJSONArray(2);
     JSONArray uploadNames = args.getJSONArray(3);
-    int timeout = args.getInt(4) * 1000;
-    boolean followRedirect = args.getBoolean(5);
-    String responseType = args.getString(6);
+    int connectTimeout = args.getInt(4) * 1000;
+    int readTimeout = args.getInt(5) * 1000;
+    boolean followRedirect = args.getBoolean(6);
+    String responseType = args.getString(7);
+    Integer reqId = args.getInt(8);
 
-    Integer reqId = args.getInt(7);
     CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
-    CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePaths, uploadNames, timeout, followRedirect,
+    CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePaths, uploadNames, connectTimeout, readTimeout, followRedirect,
         responseType, this.tlsConfiguration, this.cordova.getActivity().getApplicationContext(), observableCallbackContext);
 
     startRequest(reqId, observableCallbackContext, upload);
@@ -162,14 +165,15 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     String url = args.getString(0);
     JSONObject headers = args.getJSONObject(1);
     String filePath = args.getString(2);
-    int timeout = args.getInt(3) * 1000;
-    boolean followRedirect = args.getBoolean(4);
+    int connectTimeout = args.getInt(3) * 1000;
+    int readTimeout = args.getInt(4) * 1000;
+    boolean followRedirect = args.getBoolean(5);
+    Integer reqId = args.getInt(6);
 
-    Integer reqId = args.getInt(5);
     CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
-    CordovaHttpDownload download = new CordovaHttpDownload(url, headers, filePath, timeout, followRedirect,
-        this.tlsConfiguration, observableCallbackContext);
+    CordovaHttpDownload download = new CordovaHttpDownload(url, headers, filePath, connectTimeout, readTimeout,
+        followRedirect, this.tlsConfiguration, observableCallbackContext);
 
     startRequest(reqId, observableCallbackContext, download);
 

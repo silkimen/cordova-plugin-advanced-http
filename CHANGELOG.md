@@ -4,6 +4,7 @@
 
 - Fixed #425: plugin crashes on Android SDK levels < 24
 - Fixed #418: deprecated AFNetworking method causes app crash (thanks meiram-tr)
+- Fixed #404: wrong timeout implementation (thanks YouYue123)
 
 ## 3.2.0
 
