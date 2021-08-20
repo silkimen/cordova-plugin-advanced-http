@@ -124,10 +124,23 @@ This defaults to `urlencoded`. You can also override the default content type he
 :warning: `multipart` depends on several Web API standards which need to be supported in your web view. Check out https://github.com/silkimen/cordova-plugin-advanced-http/wiki/Web-APIs-required-for-Multipart-requests for more info.
 
 ### setRequestTimeout
-Set the "read" timeout in seconds. This is the timeout interval to use when waiting for additional data.
-
+Set how long to wait for a request to respond, in seconds.
+For Android, this will set both [connectTimeout](https://developer.android.com/reference/java/net/URLConnection#getConnectTimeout()) and [readTimeout](https://developer.android.com/reference/java/net/URLConnection#setReadTimeout(int))
+For iOS, this will set [timeout interval](https://developer.apple.com/documentation/foundation/nsmutableurlrequest/1414063-timeoutinterval)
 ```js
 cordova.plugin.http.setRequestTimeout(5.0);
+```
+
+### setConnectTimeout (Android Only)
+Set connect timeout for Android
+```js
+cordova.plugin.http.setRequestTimeout(5.0);
+```
+
+### setReadTimeout (Android Only)
+Set read timeout for Android
+```js
+cordova.plugin.http.setReadTimeout(5.0);
 ```
 
 ### setFollowRedirect<a name="setFollowRedirect"></a>
