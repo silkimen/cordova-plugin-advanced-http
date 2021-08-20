@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.1
+
+- Fixed #425: plugin crashes on Android SDK levels < 24
+
 ## 3.2.0
 
 - Feature #420: implement blacklist feature to disable SSL/TLS versions on Android (thanks to @MobisysGmbH)
