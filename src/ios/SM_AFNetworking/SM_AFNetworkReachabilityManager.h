@@ -1,4 +1,4 @@
-// AFNetworkReachabilityManager.h
+// SM_AFNetworkReachabilityManager.h
 // Copyright (c) 2011–2016 Alamofire Software Foundation ( http://alamofire.org/ )
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,15 +34,15 @@ typedef NS_ENUM(NSInteger, AFNetworkReachabilityStatus) {
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- `AFNetworkReachabilityManager` monitors the reachability of domains, and addresses for both WWAN and WiFi network interfaces.
+ `SM_AFNetworkReachabilityManager` monitors the reachability of domains, and addresses for both WWAN and WiFi network interfaces.
 
  Reachability can be used to determine background information about why a network operation failed, or to trigger a network operation retrying when a connection is established. It should not be used to prevent a user from initiating a network request, as it's possible that an initial request may be required to establish reachability.
 
  See Apple's Reachability Sample Code ( https://developer.apple.com/library/ios/samplecode/reachability/ )
 
- @warning Instances of `AFNetworkReachabilityManager` must be started with `-startMonitoring` before reachability status can be determined.
+ @warning Instances of `SM_AFNetworkReachabilityManager` must be started with `-startMonitoring` before reachability status can be determined.
  */
-@interface AFNetworkReachabilityManager : NSObject
+@interface SM_AFNetworkReachabilityManager : NSObject
 
 /**
  The current network reachability status.
@@ -150,7 +150,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  ## Network Reachability
 
- The following constants are provided by `AFNetworkReachabilityManager` as possible network reachability statuses.
+ The following constants are provided by `SM_AFNetworkReachabilityManager` as possible network reachability statuses.
 
  enum {
  AFNetworkReachabilityStatusUnknown,
@@ -175,8 +175,8 @@ NS_ASSUME_NONNULL_BEGIN
 
  Strings that are used as keys in a `userInfo` dictionary in a network reachability status change notification.
 
- `AFNetworkingReachabilityNotificationStatusItem`
- A key in the userInfo dictionary in a `AFNetworkingReachabilityDidChangeNotification` notification.
+ `SM_AFNetworkingReachabilityNotificationStatusItem`
+ A key in the userInfo dictionary in a `SM_AFNetworkingReachabilityDidChangeNotification` notification.
  The corresponding value is an `NSNumber` object representing the `AFNetworkReachabilityStatus` value for the current reachability status.
  */
 
@@ -186,12 +186,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Posted when network reachability changes.
- This notification assigns no notification object. The `userInfo` dictionary contains an `NSNumber` object under the `AFNetworkingReachabilityNotificationStatusItem` key, representing the `AFNetworkReachabilityStatus` value for the current network reachability.
+ This notification assigns no notification object. The `userInfo` dictionary contains an `NSNumber` object under the `SM_AFNetworkingReachabilityNotificationStatusItem` key, representing the `AFNetworkReachabilityStatus` value for the current network reachability.
 
  @warning In order for network reachability to be monitored, include the `SystemConfiguration` framework in the active target's "Link Binary With Library" build phase, and add `#import <SystemConfiguration/SystemConfiguration.h>` to the header prefix of the project (`Prefix.pch`).
  */
-FOUNDATION_EXPORT NSString * const AFNetworkingReachabilityDidChangeNotification;
-FOUNDATION_EXPORT NSString * const AFNetworkingReachabilityNotificationStatusItem;
+FOUNDATION_EXPORT NSString * const SM_AFNetworkingReachabilityDidChangeNotification;
+FOUNDATION_EXPORT NSString * const SM_AFNetworkingReachabilityNotificationStatusItem;
 
 ///--------------------
 /// @name Functions

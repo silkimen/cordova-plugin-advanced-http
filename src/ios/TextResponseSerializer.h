@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "AFURLResponseSerialization.h"
+#import "SM_AFURLResponseSerialization.h"
 
 @interface TextResponseSerializer : AFHTTPResponseSerializer
 

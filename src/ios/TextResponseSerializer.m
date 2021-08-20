@@ -94,26 +94,26 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
     if (data && !*decoded) {
       NSMutableDictionary *mutableUserInfo = [@{
         NSURLErrorFailingURLErrorKey:[response URL],
-        AFNetworkingOperationFailingURLResponseErrorKey: response,
-        AFNetworkingOperationFailingURLResponseDataErrorKey: data,
-        AFNetworkingOperationFailingURLResponseBodyErrorKey: @"Could not decode response data due to invalid or unknown charset encoding",
+        SM_AFNetworkingOperationFailingURLResponseErrorKey: response,
+        SM_AFNetworkingOperationFailingURLResponseDataErrorKey: data,
+        SM_AFNetworkingOperationFailingURLResponseBodyErrorKey: @"Could not decode response data due to invalid or unknown charset encoding",
       } mutableCopy];
 
-      validationError = AFErrorWithUnderlyingError([NSError errorWithDomain:AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo], validationError);
+      validationError = AFErrorWithUnderlyingError([NSError errorWithDomain:SM_AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo], validationError);
       responseIsValid = NO;
     } else if (self.acceptableStatusCodes && ![self.acceptableStatusCodes containsIndex:(NSUInteger)response.statusCode] && [response URL]) {
       NSMutableDictionary *mutableUserInfo = [@{
-        NSLocalizedDescriptionKey: [NSString stringWithFormat:NSLocalizedStringFromTable(@"Request failed: %@ (%ld)", @"AFNetworking", nil), [NSHTTPURLResponse localizedStringForStatusCode:response.statusCode], (long)response.statusCode],
+        NSLocalizedDescriptionKey: [NSString stringWithFormat:NSLocalizedStringFromTable(@"Request failed: %@ (%ld)", @"SM_AFNetworking", nil), [NSHTTPURLResponse localizedStringForStatusCode:response.statusCode], (long)response.statusCode],
         NSURLErrorFailingURLErrorKey: [response URL],
-        AFNetworkingOperationFailingURLResponseErrorKey: response,
+        SM_AFNetworkingOperationFailingURLResponseErrorKey: response,
       } mutableCopy];
 
       if (data) {
-        mutableUserInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] = data;
-        mutableUserInfo[AFNetworkingOperationFailingURLResponseBodyErrorKey] = *decoded;
+        mutableUserInfo[SM_AFNetworkingOperationFailingURLResponseDataErrorKey] = data;
+        mutableUserInfo[SM_AFNetworkingOperationFailingURLResponseBodyErrorKey] = *decoded;
       }
 
-      validationError = AFErrorWithUnderlyingError([NSError errorWithDomain:AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo], validationError);
+      validationError = AFErrorWithUnderlyingError([NSError errorWithDomain:SM_AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo], validationError);
       responseIsValid = NO;
     }
   }
@@ -125,7 +125,7 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
   return responseIsValid;
 }
 
-#pragma mark - AFURLResponseSerialization
+#pragma mark - SM_AFURLResponseSerialization
 
 - (id)responseObjectForResponse:(NSURLResponse *)response
                            data:(NSData *)data
@@ -134,7 +134,7 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
   NSString* decoded = nil;
 
   if (![self validateResponse:(NSHTTPURLResponse *)response data:data decoded:&decoded error:error]) {
-    if (!error || AFErrorOrUnderlyingErrorHasCodeInDomain(*error, NSURLErrorCannotDecodeContentData, AFURLResponseSerializationErrorDomain)) {
+    if (!error || AFErrorOrUnderlyingErrorHasCodeInDomain(*error, NSURLErrorCannotDecodeContentData, SM_AFURLResponseSerializationErrorDomain)) {
       return nil;
     }
   }

@@ -8,7 +8,7 @@
     return serializer;
 }
 
-#pragma mark - AFURLRequestSerialization
+#pragma mark - SM_AFURLRequestSerialization
 
 - (NSURLRequest *)requestBySerializingRequest:(NSURLRequest *)request
                                withParameters:(id)parameters

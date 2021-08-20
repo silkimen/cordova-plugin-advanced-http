@@ -85,20 +85,20 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
   if (response && [response isKindOfClass:[NSHTTPURLResponse class]]) {
     if (self.acceptableStatusCodes && ![self.acceptableStatusCodes containsIndex:(NSUInteger)response.statusCode] && [response URL]) {
       NSMutableDictionary *mutableUserInfo = [@{
-        NSLocalizedDescriptionKey: [NSString stringWithFormat:NSLocalizedStringFromTable(@"Request failed: %@ (%ld)", @"AFNetworking", nil), [NSHTTPURLResponse localizedStringForStatusCode:response.statusCode], (long)response.statusCode],
+        NSLocalizedDescriptionKey: [NSString stringWithFormat:NSLocalizedStringFromTable(@"Request failed: %@ (%ld)", @"SM_AFNetworking", nil), [NSHTTPURLResponse localizedStringForStatusCode:response.statusCode], (long)response.statusCode],
         NSURLErrorFailingURLErrorKey: [response URL],
-        AFNetworkingOperationFailingURLResponseErrorKey: response,
+        SM_AFNetworkingOperationFailingURLResponseErrorKey: response,
       } mutableCopy];
 
       if (data) {
-        mutableUserInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] = data;
+        mutableUserInfo[SM_AFNetworkingOperationFailingURLResponseDataErrorKey] = data;
 
         // trying to decode error message in body
-        mutableUserInfo[AFNetworkingOperationFailingURLResponseBodyErrorKey] = [self decodeResponseData:data withEncoding:[self getEncoding:response]];
+        mutableUserInfo[SM_AFNetworkingOperationFailingURLResponseBodyErrorKey] = [self decodeResponseData:data withEncoding:[self getEncoding:response]];
       }
 
       if (error) {
-        *error = [NSError errorWithDomain:AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo];
+        *error = [NSError errorWithDomain:SM_AFURLResponseSerializationErrorDomain code:NSURLErrorBadServerResponse userInfo:mutableUserInfo];
       }
 
       return NO;
@@ -108,14 +108,14 @@ static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger co
   return YES;
 }
 
-#pragma mark - AFURLResponseSerialization
+#pragma mark - SM_AFURLResponseSerialization
 
 - (id)responseObjectForResponse:(NSURLResponse *)response
                            data:(NSData *)data
                           error:(NSError *__autoreleasing *)error
 {
   if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
-    if (!error || AFErrorOrUnderlyingErrorHasCodeInDomain(*error, NSURLErrorCannotDecodeContentData, AFURLResponseSerializationErrorDomain)) {
+    if (!error || AFErrorOrUnderlyingErrorHasCodeInDomain(*error, NSURLErrorCannotDecodeContentData, SM_AFURLResponseSerializationErrorDomain)) {
       return nil;
     }
   }
