@@ -16,6 +16,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 import android.util.Base64;
 
@@ -65,6 +68,15 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
 
     if (action == null) {
       return false;
+    }
+
+    if(!isNetworkAvailable()) {
+      CordovaHttpResponse response = new CordovaHttpResponse();
+      response.setStatus(-6);
+      response.setErrorMessage("Not Connected");
+      callbackContext.error(response.toJSON());
+
+      return true;
     }
 
     if ("get".equals(action)) {
@@ -248,5 +260,13 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
         removeReq(c.getRequestId());
       }
     }
+  }
+
+  private boolean isNetworkAvailable() {
+    ConnectivityManager connectivityManager
+      = (ConnectivityManager) cordova.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
+    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
   }
 }
