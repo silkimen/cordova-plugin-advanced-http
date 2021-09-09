@@ -43,6 +43,10 @@ e.g. blacklist `SSLv3` and `TLSv1`:
 <preference name="AndroidBlacklistSecureSocketProtocols" value="SSLv3,TLSv1" />
 ```
 
+## Currently known issues
+
+- [abort](#abort)ing sent requests is not working reliably
+
 ## Usage
 
 ### Plain Cordova
