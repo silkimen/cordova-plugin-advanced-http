@@ -1,6 +1,8 @@
 package com.silkimen.cordovahttp;
 
 import java.security.KeyStore;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.silkimen.http.TLSConfiguration;
 
@@ -83,6 +85,9 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
     String url = args.getString(0);
     JSONObject headers = args.getJSONObject(1);
+    if ("delete".equals(method)) {
+      headers = addXsrfToken(headers);
+    }
     int timeout = args.getInt(2) * 1000;
     boolean followRedirect = args.getBoolean(3);
     String responseType = args.getString(4);
@@ -102,6 +107,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     Object data = args.get(1);
     String serializer = args.getString(2);
     JSONObject headers = args.getJSONObject(3);
+    headers = addXsrfToken(headers);
     int timeout = args.getInt(4) * 1000;
     boolean followRedirect = args.getBoolean(5);
     String responseType = args.getString(6);
@@ -117,6 +123,7 @@ public class CordovaHttpPlugin extends CordovaPlugin {
   private boolean uploadFiles(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
     String url = args.getString(0);
     JSONObject headers = args.getJSONObject(1);
+    headers = addXsrfToken(headers);
     JSONArray filePaths = args.getJSONArray(2);
     JSONArray uploadNames = args.getJSONArray(3);
     int timeout = args.getInt(4) * 1000;
@@ -165,5 +172,18 @@ public class CordovaHttpPlugin extends CordovaPlugin {
     cordova.getThreadPool().execute(runnable);
 
     return true;
+  }
+
+  private JSONObject addXsrfToken(JSONObject headers) throws JSONException {
+    Pattern pattern = Pattern.compile("XSRF-TOKEN-CV=([^;]*)");
+    Matcher matcher = pattern.matcher(headers.getString("Cookie"));
+
+    while (matcher.find()) {
+      if (matcher.groupCount() == 1) {
+        headers.put("X-XSRF-TOKEN-CV", matcher.group(1));
+      }
+    }
+
+    return headers;
   }
 }
