@@ -16,6 +16,7 @@
 - (NSMutableDictionary*)copyHeaderFields:(NSDictionary*)headerFields;
 - (void)setTimeout:(NSTimeInterval)timeout forManager:(AFHTTPSessionManager*)manager;
 - (void)setRedirect:(bool)redirect forManager:(AFHTTPSessionManager*)manager;
+- (void)setXsrfHeader:(NSDictionary*)headers withMethod:(NSString*)method forManager:(AFHTTPSessionManager*)manager;
 
 @end
 
@@ -71,6 +72,39 @@
     [headers enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         [manager.requestSerializer setValue:obj forHTTPHeaderField:key];
     }];
+}
+
+- (void)setXsrfHeader:(NSDictionary*)headers withMethod:(NSString*)method forManager:(AFHTTPSessionManager*)manager {
+    NSArray *antiforgeryAffectedMethodes;
+    antiforgeryAffectedMethodes = [NSArray arrayWithObjects:
+    @"PUT",
+    @"POST",
+    @"DELETE",
+    @"UPLOADFILES",
+    @"DOWNLOADFILE", nil];
+    if ([antiforgeryAffectedMethodes indexOfObject:method] != NSNotFound) {
+        [headers enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+            if ([key isEqual:@"Cookie"] && [ obj rangeOfString:@"XSRF-TOKEN-CV" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+                NSArray *cookies = [obj componentsSeparatedByString:@";"];
+                for (NSString *cookie in cookies) {
+                    if ([cookie hasPrefix:@"XSRF-TOKEN"]) {
+                        [manager.requestSerializer setValue:[cookie componentsSeparatedByString:@"="].lastObject forKey:@"X-XSRF-TOKEN-CV"];
+                        return;
+                    }
+                    //NSString *htmlString = @"A long string containing Name:</td><td>A name here</td> amongst other things";
+                    //NSRegularExpression *nameExpression = [NSRegularExpression regularExpressionWithPattern:@"Name:</td>.*\">(.*)</td>" options:NSRegularExpressionSearch error:nil];
+
+                    //NSArray *matches = [nameExpression matchesInString:htmlString
+                    //                                  options:0
+                    //                                    range:NSMakeRange(0, [htmlString length])];
+                    //for (NSTextCheckingResult *match in matches) {
+                    //    NSRange matchRange = [match range];
+                    //    NSString *matchString = [htmlString substringWithRange:matchRange];
+                    //    NSLog(@"%@", matchString);
+                    }
+            }
+        }];
+    }
 }
 
 - (void)setRedirect:(bool)followRedirect forManager:(AFHTTPSessionManager*)manager {
@@ -185,6 +219,7 @@
     [self setRequestSerializer: @"default" forManager: manager];
     [self setupAuthChallengeBlock: manager];
     [self setRequestHeaders: headers forManager: manager];
+    [self setXsrfHeader:headers withMethod:method forManager:manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
     [self setResponseSerializer:responseType forManager:manager];
@@ -265,10 +300,11 @@
     [self setRequestSerializer: serializerName forManager: manager];
     [self setupAuthChallengeBlock: manager];
     [self setRequestHeaders: headers forManager: manager];
+    [self setXsrfHeader: headers withMethod:(NSString*)method forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
     [self setResponseSerializer:responseType forManager:manager];
-
+    
     CordovaHttpPlugin* __weak weakSelf = self;
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
@@ -441,6 +477,7 @@
     NSString *responseType = [command.arguments objectAtIndex:6];
 
     [self setRequestHeaders: headers forManager: manager];
+    [self setXsrfHeader:headers withMethod:@"UPLOADFILES" forManager:manager];
     [self setupAuthChallengeBlock: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
@@ -500,6 +537,7 @@
     bool followRedirect = [[command.arguments objectAtIndex:4] boolValue];
 
     [self setRequestHeaders: headers forManager: manager];
+    [self setXsrfHeader:headers withMethod:@"DOWNLOADFILE" forManager:manager];
     [self setupAuthChallengeBlock: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
