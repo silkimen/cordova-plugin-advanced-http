@@ -87,10 +87,13 @@
             if ([key isEqual:@"Cookie"] && [ obj rangeOfString:@"XSRF-TOKEN-CV" options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 NSArray *cookies = [obj componentsSeparatedByString:@";"];
                 for (NSString *cookie in cookies) {
-                    if ([cookie hasPrefix:@"XSRF-TOKEN-CV"]) {
-                        [manager.requestSerializer setValue:[cookie componentsSeparatedByString:@"="].lastObject forKey:@"X-XSRF-TOKEN-CV"];
+                    NSString *trimmed = [cookie stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                    if ([trimmed hasPrefix:@"XSRF-TOKEN-CV"]) {
+                        [manager.requestSerializer setValue:[trimmed componentsSeparatedByString:@"="].lastObject forHTTPHeaderField:@"X-XSRF-TOKEN-CV"];
                         return;
+             
                     }
+                }
             }
         }];
     }
