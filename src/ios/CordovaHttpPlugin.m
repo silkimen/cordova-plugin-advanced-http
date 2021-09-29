@@ -91,17 +91,6 @@
                         [manager.requestSerializer setValue:[cookie componentsSeparatedByString:@"="].lastObject forKey:@"X-XSRF-TOKEN-CV"];
                         return;
                     }
-                    //NSString *htmlString = @"A long string containing Name:</td><td>A name here</td> amongst other things";
-                    //NSRegularExpression *nameExpression = [NSRegularExpression regularExpressionWithPattern:@"Name:</td>.*\">(.*)</td>" options:NSRegularExpressionSearch error:nil];
-
-                    //NSArray *matches = [nameExpression matchesInString:htmlString
-                    //                                  options:0
-                    //                                    range:NSMakeRange(0, [htmlString length])];
-                    //for (NSTextCheckingResult *match in matches) {
-                    //    NSRange matchRange = [match range];
-                    //    NSString *matchString = [htmlString substringWithRange:matchRange];
-                    //    NSLog(@"%@", matchString);
-                    }
             }
         }];
     }
