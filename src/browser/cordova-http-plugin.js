@@ -159,15 +159,17 @@ function sendRequest(method, withData, opts, success, failure) {
     serializer = opts[2];
     headers = opts[3];
     timeout = opts[4];
-    followRedirect = opts[5];
-    responseType = opts[6];
-    reqId = opts[7];
+    // ignore opts[5] (read timeout)
+    followRedirect = opts[6];
+    responseType = opts[7];
+    reqId = opts[8];
   } else {
     headers = opts[1];
     timeout = opts[2];
-    followRedirect = opts[3];
-    responseType = opts[4];
-    reqId = opts[5];
+    // ignore opts[3] (read timeout)
+    followRedirect = opts[4];
+    responseType = opts[5];
+    reqId = opts[6];
   }
 
   var onSuccess = injectRequestIdHandler(reqId, success);
