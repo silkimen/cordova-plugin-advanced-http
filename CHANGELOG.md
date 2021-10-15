@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.2.2
+
+- Fixed #438: requests not working correctly on browser platform because request options are not processed correctly
+
 ## 3.2.1
 
 - Fixed #425: plugin crashes on Android SDK levels < 24

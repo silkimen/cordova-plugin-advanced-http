@@ -151,23 +151,27 @@ function setHeaders(xhr, headers) {
 }
 
 function sendRequest(method, withData, opts, success, failure) {
-  var data, serializer, headers, timeout, followRedirect, responseType, reqId;
+  var data, serializer, headers, readTimeout, followRedirect, responseType, reqId;
   var url = opts[0];
 
   if (withData) {
     data = opts[1];
     serializer = opts[2];
     headers = opts[3];
-    timeout = opts[4];
-    followRedirect = opts[5];
-    responseType = opts[6];
-    reqId = opts[7];
+    // connect timeout not applied
+    // connectTimeout = opts[4];
+    readTimeout = opts[5];
+    followRedirect = opts[6];
+    responseType = opts[7];
+    reqId = opts[8];
   } else {
     headers = opts[1];
-    timeout = opts[2];
-    followRedirect = opts[3];
-    responseType = opts[4];
-    reqId = opts[5];
+    // connect timeout not applied
+    // connectTimeout = opts[2];
+    readTimeout = opts[3];
+    followRedirect = opts[4];
+    responseType = opts[5];
+    reqId = opts[6];
   }
 
   var onSuccess = injectRequestIdHandler(reqId, success);
@@ -229,7 +233,10 @@ function sendRequest(method, withData, opts, success, failure) {
 
   // requesting text instead of JSON because it's parsed in the response handler
   xhr.responseType = responseType === 'json' ? 'text' : responseType;
-  xhr.timeout = timeout * 1000;
+
+  // we can't set connect timeout and read timeout separately on browser platform
+  xhr.timeout = readTimeout * 1000;
+
   setHeaders(xhr, headers);
 
   xhr.onerror = function () {

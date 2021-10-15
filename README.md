@@ -129,8 +129,9 @@ This defaults to `urlencoded`. You can also override the default content type he
 
 ### setRequestTimeout
 Set how long to wait for a request to respond, in seconds.
-For Android, this will set both [connectTimeout](https://developer.android.com/reference/java/net/URLConnection#getConnectTimeout()) and [readTimeout](https://developer.android.com/reference/java/net/URLConnection#setReadTimeout(int))
-For iOS, this will set [timeout interval](https://developer.apple.com/documentation/foundation/nsmutableurlrequest/1414063-timeoutinterval)
+For Android, this will set both [connectTimeout](https://developer.android.com/reference/java/net/URLConnection#getConnectTimeout()) and [readTimeout](https://developer.android.com/reference/java/net/URLConnection#setReadTimeout(int)).
+For iOS, this will set [timeout interval](https://developer.apple.com/documentation/foundation/nsmutableurlrequest/1414063-timeoutinterval).
+For browser platform, this will set [timeout](https://developer.mozilla.org/fr/docs/Web/API/XMLHttpRequest/timeout).
 ```js
 cordova.plugin.http.setRequestTimeout(5.0);
 ```
