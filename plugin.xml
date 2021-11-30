@@ -36,26 +36,14 @@
     <header-file src="src/ios/BinaryResponseSerializer.h"/>
     <header-file src="src/ios/TextResponseSerializer.h"/>
     <header-file src="src/ios/TextRequestSerializer.h"/>
-    <header-file src="src/ios/SM_AFNetworking/SM_AFHTTPSessionManager.h"/>
-    <header-file src="src/ios/SM_AFNetworking/SM_AFNetworking.h"/>
-    <header-file src="src/ios/SM_AFNetworking/SM_AFNetworkReachabilityManager.h"/>
-    <header-file src="src/ios/SM_AFNetworking/SM_AFSecurityPolicy.h"/>
-    <header-file src="src/ios/SM_AFNetworking/SM_AFURLRequestSerialization.h"/>
-    <header-file src="src/ios/SM_AFNetworking/SM_AFURLResponseSerialization.h"/>
-    <header-file src="src/ios/SM_AFNetworking/SM_AFURLSessionManager.h"/>
     <header-file src="src/ios/SDNetworkActivityIndicator/SDNetworkActivityIndicator.h"/>
     <source-file src="src/ios/CordovaHttpPlugin.m"/>
     <source-file src="src/ios/BinaryRequestSerializer.m"/>
     <source-file src="src/ios/BinaryResponseSerializer.m"/>
     <source-file src="src/ios/TextResponseSerializer.m"/>
     <source-file src="src/ios/TextRequestSerializer.m"/>
-    <source-file src="src/ios/SM_AFNetworking/SM_AFHTTPSessionManager.m"/>
-    <source-file src="src/ios/SM_AFNetworking/SM_AFNetworkReachabilityManager.m"/>
-    <source-file src="src/ios/SM_AFNetworking/SM_AFSecurityPolicy.m"/>
-    <source-file src="src/ios/SM_AFNetworking/SM_AFURLRequestSerialization.m"/>
-    <source-file src="src/ios/SM_AFNetworking/SM_AFURLResponseSerialization.m"/>
-    <source-file src="src/ios/SM_AFNetworking/SM_AFURLSessionManager.m"/>
     <source-file src="src/ios/SDNetworkActivityIndicator/SDNetworkActivityIndicator.m"/>
+    <framework src="AFNetworking" type="podspec" spec="~> 4.0.1" />
     <framework src="Security.framework"/>
     <framework src="SystemConfiguration.framework"/>
   </platform>
