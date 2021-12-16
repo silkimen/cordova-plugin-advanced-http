@@ -72,8 +72,8 @@ static dispatch_group_t url_session_manager_completion_group() {
 NSString * const SM_AFNetworkingTaskDidResumeNotification = @"com.alamofire.networking.task.resume";
 NSString * const SM_AFNetworkingTaskDidCompleteNotification = @"com.alamofire.networking.task.complete";
 NSString * const SM_AFNetworkingTaskDidSuspendNotification = @"com.alamofire.networking.task.suspend";
-NSString * const AFURLSessionDidInvalidateNotification = @"com.alamofire.networking.session.invalidate";
-NSString * const AFURLSessionDownloadTaskDidFailToMoveFileNotification = @"com.alamofire.networking.session.download.file-manager-error";
+NSString * const SM_AFURLSessionDidInvalidateNotification = @"com.alamofire.networking.session.invalidate";
+NSString * const SM_AFURLSessionDownloadTaskDidFailToMoveFileNotification = @"com.alamofire.networking.session.download.file-manager-error";
 
 NSString * const SM_AFNetworkingTaskDidCompleteSerializedResponseKey = @"com.alamofire.networking.task.complete.serializedresponse";
 NSString * const SM_AFNetworkingTaskDidCompleteResponseSerializerKey = @"com.alamofire.networking.task.complete.responseserializer";
@@ -336,7 +336,7 @@ didFinishDownloadingToURL:(NSURL *)location
             [[NSFileManager defaultManager] moveItemAtURL:location toURL:self.downloadFileURL error:&fileManagerError];
 
             if (fileManagerError) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:AFURLSessionDownloadTaskDidFailToMoveFileNotification object:downloadTask userInfo:fileManagerError.userInfo];
+                [[NSNotificationCenter defaultCenter] postNotificationName:SM_AFURLSessionDownloadTaskDidFailToMoveFileNotification object:downloadTask userInfo:fileManagerError.userInfo];
             }
         }
     }
@@ -368,11 +368,11 @@ static inline BOOL af_addMethod(Class theClass, SEL selector, Method method) {
 static NSString * const AFNSURLSessionTaskDidResumeNotification  = @"com.alamofire.networking.nsurlsessiontask.resume";
 static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofire.networking.nsurlsessiontask.suspend";
 
-@interface _AFURLSessionTaskSwizzling : NSObject
+@interface _SM_AFURLSessionTaskSwizzling : NSObject
 
 @end
 
-@implementation _AFURLSessionTaskSwizzling
+@implementation _SM_AFURLSessionTaskSwizzling
 
 + (void)load {
     /**
@@ -956,7 +956,7 @@ didBecomeInvalidWithError:(NSError *)error
         self.sessionDidBecomeInvalid(session, error);
     }
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:AFURLSessionDidInvalidateNotification object:session];
+    [[NSNotificationCenter defaultCenter] postNotificationName:SM_AFURLSessionDidInvalidateNotification object:session];
 }
 
 - (void)URLSession:(NSURLSession *)session
@@ -1176,7 +1176,7 @@ didFinishDownloadingToURL:(NSURL *)location
             NSError *error = nil;
             [[NSFileManager defaultManager] moveItemAtURL:location toURL:fileURL error:&error];
             if (error) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:AFURLSessionDownloadTaskDidFailToMoveFileNotification object:downloadTask userInfo:error.userInfo];
+                [[NSNotificationCenter defaultCenter] postNotificationName:SM_AFURLSessionDownloadTaskDidFailToMoveFileNotification object:downloadTask userInfo:error.userInfo];
             }
 
             return;

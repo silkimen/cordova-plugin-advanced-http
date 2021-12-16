@@ -33,7 +33,7 @@ NSString * const SM_AFNetworkingReachabilityNotificationStatusItem = @"SM_AFNetw
 
 typedef void (^AFNetworkReachabilityStatusBlock)(AFNetworkReachabilityStatus status);
 
-NSString * AFStringFromNetworkReachabilityStatus(AFNetworkReachabilityStatus status) {
+NSString * SM_AFStringFromNetworkReachabilityStatus(AFNetworkReachabilityStatus status) {
     switch (status) {
         case AFNetworkReachabilityStatusNotReachable:
             return NSLocalizedStringFromTable(@"Not Reachable", @"SM_AFNetworking", nil);
@@ -240,7 +240,7 @@ static void AFNetworkReachabilityReleaseCallback(const void *info) {
 #pragma mark -
 
 - (NSString *)localizedNetworkReachabilityStatusString {
-    return AFStringFromNetworkReachabilityStatus(self.networkReachabilityStatus);
+    return SM_AFStringFromNetworkReachabilityStatus(self.networkReachabilityStatus);
 }
 
 #pragma mark -
