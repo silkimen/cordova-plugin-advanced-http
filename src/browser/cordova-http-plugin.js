@@ -241,7 +241,7 @@ function sendRequest(method, withData, opts, success, failure) {
     setHeaders(xhr, headers);
   } catch(error) {
     return onFail({
-      status: -8,
+      status: -1,
       error: error,
       url: url,
       headers: headers
