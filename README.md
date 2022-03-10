@@ -12,10 +12,6 @@ Cordova / Phonegap plugin for communicating with HTTP servers.  Supports iOS, An
 
 This is a fork of [Wymsee's Cordova-HTTP plugin](https://github.com/wymsee/cordova-HTTP).
 
-## Forked by spoonconsulting
-
-Duplicate symbol error due to AFNetworking in cordova-plugin-background-upload
-
 ## Advantages over Javascript requests
 
  - SSL / TLS Pinning
