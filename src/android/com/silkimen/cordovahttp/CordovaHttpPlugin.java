@@ -70,10 +70,18 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
       return false;
     }
 
-    if(!isNetworkAvailable()) {
+    if ("setServerTrustMode".equals(action)) {
+      return this.setServerTrustMode(args, callbackContext);
+    } else if ("setClientAuthMode".equals(action)) {
+      return this.setClientAuthMode(args, callbackContext);
+    } else if ("abort".equals(action)) {
+      return this.abort(args, callbackContext);
+    }
+
+    if (!isNetworkAvailable()) {
       CordovaHttpResponse response = new CordovaHttpResponse();
       response.setStatus(-6);
-      response.setErrorMessage("Not Connected");
+      response.setErrorMessage("No network connection available");
       callbackContext.error(response.toJSON());
 
       return true;
@@ -97,12 +105,6 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
       return this.uploadFiles(args, callbackContext);
     } else if ("downloadFile".equals(action)) {
       return this.downloadFile(args, callbackContext);
-    } else if ("setServerTrustMode".equals(action)) {
-      return this.setServerTrustMode(args, callbackContext);
-    } else if ("setClientAuthMode".equals(action)) {
-      return this.setClientAuthMode(args, callbackContext);
-    } else if ("abort".equals(action)) {
-      return this.abort(args, callbackContext);
     } else {
       return false;
     }
@@ -263,8 +265,7 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
   }
 
   private boolean isNetworkAvailable() {
-    ConnectivityManager connectivityManager
-      = (ConnectivityManager) cordova.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+    ConnectivityManager connectivityManager = (ConnectivityManager) cordova.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
 
     return activeNetworkInfo != null && activeNetworkInfo.isConnected();
