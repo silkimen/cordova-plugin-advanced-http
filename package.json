@@ -58,11 +58,11 @@
   },
   "homepage": "https://github.com/silkimen/cordova-plugin-advanced-http#readme",
   "devDependencies": {
-    "chai": "4.2.0",
+    "chai": "4.3.6",
     "colors": "1.4.0",
-    "cordova": "10.0.0",
-    "mocha": "8.2.0",
-    "umd-tough-cookie": "2.4.3",
+    "cordova": "11.0.0",
+    "mocha": "9.2.2",
+    "umd-tough-cookie": "3.0.0",
     "wd": "1.14.0",
     "xml2js": "0.4.23"
   }

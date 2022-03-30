@@ -9,9 +9,7 @@ const hooks = {
       }
 
       helpers.setDefaultServerTrustMode(function () {
-        // @TODO: not ready yet
-        // helpers.setNoneClientAuthMode(resolve, reject);
-        resolve();
+        helpers.setNoneClientAuthMode(resolve, reject);
       }, reject);
     });
   }
@@ -23,12 +21,16 @@ const helpers = {
   setPinnedServerTrustMode: function (resolve, reject) { cordova.plugin.http.setServerTrustMode('pinned', resolve, reject); },
   setNoneClientAuthMode: function (resolve, reject) { cordova.plugin.http.setClientAuthMode('none', resolve, reject); },
   setBufferClientAuthMode: function (resolve, reject) {
-    helpers.getWithXhr(function (pkcs) {
-      cordova.plugin.http.setClientAuthMode('buffer', {
-        rawPkcs: pkcs,
-        pkcsPassword: 'badssl.com'
-      }, resolve, reject);
-    }, './certificates/badssl-client-cert.pkcs', 'arraybuffer');
+    var path = cordova.file.applicationDirectory + 'www/certificates/badssl-client-cert.pkcs';
+
+    resolveLocalFileSystemURL(path, function(entry) {
+      helpers.readFileEntry(entry, 'buffer', function(pkcs) {
+        cordova.plugin.http.setClientAuthMode('buffer', {
+          rawPkcs: pkcs,
+          pkcsPassword: 'badssl.com'
+        }, resolve, reject);
+      }, reject);
+    }, reject);
   },
   setJsonSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('json')); },
   setUtf8StringSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('utf8')); },
@@ -37,22 +39,7 @@ const helpers = {
   setRawSerializer: function (resolve) { resolve(cordova.plugin.http.setDataSerializer('raw')); },
   disableFollowingRedirect: function (resolve) { resolve(cordova.plugin.http.setFollowRedirect(false)); },
   enableFollowingRedirect: function (resolve) { resolve(cordova.plugin.http.setFollowRedirect(true)); },
-  getWithXhr: function (done, url, type) {
-    var xhr = new XMLHttpRequest();
-
-    xhr.addEventListener('load', function () {
-      if (!type || type === 'text') {
-        done(this.responseText);
-      } else {
-        done(this.response);
-      }
-    });
-
-    xhr.responseType = type;
-    xhr.open('GET', url);
-    xhr.send();
-  },
-  readFileEntryAsText: function(fileEntry, onSuccess, onFail) {
+  readFileEntry: function(fileEntry, contentType, onSuccess, onFail) {
     var reader = new FileReader();
 
     reader.onerror = onFail;
@@ -62,7 +49,11 @@ const helpers = {
     };
 
     fileEntry.file(function(file) {
-      reader.readAsText(file);
+      if (contentType === 'buffer') {
+        reader.readAsArrayBuffer(file);
+      } else {
+        reader.readAsText(file);
+      }
     }, onFail);
   },
   writeToFile: function (done, fileName, content) {
@@ -355,7 +346,7 @@ const tests = [
       var targetPath = cordova.file.cacheDirectory + 'test.xml';
 
       cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function (entry) {
-        helpers.readFileEntryAsText(entry, function(content) {
+        helpers.readFileEntry(entry, 'text', function (content) {
           resolve({
             sourceUrl: sourceUrl,
             targetPath: targetPath,
@@ -533,7 +524,7 @@ const tests = [
       cordova.plugin.http.setCookie('http://httpbin.org/get', 'mySecondCookie=mySecondValue');
 
       cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function (entry) {
-        helpers.readFileEntryAsText(entry, function (content) {
+        helpers.readFileEntry(entry, 'text', function (content) {
           resolve({
             sourceUrl: sourceUrl,
             targetPath: targetPath,
@@ -710,7 +701,7 @@ const tests = [
       var targetPath = cordova.file.cacheDirectory + 'test.xml';
 
       cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function (entry) {
-        helpers.readFileEntryAsText(entry, function (content) {
+        helpers.readFileEntry(entry, 'text', function (content) {
           resolve({
             sourceUrl: sourceUrl,
             targetPath: targetPath,
@@ -864,14 +855,18 @@ const tests = [
     before: helpers.setMultipartSerializer,
     func: function (resolve, reject) {
       var ponyfills = cordova.plugin.http.ponyfills;
-      helpers.getWithXhr(function (blob) {
-        var formData = new ponyfills.FormData();
-        formData.append('CordovaLogo', blob);
+      var path = cordova.file.applicationDirectory + 'www/res/cordova_logo.png';
 
-        var url = 'https://httpbin.org/anything';
-        var options = { method: 'post', data: formData };
-        cordova.plugin.http.sendRequest(url, options, resolve, reject);
-      }, './res/cordova_logo.png', 'blob');
+      resolveLocalFileSystemURL(path, function(entry) {
+        helpers.readFileEntry(entry, 'buffer', function(buffer) {
+          var formData = new ponyfills.FormData();
+          formData.append('CordovaLogo', new Blob([buffer], { type: 'image/png' }));
+
+          var url = 'https://httpbin.org/anything';
+          var options = { method: 'post', data: formData };
+          cordova.plugin.http.sendRequest(url, options, resolve, reject);
+        }, reject);
+      }, reject);
     },
     validationFunc: function (driver, result) {
       helpers.checkResult(result, 'resolved');
@@ -890,9 +885,13 @@ const tests = [
     expected: 'resolved: {"status":200,"data:application/octet-stream;base64,iVBORw0KGgoAAAANSUhEUg ...',
     before: helpers.setRawSerializer,
     func: function (resolve, reject) {
-      helpers.getWithXhr(function (buffer) {
-        cordova.plugin.http.post('http://httpbin.org/anything', buffer, {}, resolve, reject);
-      }, './res/cordova_logo.png', 'arraybuffer');
+      var path = cordova.file.applicationDirectory + 'www/res/cordova_logo.png';
+
+      resolveLocalFileSystemURL(path, function(entry) {
+        helpers.readFileEntry(entry, 'buffer', function(buffer) {
+          cordova.plugin.http.post('http://httpbin.org/anything', buffer, {}, resolve, reject);
+        }, reject);
+      }, reject);
     },
     validationFunc: function (driver, result) {
       helpers.checkResult(result, 'resolved');
@@ -1088,7 +1087,7 @@ const tests = [
       var targetPath = cordova.file.cacheDirectory + 'test.xml';
 
       var reqId = cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function (entry) {
-        helpers.getWithXhr(function (content) {
+        helpers.readFileEntry(entry, 'text', function(content) {
           resolve({
             sourceUrl: sourceUrl,
             targetPath: targetPath,
@@ -1096,7 +1095,7 @@ const tests = [
             name: entry.name,
             content: content
           });
-        }, targetPath);
+        }, reject);
       }, reject);
 
       setTimeout(function () {

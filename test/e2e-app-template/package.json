@@ -3,7 +3,6 @@
   "displayName": "HttpDemo",
   "version": "1.0.0",
   "description": "A sample Apache Cordova application that demonstrates advanced HTTP plugin.",
-  "main": "index.js",
   "scripts": {
     "build": "scripts/build.sh",
     "test": "npm run build && scripts/test.sh"
@@ -11,12 +10,11 @@
   "author": "Sefa Ilkimen",
   "license": "Apache-2.0",
   "dependencies": {
-    "cordova": "10.0.0",
+    "cordova": "11.0.0",
     "cordova-android": "10.1.1",
     "cordova-browser": "6.0.0",
     "cordova-ios": "6.2.0",
-    "cordova-plugin-device": "2.0.3",
-    "cordova-plugin-wkwebview-file-xhr": "3.0.0"
+    "cordova-plugin-device": "2.0.3"
   },
   "cordova": {
     "platforms": [
@@ -25,11 +23,7 @@
       "browser"
     ],
     "plugins": {
-      "cordova-plugin-device": {},
-      "cordova-plugin-wkwebview-file-xhr": {}
+      "cordova-plugin-device": {}
     }
-  },
-  "devDependencies": {
-    "cordova-plugin-device": "2.0.3"
   }
 }
