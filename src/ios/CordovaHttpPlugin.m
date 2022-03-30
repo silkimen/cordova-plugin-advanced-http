@@ -42,13 +42,13 @@
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(SM_AFHTTPSessionManager*)manager {
     if ([serializerName isEqualToString:@"json"]) {
-        manager.requestSerializer = [AFJSONRequestSerializer serializer];
+        manager.requestSerializer = [SM_AFJSONRequestSerializer serializer];
     } else if ([serializerName isEqualToString:@"utf8"]) {
         manager.requestSerializer = [TextRequestSerializer serializer];
     } else if ([serializerName isEqualToString:@"raw"]) {
         manager.requestSerializer = [BinaryRequestSerializer serializer];
     } else {
-        manager.requestSerializer = [AFHTTPRequestSerializer serializer];
+        manager.requestSerializer = [SM_AFHTTPRequestSerializer serializer];
     }
 }
 
@@ -523,7 +523,7 @@
 
 - (void)downloadFile:(CDVInvokedUrlCommand*)command {
     SM_AFHTTPSessionManager *manager = [SM_AFHTTPSessionManager manager];
-    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    manager.responseSerializer = [SM_AFHTTPResponseSerializer serializer];
 
     NSString *url = [command.arguments objectAtIndex:0];
     NSDictionary *headers = [command.arguments objectAtIndex:1];

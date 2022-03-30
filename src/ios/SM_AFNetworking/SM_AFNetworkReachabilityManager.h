@@ -200,7 +200,7 @@ FOUNDATION_EXPORT NSString * const SM_AFNetworkingReachabilityNotificationStatus
 /**
  Returns a localized string representation of an `AFNetworkReachabilityStatus` value.
  */
-FOUNDATION_EXPORT NSString * AFStringFromNetworkReachabilityStatus(AFNetworkReachabilityStatus status);
+FOUNDATION_EXPORT NSString * SM_AFStringFromNetworkReachabilityStatus(AFNetworkReachabilityStatus status);
 
 NS_ASSUME_NONNULL_END
 #endif
