@@ -237,7 +237,16 @@ function sendRequest(method, withData, opts, success, failure) {
   // we can't set connect timeout and read timeout separately on browser platform
   xhr.timeout = readTimeout * 1000;
 
-  setHeaders(xhr, headers);
+  try {
+    setHeaders(xhr, headers);
+  } catch(error) {
+    return onFail({
+      status: -1,
+      error: error,
+      url: url,
+      headers: headers
+    });
+  }
 
   xhr.onerror = function () {
     return onFail(createXhrFailureObject(xhr));
