@@ -52,6 +52,19 @@ const helpers = {
     xhr.open('GET', url);
     xhr.send();
   },
+  readFileEntryAsText: function(fileEntry, onSuccess, onFail) {
+    var reader = new FileReader();
+
+    reader.onerror = onFail;
+
+    reader.onloadend = function() {
+      onSuccess(reader.result);
+    };
+
+    fileEntry.file(function(file) {
+      reader.readAsText(file);
+    }, onFail);
+  },
   writeToFile: function (done, fileName, content) {
     window.resolveLocalFileSystemURL(cordova.file.cacheDirectory, function (directoryEntry) {
       directoryEntry.getFile(fileName, { create: true, exclusive: false }, function (fileEntry) {
@@ -342,7 +355,7 @@ const tests = [
       var targetPath = cordova.file.cacheDirectory + 'test.xml';
 
       cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function (entry) {
-        helpers.getWithXhr(function (content) {
+        helpers.readFileEntryAsText(entry, function(content) {
           resolve({
             sourceUrl: sourceUrl,
             targetPath: targetPath,
@@ -350,7 +363,7 @@ const tests = [
             name: entry.name,
             content: content
           });
-        }, targetPath);
+        }, reject);
       }, reject);
     },
     validationFunc: function (driver, result) {
@@ -520,7 +533,7 @@ const tests = [
       cordova.plugin.http.setCookie('http://httpbin.org/get', 'mySecondCookie=mySecondValue');
 
       cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function (entry) {
-        helpers.getWithXhr(function (content) {
+        helpers.readFileEntryAsText(entry, function (content) {
           resolve({
             sourceUrl: sourceUrl,
             targetPath: targetPath,
@@ -528,7 +541,7 @@ const tests = [
             name: entry.name,
             content: content
           });
-        }, targetPath);
+        }, reject);
       }, reject);
     },
     validationFunc: function (driver, result) {
@@ -697,7 +710,7 @@ const tests = [
       var targetPath = cordova.file.cacheDirectory + 'test.xml';
 
       cordova.plugin.http.downloadFile(sourceUrl, {}, {}, targetPath, function (entry) {
-        helpers.getWithXhr(function (content) {
+        helpers.readFileEntryAsText(entry, function (content) {
           resolve({
             sourceUrl: sourceUrl,
             targetPath: targetPath,
@@ -705,7 +718,7 @@ const tests = [
             name: entry.name,
             content: content
           });
-        }, targetPath);
+        }, reject);
       }, reject);
     },
     validationFunc: function (driver, result) {

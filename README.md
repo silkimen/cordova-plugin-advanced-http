@@ -418,7 +418,7 @@ Downloads a file and saves it to the device.  Takes a URL, parameters, headers, 
 
 ```js
 cordova.plugin.http.downloadFile(
-  "https://google.com/", 
+  "https://google.com/",
   { id: '12', message: 'test' },
   { Authorization: 'OAuth2: token' },
   'file:///somepicture.jpg',
@@ -434,7 +434,7 @@ cordova.plugin.http.downloadFile(
     Object.keys(response.headers).forEach(function (key) {
       console.log(key, response.headers[key]);
     });
-  }, 
+  },
   // error callback
   function(response) {
     console.error(response.error);
@@ -526,7 +526,7 @@ First, install current package with `npm install` to fetch dev dependencies.
 
 Then, to execute Javascript tests:
 ```shell
-npm run testjs
+npm run test:js
 ```
 
 And, to execute E2E tests:
@@ -537,8 +537,8 @@ And, to execute E2E tests:
 - run
   -  updating client and server certificates, building test app, and running e2e tests
 ```shell
-npm run testandroid
-npm run testios
+npm run test:android
+npm run test:ios
 ```
 
 ## Contribute & Develop

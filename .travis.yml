@@ -7,52 +7,52 @@ addons:
 
 matrix:
   include:
-  - name: "iOS Build & Test"
-    language: objective-c
-    sudo: false
-    os: osx
-    osx_image: xcode12.5
+    - name: "iOS Build & Test"
+      language: objective-c
+      sudo: false
+      os: osx
+      osx_image: xcode12.5
 
-    before_install:
-    - export LANG=en_US.UTF-8 &&
-      nvm use 14
+      before_install:
+        - export LANG=en_US.UTF-8 &&
+          nvm use 14
 
-    install:
-    - npm install
+      install:
+        - npm install
 
-    script:
-    - npm run testjs &&
-      npm run updatecert &&
-      scripts/build-test-app.sh --ios --emulator &&
-      scripts/upload-saucelabs.sh --ios &&
-      scripts/test-app.sh --ios --emulator;
+      script:
+        - npm run test:js &&
+          npm run update:cert &&
+          scripts/build-test-app.sh --ios --emulator &&
+          scripts/upload-saucelabs.sh --ios &&
+          scripts/test-app.sh --ios --emulator;
 
-  - name: "Android Build & Test"
-    language: android
-    sudo : required
+    - name: "Android Build & Test"
+      language: android
+      sudo: required
 
-    android:
-      components:
-        - tools
-        - platform-tools
-        - build-tools-28.0.3
-        - android-28
-        - extra-android-support
-        - extra-android-m2repository
-        - extra-google-m2repository
+      android:
+        components:
+          - tools
+          - platform-tools
+          - build-tools-30.0.1
+          - android-28
+          - extra-android-support
+          - extra-android-m2repository
+          - extra-google-m2repository
 
-    before_install:
-    - export LANG=en_US.UTF-8 &&
-      curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - &&
-      sudo apt-get install -y nodejs
-    - yes | sdkmanager --update
+      before_install:
+        - export LANG=en_US.UTF-8 &&
+          curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - &&
+          sudo apt-get install -y nodejs
+        - yes | sdkmanager --update
 
-    install:
-    - npm install
+      install:
+        - npm install
 
-    script:
-    - npm run testjs &&
-      npm run updatecert &&
-      scripts/build-test-app.sh --android --emulator &&
-      scripts/upload-saucelabs.sh --android &&
-      scripts/test-app.sh --android --emulator;
+      script:
+        - npm run test:js &&
+          npm run update:cert &&
+          scripts/build-test-app.sh --android --emulator &&
+          scripts/upload-saucelabs.sh --android &&
+          scripts/test-app.sh --android --emulator;

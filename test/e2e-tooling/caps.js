@@ -64,7 +64,7 @@ const configs = {
     os_version: '14',
     project: 'HTTP Test App',
     autoWebview: true,
-    app: 'HttpTestAppAndroid',
+    app: 'HttpTestAppIos',
     'browserstack.networkLogs': false
   },
   browserstackAndroidDevice: {
