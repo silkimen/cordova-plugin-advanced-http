@@ -91,11 +91,15 @@ _out:
 
 static BOOL AFServerTrustIsValid(SecTrustRef serverTrust) {
     BOOL isValid = NO;
-    SecTrustResultType result;
-    __Require_noErr_Quiet(SecTrustEvaluate(serverTrust, &result), _out);
+    CFErrorRef error = nil;
+    isValid = SecTrustEvaluateWithError(serverTrust, &error);
 
-    isValid = (result == kSecTrustResultUnspecified || result == kSecTrustResultProceed);
-
+#ifdef DEBUG
+    if (!isValid) {
+        NSError *nerror = (__bridge NSError *)error;
+        NSLog(@"%@",nerror);
+    }
+#endif
 _out:
     return isValid;
 }
