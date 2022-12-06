@@ -71,7 +71,7 @@ class CordovaServerTrust implements Runnable {
         this.tlsConfiguration.setTrustManagers(this.noOpTrustManagers);
       } else if ("pinned".equals(this.mode)) {
         this.tlsConfiguration.setHostnameVerifier(null);
-        this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromBundle("www/certificates")));
+        this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromBundle("www/certificates", "public/certificates")));
       } else {
         this.tlsConfiguration.setHostnameVerifier(null);
         this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromKeyStore("AndroidCAStore")));
@@ -92,9 +92,10 @@ class CordovaServerTrust implements Runnable {
     return tmf.getTrustManagers();
   }
 
-  private KeyStore getCertsFromBundle(String path) throws GeneralSecurityException, IOException {
+  private KeyStore getCertsFromBundle(String path, String capPath) throws GeneralSecurityException, IOException {
     AssetManager assetManager = this.activity.getAssets();
-    String[] files = assetManager.list(path);
+    String[] cordovaFiles = assetManager.list(path);
+    String[] capFiles = assetManager.list(capPath);
 
     CertificateFactory cf = CertificateFactory.getInstance("X.509");
     String keyStoreType = KeyStore.getDefaultType();
@@ -102,14 +103,24 @@ class CordovaServerTrust implements Runnable {
 
     keyStore.load(null, null);
 
-    for (int i = 0; i < files.length; i++) {
-      int index = files[i].lastIndexOf('.');
+    for (int i = 0; i < cordovaFiles.length; i++) {
+      int index = cordovaFiles[i].lastIndexOf('.');
 
-      if (index == -1 || !files[i].substring(index).equals(".cer")) {
+      if (index == -1 || !cordovaFiles[i].substring(index).equals(".cer")) {
         continue;
       }
 
-      keyStore.setCertificateEntry("CA" + i, cf.generateCertificate(assetManager.open(path + "/" + files[i])));
+      keyStore.setCertificateEntry("CA" + i, cf.generateCertificate(assetManager.open(path + "/" + cordovaFiles[i])));
+    }
+
+    for (int i = 0; i < capFiles.length; i++) {
+      int index = capFiles[i].lastIndexOf('.');
+
+      if (index == -1 || !capFiles[i].substring(index).equals(".cer")) {
+        continue;
+      }
+
+      keyStore.setCertificateEntry("CA" + i, cf.generateCertificate(assetManager.open(capPath + "/" + capFiles[i])));
     }
 
     return keyStore;
