@@ -67,18 +67,20 @@ class CordovaHttpUpload extends CordovaHttpBase {
       }
 
       if (hasProgressHandler) {
-        request.progress((transferred, total) -> {
-          JSONObject json = new JSONObject();
-          try {
-            json.put("isProgress", true);
-            json.put("transferred", transferred);
-            json.put("total", total);
+        request.progress(new HttpRequest.UploadProgress() {
+          public void onUpload(long transferred, long total) {
+            JSONObject json = new JSONObject();
+            try {
+              json.put("isProgress", true);
+              json.put("transferred", transferred);
+              json.put("total", total);
 
-            PluginResult result = new PluginResult(PluginResult.Status.OK, json);
-            result.setKeepCallback(true);
-            callbackContext.getCallbackContext().sendPluginResult(result);
-          } catch (JSONException e) {
-            Log.e(TAG, "onUpload progress error", e);
+              PluginResult result = new PluginResult(PluginResult.Status.OK, json);
+              result.setKeepCallback(true);
+              callbackContext.getCallbackContext().sendPluginResult(result);
+            } catch (JSONException e) {
+              Log.e(TAG, "onUpload progress error", e);
+            }
           }
         });
       }
