@@ -163,7 +163,7 @@ cordova.plugin.http.getCookieString(url);
 ```
 
 ### setCookie
-Add a custom cookie. Takes a URL, a cookie string and an options object. See [ToughCookie documentation](https://github.com/salesforce/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie) for allowed options.
+Add a custom cookie. Takes a URL, a cookie string and an options object. See [ToughCookie documentation](https://github.com/salesforce/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie) for allowed options. Cookie will persist until removed with [removeCookies](#removecookies) or [clearCookies](#clearcookies).
 
 ```js
 cordova.plugin.http.setCookie(url, cookie, options);
