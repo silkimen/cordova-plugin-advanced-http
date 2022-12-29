@@ -321,18 +321,18 @@ const tests = [
   },
   {
     description: 'should resolve correct URL after redirect (GET) #33',
-    expected: 'resolved: {"status": 200, url: "http://httpbin.org/anything", ...',
-    func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
+    expected: 'resolved: {"status": 200, url: "http://httpbingo.org/anything", ...',
+    func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=http://httpbingo.org/anything', {}, {}, resolve, reject); },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('resolved');
-      result.data.url.should.be.equal('http://httpbin.org/anything');
+      result.data.url.should.be.equal('http://httpbingo.org/anything');
     }
   },
   {
     description: 'should not follow 302 redirect when following redirects is disabled',
     expected: 'rejected: {"status": 302, ...',
     before: function (resolve, reject) { cordova.plugin.http.setFollowRedirect(false); resolve(); },
-    func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=http://httpbin.org/anything', {}, {}, resolve, reject); },
+    func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=http://httpbingo.org/anything', {}, {}, resolve, reject); },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('rejected');
       result.data.status.should.be.equal(302);
