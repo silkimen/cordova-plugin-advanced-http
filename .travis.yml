@@ -34,18 +34,12 @@ matrix:
       android:
         components:
           - tools
-          - platform-tools
-          - build-tools-30.0.1
-          - android-28
-          - extra-android-support
-          - extra-android-m2repository
-          - extra-google-m2repository
 
       before_install:
         - export LANG=en_US.UTF-8 &&
           curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - &&
           sudo apt-get install -y nodejs
-        - yes | sdkmanager --update
+        - yes | sdkmanager "tools" "build-tools;30.0.3" "platforms;android-30" "extras;android;m2repository" "extras;google;m2repository"
 
       install:
         - npm install
