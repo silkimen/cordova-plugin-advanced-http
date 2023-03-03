@@ -164,11 +164,12 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     boolean followRedirect = args.getBoolean(6);
     String responseType = args.getString(7);
     Integer reqId = args.getInt(8);
+    boolean hasProgressCallback = args.getBoolean(9);
 
     CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
     CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePaths, uploadNames, connectTimeout, readTimeout, followRedirect,
-        responseType, this.tlsConfiguration, this.cordova.getActivity().getApplicationContext(), observableCallbackContext);
+        hasProgressCallback, responseType, this.tlsConfiguration, this.cordova.getActivity().getApplicationContext(), observableCallbackContext);
 
     startRequest(reqId, observableCallbackContext, upload);
 
@@ -183,11 +184,12 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     int readTimeout = args.getInt(4) * 1000;
     boolean followRedirect = args.getBoolean(5);
     Integer reqId = args.getInt(6);
+    boolean hasProgressCallback = args.getBoolean(7);
 
     CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
     CordovaHttpDownload download = new CordovaHttpDownload(url, headers, filePath, connectTimeout, readTimeout,
-        followRedirect, this.tlsConfiguration, observableCallbackContext);
+        followRedirect, hasProgressCallback, this.tlsConfiguration, observableCallbackContext);
 
     startRequest(reqId, observableCallbackContext, download);
 

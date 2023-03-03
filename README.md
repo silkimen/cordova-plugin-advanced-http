@@ -403,12 +403,19 @@ const name = 'picture';
 const filePath = ['file:///somepicture.jpg', 'file:///somedocument.doc'];
 const name = ['picture', 'document'];
 
-cordova.plugin.http.uploadFile("https://google.com/", {
-    id: '12',
-    message: 'test'
-}, { Authorization: 'OAuth2: token' }, filePath, name, function(response) {
-    console.log(response.status);
-}, function(response) {
+cordova.plugin.http.uploadFile(
+  "https://google.com/", 
+  { id: '12', message: 'test' }, 
+  { Authorization: 'OAuth2: token' }, 
+  filePath, 
+  name,
+  function(progressData) {
+    console.log((progressData.transferred / progressData.total * 100) + ' percent complete')
+  },  
+  function(response) {
+      console.log(response.status);
+  }, 
+  function(response) {
     console.error(response.error);
 });
 ```
@@ -422,6 +429,9 @@ cordova.plugin.http.downloadFile(
   { id: '12', message: 'test' },
   { Authorization: 'OAuth2: token' },
   'file:///somepicture.jpg',
+  function(progressData) {
+    console.log((progressData.transferred / progressData.total * 100) + ' percent complete')
+  },
   // success callback
   function(entry, response) {
     // prints the filename
