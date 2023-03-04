@@ -71,7 +71,7 @@ class CordovaServerTrust implements Runnable {
         this.tlsConfiguration.setTrustManagers(this.noOpTrustManagers);
       } else if ("pinned".equals(this.mode)) {
         this.tlsConfiguration.setHostnameVerifier(null);
-        this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromBundle("www/certificates")));
+        this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromBundle(getWebAssetDir() + "/certificates")));
       } else {
         this.tlsConfiguration.setHostnameVerifier(null);
         this.tlsConfiguration.setTrustManagers(this.getTrustManagers(this.getCertsFromKeyStore("AndroidCAStore")));
@@ -82,6 +82,14 @@ class CordovaServerTrust implements Runnable {
       Log.e(TAG, "An error occured while configuring SSL cert mode", e);
       callbackContext.error("An error occured while configuring SSL cert mode");
     }
+  }
+
+  private String getWebAssetDir() {
+    return isRunningOnCapacitor()? "public" : "www";
+  }
+
+  private  boolean isRunningOnCapacitor() {
+    return this.activity.getClass().getSuperclass().getName().contains("com.getcapacitor");
   }
 
   private TrustManager[] getTrustManagers(KeyStore store) throws GeneralSecurityException {
