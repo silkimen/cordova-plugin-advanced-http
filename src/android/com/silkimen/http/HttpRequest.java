@@ -37,6 +37,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -2489,10 +2490,14 @@ public class HttpRequest {
       public HttpRequest run() throws IOException {
         final byte[] buffer = new byte[bufferSize];
         int read;
-        while ((read = input.read(buffer)) != -1) {
-          output.write(buffer, 0, read);
-          totalWritten += read;
-          progress.onUpload(totalWritten, totalSize);
+        try{
+          while ((read = input.read(buffer)) != -1) {
+            output.write(buffer, 0, read);
+            totalWritten += read;
+            progress.onUpload(totalWritten, totalSize);
+          }
+        }catch(EOFException e){
+          e.printStackTrace();
         }
         return HttpRequest.this;
       }
