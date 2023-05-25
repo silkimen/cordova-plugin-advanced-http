@@ -273,7 +273,10 @@ Here's a quick example:
 const options = {
   method: 'post',
   data: { id: 12, message: 'test' },
-  headers: { Authorization: 'OAuth2: token' }
+  headers: { Authorization: 'OAuth2: token' },
+  onProgress: function(progressData) {
+    console.log((progressData.transferred / progressData.total * 100) + ' percent complete')
+  }
 };
 
 cordova.plugin.http.sendRequest('https://google.com/', options, function(response) {
@@ -413,36 +416,6 @@ cordova.plugin.http.uploadFile("https://google.com/", {
 });
 ```
 
-### uploadFileWithOptions
-
-```js
-// e.g. for single file
-const filePath = 'file:///somepicture.jpg';
-const name = 'picture';
-
-// e.g. for multiple files
-const filePath = ['file:///somepicture.jpg', 'file:///somedocument.doc'];
-const name = ['picture', 'document'];
-
-cordova.plugin.http.uploadFileWithOptions(
-  "https://google.com/",
-  {
-    params: { id: '12', message: 'test' },
-    headers: { Authorization: 'OAuth2: token' },
-    filePath,
-    name,
-    onProgress: function(progressData) {
-      console.log((progressData.transferred / progressData.total * 100) + ' percent complete')
-    }
-  },
-  function(response) {
-    console.log(response.status);
-  },
-  function(response) {
-    console.error(response.error);
-});
-```
-
 ### downloadFile<a name="downloadFile"></a>
 Downloads a file and saves it to the device.  Takes a URL, parameters, headers, and a filePath.  See [post](#post) documentation for details on what is returned on failure.  On success this function returns a cordova [FileEntry object](http://cordova.apache.org/docs/en/3.3.0/cordova_file_file.md.html#FileEntry) as first and the response object as second parameter.
 
@@ -452,39 +425,6 @@ cordova.plugin.http.downloadFile(
   { id: '12', message: 'test' },
   { Authorization: 'OAuth2: token' },
   'file:///somepicture.jpg',
-  // success callback
-  function(entry, response) {
-    // prints the filename
-    console.log(entry.name);
-
-    // prints the filePath
-    console.log(entry.fullPath);
-
-    // prints all header key/value pairs
-    Object.keys(response.headers).forEach(function (key) {
-      console.log(key, response.headers[key]);
-    });
-  },
-  // error callback
-  function(response) {
-    console.error(response.error);
-  }
-);
-```
-
-### downloadFileWithOptions
-
-```js
-cordova.plugin.http.downloadFileWithOptions(
-  "https://google.com/",
-  {
-    params: { id: '12', message: 'test' },
-    headers: { Authorization: 'OAuth2: token' },
-    filePath: 'file:///somepicture.jpg',
-    onProgress: function(progressData) {
-      console.log((progressData.transferred / progressData.total * 100) + ' percent complete')
-    }
-  },
   // success callback
   function(entry, response) {
     // prints the filename
