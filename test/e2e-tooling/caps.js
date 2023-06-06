@@ -68,7 +68,7 @@ const configs = {
     'browserstack.networkLogs': false
   },
   browserstackAndroidDevice: {
-    device: 'Google Nexus 6',
+    device: 'Samsung Galaxy S7',
     os_version: '6.0',
     project: 'HTTP Test App',
     autoWebview: true,
