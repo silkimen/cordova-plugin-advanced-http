@@ -70,8 +70,8 @@ const configs = {
   },
   browserstackAndroidDevice: {
     'appium-version': '1.22.0',
-    device: 'Samsung Galaxy S7',
-    os_version: '6.0',
+    device: 'Samsung Galaxy S8',
+    os_version: '7.0',
     project: 'HTTP Test App',
     autoWebview: true,
     app: 'HttpTestAppAndroid',
