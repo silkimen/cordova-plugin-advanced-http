@@ -25,18 +25,40 @@ class CordovaHttpUpload extends CordovaHttpBase {
   private JSONArray uploadNames;
   private Context applicationContext;
 
+  private boolean submitRaw = false;
+
   public CordovaHttpUpload(String url, JSONObject headers, JSONArray filePaths, JSONArray uploadNames, int connectTimeout, int readTimeout,
-      boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration,
+      boolean followRedirects, String responseType, TLSConfiguration tlsConfiguration, boolean submitRaw,
       Context applicationContext, CordovaObservableCallbackContext callbackContext) {
 
     super("POST", url, headers, connectTimeout, readTimeout, followRedirects, responseType, tlsConfiguration, callbackContext);
     this.filePaths = filePaths;
     this.uploadNames = uploadNames;
     this.applicationContext = applicationContext;
+    this.submitRaw = submitRaw;
   }
 
   @Override
   protected void sendBody(HttpRequest request) throws Exception {
+    if (this.submitRaw) {
+      if (this.filePaths.length() != 1) {
+        throw new IllegalArgumentException("Can only transmit a single file. Multiple files are not supported in this mode.");
+      }
+
+      String filePath = this.filePaths.getString(0);
+      Uri fileURI = Uri.parse(filePath);
+
+      if (ContentResolver.SCHEME_FILE.equals((fileURI.getScheme()))) {
+        File file = new File(new URI(filePath));
+        request.send(file);
+      } else if (ContentResolver.SCHEME_CONTENT.equals(fileURI.getScheme())) {
+        InputStream inputStream = this.applicationContext.getContentResolver().openInputStream(fileURI);
+        request.send(inputStream);
+      }
+
+      return;
+    }
+
     for (int i = 0; i < this.filePaths.length(); ++i) {
       String uploadName = this.uploadNames.getString(i);
       String filePath = this.filePaths.getString(i);

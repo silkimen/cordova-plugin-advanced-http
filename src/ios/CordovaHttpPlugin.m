@@ -460,50 +460,30 @@
     NSDictionary *headers = [command.arguments objectAtIndex:1];
     NSArray *filePaths = [command.arguments objectAtIndex: 2];
     NSArray *names = [command.arguments objectAtIndex: 3];
-    NSTimeInterval connectTimeout = [[command.arguments objectAtIndex:4] doubleValue];
+    NSTimeInterval _connectTimeout = [[command.arguments objectAtIndex:4] doubleValue];
     NSTimeInterval readTimeout = [[command.arguments objectAtIndex:5] doubleValue];
     bool followRedirect = [[command.arguments objectAtIndex:6] boolValue];
     NSString *responseType = [command.arguments objectAtIndex:7];
-    NSNumber *reqId = [command.arguments objectAtIndex:8];
-
-    [self setRequestHeaders: headers forManager: manager];
-    [self setTimeout:readTimeout forManager:manager];
-    [self setRedirect:followRedirect forManager:manager];
-    [self setResponseSerializer:responseType forManager:manager];
+    NSDictionary *transmitOptions = [command.arguments objectAtIndex:8];
+    NSNumber *reqId = [command.arguments objectAtIndex:9];
+  
+    NSString *transmitFileType = [transmitOptions objectForKey:@"transmitFileAs"];
 
     CordovaHttpPlugin* __weak weakSelf = self;
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
-    @try {
-        NSURLSessionDataTask *task = [manager POST:url parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
-            NSError *error;
-            for (int i = 0; i < [filePaths count]; i++) {
-                NSString *filePath = (NSString *) [filePaths objectAtIndex:i];
-                NSString *uploadName = (NSString *) [names objectAtIndex:i];
-                NSURL *fileURL = [NSURL URLWithString: filePath];
-                [formData appendPartWithFileURL:fileURL name:uploadName error:&error];
-            }
-            if (error) {
-                [weakSelf removeRequest:reqId];
-
-                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-                [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
-                [dictionary setObject:@"Could not add file to post body." forKey:@"error"];
-                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
-                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-                [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
-                return;
-            }
-        } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
-            [weakSelf removeRequest:reqId];
-
-            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
-
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
-        } failure:^(NSURLSessionTask *task, NSError *error) {
+    @try
+    {
+        NSURLSessionDataTask* task;
+      
+        void (^setupManager)(void) = ^() {
+          [self setRequestHeaders: headers forManager: manager];
+          [self setTimeout:readTimeout forManager:manager];
+          [self setRedirect:followRedirect forManager:manager];
+          [self setResponseSerializer:responseType forManager:manager];
+        };
+      
+        void (^onFailure)(NSURLSessionTask *, NSError *) = ^(NSURLSessionTask *task, NSError *error) {
             [weakSelf removeRequest:reqId];
 
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
@@ -512,10 +492,95 @@
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
-        }];
+            [manager invalidateSessionCancelingTasks:YES];
+        };
+      
+        void (^onSuccess)(NSURLSessionTask *, id) = ^(NSURLSessionTask *task, id responseObject) {
+            [weakSelf removeRequest:reqId];
+
+            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+            [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
+
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+            [manager invalidateSessionCancelingTasks:YES];
+        };
+      
+        bool submitRaw = [transmitFileType isEqualToString:@"BINARY"];
+      
+        // RAW
+        if (submitRaw)
+        {
+            if ([filePaths count] == 1)
+            {
+              // setup the request serializer to submit the raw file content
+              manager.requestSerializer = [BinaryRequestSerializer serializer];
+              setupManager();
+              
+              NSURL *fileURL = [NSURL URLWithString:[filePaths objectAtIndex:0]];
+              NSError *error;
+              NSData *fileData = [NSData dataWithContentsOfURL:fileURL options:0 error:&error];
+              
+              if (error)
+              {
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                [self handleError:dictionary withResponse:nil error:error];
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+                [manager invalidateSessionCancelingTasks:YES];
+                return;
+              }
+              
+              task = [manager uploadTaskWithHTTPMethod:@"POST" URLString:url parameters:fileData progress:nil success:onSuccess failure:onFailure];
+            }
+            else
+            {
+                [NSException raise:@"ArgumentException" format:@"Can only transmit a single file. Multiple files are not supported in this mode."];
+            }
+        }
+        else // FALLBACK: Multipart / FormData
+        {
+          setupManager();
+          task = [manager
+                  POST:url
+                  parameters:nil
+                  constructingBodyWithBlock:^(id<AFMultipartFormData> formData)
+                  {
+                      NSError *error;
+                    
+                      for (int i = 0; i < [filePaths count]; i++)
+                      {
+                          NSString *filePath = (NSString *) [filePaths objectAtIndex:i];
+                          NSString *uploadName = (NSString *) [names objectAtIndex:i];
+                          NSURL *fileURL = [NSURL URLWithString: filePath];
+                          [formData appendPartWithFileURL:fileURL name:uploadName error:&error];
+                      }
+                    
+                      if (error)
+                      {
+                          [weakSelf removeRequest:reqId];
+
+                          NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                          [dictionary setObject:[NSNumber numberWithInt:500] forKey:@"status"];
+                          [dictionary setObject:@"Could not add file to post body." forKey:@"error"];
+                          CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+                          [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                          [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+                          return;
+                      }
+                  }
+                  progress:nil
+                  success:onSuccess
+                  failure:onFailure
+            ];
+        }
+      
         [self addRequest:reqId forTask:task];
     }
-    @catch (NSException *exception) {
+    @catch (NSException *exception)
+    {
         [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         [self handleException:exception withCommand:command];
     }

@@ -180,7 +180,12 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
         break;
       case 'upload':
         var fileOptions = helpers.checkUploadFileOptions(options.filePath, options.name);
-        exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.connectTimeout, options.readTimeout, options.followRedirect, options.responseType, reqId]);
+
+        // support uploading files as octet-stream / encoded string instead of form-data
+        var transmitOptions = {};
+        transmitOptions.transmitFileAs = options.transmitFileAs || 'FORMDATA';
+
+        exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.connectTimeout, options.readTimeout, options.followRedirect, options.responseType, transmitOptions, reqId]);
         break;
       case 'download':
         var filePath = helpers.checkDownloadFilePath(options.filePath);

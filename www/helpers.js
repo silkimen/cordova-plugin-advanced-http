@@ -498,7 +498,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   function handleMissingOptions(options, globals) {
     options = options || {};
 
-    return {
+    return Object.assign({}, options, {
       data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data,
       filePath: options.filePath,
       followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
@@ -511,6 +511,6 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
       connectTimeout: checkTimeoutValue(options.connectTimeout || globals.connectTimeout),
       readTimeout: checkTimeoutValue(options.readTimeout || globals.readTimeout),
       timeout: checkTimeoutValue(options.timeout || globals.timeout)
-    };
+    });
   }
 };
