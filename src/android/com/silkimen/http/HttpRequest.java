@@ -1328,6 +1328,8 @@ public class HttpRequest {
 
   private final String requestMethod;
 
+  private boolean hasProgressCallback = false;
+
   private RequestOutputStream output;
 
   private boolean multipart;
@@ -1376,6 +1378,16 @@ public class HttpRequest {
   public HttpRequest(final URL url, final String method) throws HttpRequestException {
     this.url = url;
     this.requestMethod = method;
+  }
+
+  public HttpRequest(final CharSequence url, final String method, boolean hasProgressCallback) throws HttpRequestException {
+    try {
+      this.url = new URL(url.toString());
+    } catch (MalformedURLException e) {
+      throw new HttpRequestException(e);
+    }
+    this.requestMethod = method;
+    this.hasProgressCallback = hasProgressCallback;
   }
 
   private Proxy createProxy() {
@@ -2553,7 +2565,9 @@ public class HttpRequest {
    * @throws IOException
    */
   protected HttpRequest closeOutput() throws IOException {
-    progress(null);
+    if(!this.hasProgressCallback){
+      progress(null);
+    }
     if (output == null)
       return this;
     if (multipart)
