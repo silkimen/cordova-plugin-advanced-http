@@ -115,7 +115,10 @@ abstract class CordovaHttpBase implements Runnable {
     }
 
     try {
-      if (response.hasFailed()) {
+      if (response.isRedirect()) {
+        this.url = response.getRedirectUrl();
+        this.run();
+      } else if (response.hasFailed()) {
         this.callbackContext.error(response.toJSON());
       } else {
         this.callbackContext.success(response.toJSON());
@@ -214,6 +217,8 @@ abstract class CordovaHttpBase implements Runnable {
       } else {
         response.setData(outputStream.toByteArray());
       }
+    } else if (this.followRedirects && request.code() >= 300 && request.code() < 400) {
+      response.setRedirectUrl(request.header("Location"));
     } else {
       response.setErrorMessage(HttpBodyDecoder.decodeBody(outputStream.toByteArray(), request.charset()));
     }
