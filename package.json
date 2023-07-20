@@ -60,7 +60,7 @@
   "devDependencies": {
     "chai": "4.3.6",
     "colors": "1.4.0",
-    "cordova": "11.0.0",
+    "cordova": "12.0.0",
     "mocha": "9.2.2",
     "umd-tough-cookie": "3.0.0",
     "wd": "1.14.0",
