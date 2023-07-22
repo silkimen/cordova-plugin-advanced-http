@@ -410,6 +410,8 @@ cordova.plugin.http.uploadFile("https://google.com/", {
     console.log(response.status);
 }, function(response) {
     console.error(response.error);
+}, function(progressData) {
+    console.log((progressData.transferred / progressData.total * 100) + ' percent complete')
 });
 ```
 

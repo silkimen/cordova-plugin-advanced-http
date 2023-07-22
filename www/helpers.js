@@ -510,7 +510,8 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
       serializer: checkSerializer(options.serializer || globals.serializer),
       connectTimeout: checkTimeoutValue(options.connectTimeout || globals.connectTimeout),
       readTimeout: checkTimeoutValue(options.readTimeout || globals.readTimeout),
-      timeout: checkTimeoutValue(options.timeout || globals.timeout)
+      timeout: checkTimeoutValue(options.timeout || globals.timeout),
+      onProgress: options.onProgress
     };
   }
 };

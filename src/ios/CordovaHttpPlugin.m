@@ -494,13 +494,22 @@
                 [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
                 return;
             }
-        } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
+        } progress:^(NSProgress *progress) {
+            NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+            [dictionary setValue:[NSNumber numberWithBool:YES] forKey:@"isProgress"];
+            [dictionary setValue:[NSNumber numberWithLongLong:progress.completedUnitCount] forKey:@"transferred"];
+            [dictionary setValue:[NSNumber numberWithLongLong:progress.totalUnitCount] forKey:@"total"];
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
+            [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        } success:^(NSURLSessionTask *task, id responseObject) {
             [weakSelf removeRequest:reqId];
 
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:NO]];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         } failure:^(NSURLSessionTask *task, NSError *error) {
@@ -510,6 +519,7 @@
             [self handleError:dictionary withResponse:(NSHTTPURLResponse*)task.response error:error];
 
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:NO]];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
         }];
