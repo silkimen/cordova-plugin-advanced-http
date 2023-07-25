@@ -9,7 +9,8 @@ module.exports = function init(storage, ToughCookie, WebStorageCookieStore) {
     setCookie: setCookie,
     getCookieString: getCookieString,
     clearCookies: clearCookies,
-    removeCookies: removeCookies
+    removeCookies: removeCookies,
+    setStorageImpl: setStorageImpl
   };
 
   function splitCookieString(cookieStr) {
@@ -53,7 +54,7 @@ module.exports = function init(storage, ToughCookie, WebStorageCookieStore) {
   }
 
   function clearCookies() {
-    window.localStorage.removeItem(storeKey);
+    storage.removeItem(storeKey);
   }
 
   function removeCookies(url, cb) {
@@ -66,5 +67,10 @@ module.exports = function init(storage, ToughCookie, WebStorageCookieStore) {
 
       cookieJar.store.removeCookies(domain, null, cb);
     });
+  }
+
+  function setStorageImpl(_storage) {
+    store.setStorageImpl(_storage)
+    storage = _storage;
   }
 };

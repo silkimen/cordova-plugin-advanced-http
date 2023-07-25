@@ -40,6 +40,10 @@ module.exports = function init(ToughCookie, _) {
 
   WebStorageCookieStore.prototype = Object.create(ToughCookie.Store);
 
+  WebStorageCookieStore.prototype.setStorageImpl = function (storage) {
+    this._storage = storage;
+  };
+
   WebStorageCookieStore.prototype.findCookie = function (domain, path, key, callback) {
     var store = this._readStore();
     var cookie = _.get(store, [domain, path, key], null);
