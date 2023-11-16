@@ -503,6 +503,7 @@
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+            [manager invalidateSessionCancelingTasks:YES];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             [weakSelf removeRequest:reqId];
 
@@ -512,6 +513,7 @@
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+            [manager invalidateSessionCancelingTasks:YES];
         }];
         [self addRequest:reqId forTask:task];
     }
@@ -586,6 +588,7 @@
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
                 [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
                 [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+                [manager invalidateSessionCancelingTasks:YES];
                 return;
             }
             NSData *data = (NSData *)responseObject;
@@ -596,6 +599,7 @@
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
                 [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
                 [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+                [manager invalidateSessionCancelingTasks:YES];
                 return;
             }
 
@@ -607,6 +611,7 @@
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+            [manager invalidateSessionCancelingTasks:YES];
         } failure:^(NSURLSessionTask *task, NSError *error) {
             [weakSelf removeRequest:reqId];
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
@@ -616,6 +621,7 @@
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
+            [manager invalidateSessionCancelingTasks:YES];
         }];
         [self addRequest:reqId forTask:task];
     }
