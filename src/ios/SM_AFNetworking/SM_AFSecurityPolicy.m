@@ -272,7 +272,11 @@ static NSArray * AFPublicKeyTrustChainForServerTrust(SecTrustRef serverTrust) {
                     if (certificate != NULL) {
                         [pinnedCertificates addObject:(__bridge id)certificate];
                         CFRelease(certificate);
+                    } else {
+                        NSLog(@"Failed to create certificate from data: %@", certificateData);
                     }
+                } else {
+                    NSLog(@"Encountered nil certificateData in self.pinnedCertificates");
                 }
             }
             SecTrustSetAnchorCertificates(serverTrust, (__bridge CFArrayRef)pinnedCertificates);
