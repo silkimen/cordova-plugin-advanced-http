@@ -100,18 +100,29 @@ _out:
     return isValid;
 }
 
-static NSArray * AFCertificateTrustChainForServerTrust(SecTrustRef serverTrust) {
+NSArray *AFCertificateTrustChainForServerTrust(SecTrustRef serverTrust) {
     CFIndex certificateCount = SecTrustGetCertificateCount(serverTrust);
     NSMutableArray *trustChain = [NSMutableArray arrayWithCapacity:(NSUInteger)certificateCount];
 
     for (CFIndex i = 0; i < certificateCount; i++) {
         SecCertificateRef certificate = SecTrustGetCertificateAtIndex(serverTrust, i);
-        [trustChain addObject:(__bridge_transfer NSData *)SecCertificateCopyData(certificate)];
+        NSData *certificateData = (__bridge_transfer NSData *)SecCertificateCopyData(certificate);
+
+        if (certificateData != nil) {
+            SecCertificateRef cert = SecCertificateCreateWithData(NULL, (__bridge CFDataRef)certificateData);
+            if (cert != NULL) {
+                [trustChain addObject:(__bridge id)cert];
+                CFRelease(cert);
+            } else {
+                NSLog(@"Failed to create certificate from data: %@", certificateData);
+            }
+        } else {
+            NSLog(@"Empty certificateData at index %ld", i);
+        }
     }
 
-    return [NSArray arrayWithArray:trustChain];
+    return [trustChain copy];
 }
-
 static NSArray * AFPublicKeyTrustChainForServerTrust(SecTrustRef serverTrust) {
     SecPolicyRef policy = SecPolicyCreateBasicX509();
     CFIndex certificateCount = SecTrustGetCertificateCount(serverTrust);
