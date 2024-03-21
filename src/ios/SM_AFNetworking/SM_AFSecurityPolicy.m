@@ -100,7 +100,7 @@ _out:
     return isValid;
 }
 
-NSArray *AFCertificateTrustChainForServerTrust(SecTrustRef serverTrust) {
+static NSArray *AFCertificateTrustChainForServerTrust(SecTrustRef serverTrust) {
     CFIndex certificateCount = SecTrustGetCertificateCount(serverTrust);
     NSMutableArray *trustChain = [NSMutableArray arrayWithCapacity:(NSUInteger)certificateCount];
 
@@ -121,7 +121,7 @@ NSArray *AFCertificateTrustChainForServerTrust(SecTrustRef serverTrust) {
         }
     }
 
-    return [trustChain copy];
+    return [NSArray arrayWithArray:trustChain];
 }
 static NSArray * AFPublicKeyTrustChainForServerTrust(SecTrustRef serverTrust) {
     SecPolicyRef policy = SecPolicyCreateBasicX509();
