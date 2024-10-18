@@ -103,22 +103,20 @@ _out:
 static NSArray *AFCertificateTrustChainForServerTrust(SecTrustRef serverTrust) {
     CFIndex certificateCount = SecTrustGetCertificateCount(serverTrust);
     NSMutableArray *trustChain = [NSMutableArray arrayWithCapacity:(NSUInteger)certificateCount];
-
-    for (CFIndex i = 0; i < certificateCount; i++) {
-        SecCertificateRef certificate = SecTrustGetCertificateAtIndex(serverTrust, i);
-        NSData *certificateData = (__bridge_transfer NSData *)SecCertificateCopyData(certificate);
-
-        if (certificateData != nil) {
-            SecCertificateRef cert = SecCertificateCreateWithData(NULL, (__bridge CFDataRef)certificateData);
-            if (cert != NULL) {
-                [trustChain addObject:(__bridge id)cert];
-                CFRelease(cert);
-            } else {
-                NSLog(@"Failed to create certificate from data: %@", certificateData);
+    @try {
+        for (CFIndex i = 0; i < certificateCount; i++) {
+            SecCertificateRef certificate = SecTrustGetCertificateAtIndex(serverTrust, i);
+            if (certificate != NULL) {
+                NSData *certData = (__bridge_transfer NSData *)SecCertificateCopyData(certificate);
+                if (certData) {
+                    [trustChain addObject:certData];
+                }
             }
-        } else {
-            NSLog(@"Empty certificateData at index %ld", i);
         }
+    }
+    @catch (NSException *exception) {
+        NSLog(@"Error retrieving certificate data: %@", exception);
+        return nil;
     }
 
     return [NSArray arrayWithArray:trustChain];
