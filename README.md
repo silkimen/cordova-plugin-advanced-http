@@ -447,3 +447,8 @@ This plugin uses amazing cloud services to maintain quality. CI Builds and E2E t
 ## Contribute & Develop
 
 We've set up a separate document for our [contribution guidelines](CONTRIBUTING.md).
+
+
+## Certificate Pinning
+
+Todo: add description

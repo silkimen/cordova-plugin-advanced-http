@@ -26,7 +26,55 @@
 }
 
 - (void)pluginInitialize {
-    securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+    securityPolicy.allowInvalidCertificates = NO;  // Ensure invalid certificates are not allowed
+    securityPolicy.validatesDomainName = YES;      // Validate the domain name
+
+    NSString *intermediateCertPath = [[NSBundle mainBundle] pathForResource:@"intermediate-certificate"
+                                                                     ofType:@"pem"
+                                                                inDirectory:@"assets"];
+
+    // Path to the root certificate in the "assets" folder within the app bundle
+    NSString *rootCertPath = [[NSBundle mainBundle] pathForResource:@"root-certificate"
+                                                             ofType:@"pem"
+                                                        inDirectory:@"assets"];
+
+    NSData *intermediateCertData = [self loadCertificateFromFile:intermediateCertPath];
+    NSData *rootCertData = [self loadCertificateFromFile:rootCertPath];
+
+    if (intermediateCertData && rootCertData) {
+        // Pin the intermediate and root certificates only
+        NSSet *pinnedCertificates = [NSSet setWithObjects:intermediateCertData, rootCertData, nil];
+        [securityPolicy setPinnedCertificates:pinnedCertificates];
+    }
+}
+
+// Helper method to load a PEM certificate file and convert it to NSData
+- (NSData *)loadCertificateFromFile:(NSString *)filePath {
+    NSError *error;
+    NSString *pemString = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&error];
+    if (error) {
+        NSLog(@"Error loading certificate from path: %@, error: %@", filePath, error.localizedDescription);
+        return nil;
+    }
+
+    // Convert PEM string to NSData
+    return [self convertPEMStringToNSData:pemString];
+}
+
+// Helper method to convert PEM string to NSData
+- (NSData *)convertPEMStringToNSData:(NSString *)pemString {
+    // Remove the PEM headers and footers
+    NSString *strippedPem = [pemString stringByReplacingOccurrencesOfString:@"-----BEGIN CERTIFICATE-----" withString:@""];
+    strippedPem = [strippedPem stringByReplacingOccurrencesOfString:@"-----END CERTIFICATE-----" withString:@""];
+
+    // Remove any newline or carriage return characters
+    strippedPem = [[strippedPem componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@""];
+
+    // Base64 decode the stripped string
+    NSData *certData = [[NSData alloc] initWithBase64EncodedString:strippedPem options:NSDataBase64DecodingIgnoreUnknownCharacters];
+
+    return certData;
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(AFHTTPSessionManager*)manager {
@@ -48,17 +96,30 @@
         NSURLCredential * _Nullable __autoreleasing * _Nullable credential
     ) {
         if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodServerTrust]) {
-            *credential = [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust];
 
-            if (![self->securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
-                return NSURLSessionAuthChallengeRejectProtectionSpace;
+            // Extract the server's trust
+            SecTrustRef serverTrust = challenge.protectionSpace.serverTrust;
+            NSString *serverDomain = challenge.protectionSpace.host;
+
+            // Retrieve the leaf certificate (index 0)
+            SecCertificateRef leafCertificate = SecTrustGetCertificateAtIndex(serverTrust, 0);
+
+            if (!leafCertificate) {
+                // If there is no leaf certificate, reject the connection
+                return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
             }
 
-            if (credential) {
-                return NSURLSessionAuthChallengeUseCredential;
+            // Perform certificate pinning for root and intermediate certificates only if CN matches
+            if (![self->securityPolicy evaluateServerTrust:serverTrust forDomain:serverDomain]) {
+                return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
             }
+
+            // If all validations pass, use the credential
+            *credential = [NSURLCredential credentialForTrust:serverTrust];
+            return NSURLSessionAuthChallengeUseCredential;
         }
 
+        // Handle client certificate challenges
         if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodClientCertificate] && self->x509Credential) {
             *credential = self->x509Credential;
             return NSURLSessionAuthChallengeUseCredential;
@@ -91,7 +152,6 @@
                     if ([trimmed hasPrefix:@"XSRF-TOKEN-CV"]) {
                         [manager.requestSerializer setValue:[trimmed componentsSeparatedByString:@"="].lastObject forHTTPHeaderField:@"X-XSRF-TOKEN-CV"];
                         return;
-             
                     }
                 }
             }
@@ -296,7 +356,6 @@
     [self setTimeout:timeoutInSeconds forManager:manager];
     [self setRedirect:followRedirect forManager:manager];
     [self setResponseSerializer:responseType forManager:manager];
-    
     CordovaHttpPlugin* __weak weakSelf = self;
     [[SDNetworkActivityIndicator sharedActivityIndicator] startActivity];
 
