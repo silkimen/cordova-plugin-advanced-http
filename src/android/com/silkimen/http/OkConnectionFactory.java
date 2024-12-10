@@ -1,56 +1,78 @@
 package com.silkimen.http;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import okhttp3.OkUrlFactory;
 
-import java.net.URL;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URLStreamHandler;
-import java.nio.charset.StandardCharsets;
 import java.net.Proxy;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class OkConnectionFactory implements HttpRequest.ConnectionFactory {
 
-  JSONObject jsonObject = new JSONObject(loadJSONFromAsset("certificate_settings.json"));
-  CertificatePinner.Builder pinnerBuilder = new CertificatePinner.Builder();
+  private final OkHttpClient client;
 
-  JSONArray pins = jsonObject.getJSONArray("certificates_to_pin");
+  public OkConnectionFactory() {
+    // Load JSON and initialize the OkHttpClient with certificate pinning
+    try {
+      String jsonConfig = loadJson("assets/certificate_settings.json");
+      CertificatePinner.Builder pinnerBuilder = new CertificatePinner.Builder();
 
-  for (int i = 0; i < pins.length(); i++) {
-      JSONObject pin = pins.getJSONObject(i);
-      pinnerBuilder.add(pin.getString("domain"), pin.getString("hash"));
-  }
+      JSONObject jsonObject = new JSONObject(jsonConfig);
+      JSONArray pins = jsonObject.getJSONArray("certificates_to_pin");
 
-  OkHttpClient client = new OkHttpClient.Builder()
-    .certificatePinner(pinnerBuilder.build())
-    .build();
+      for (int i = 0; i < pins.length(); i++) {
+        JSONObject pin = pins.getJSONObject(i);
+        pinnerBuilder.add(pin.getString("domain"), pin.getString("hash"));
+      }
 
-  public HttpURLConnection create(URL url) {
-    OkUrlFactory urlFactory = new OkUrlFactory(this.client);
+      this.client = new OkHttpClient.Builder()
+        .certificatePinner(pinnerBuilder.build())
+        .build();
 
-    return (HttpURLConnection) urlFactory.open(url);
-  }
-
-  public HttpURLConnection create(URL url, Proxy proxy) {
-    OkHttpClient clientWithProxy = new OkHttpClient.Builder().proxy(proxy).build();
-    OkUrlFactory urlFactory = new OkUrlFactory(clientWithProxy);
-
-    return (HttpURLConnection) urlFactory.open(url);
-  }
-
-  private String loadJSONFromAsset(String fileName) {
-    String json = null;
-    try (InputStream is = getApplicationContext().getAssets().open(fileName)) {
-        int size = is.available();
-        byte[] buffer = new byte[size];
-        is.read(buffer);
-        json = new String(buffer, StandardCharsets.UTF_8);
-    } catch (IOException ex) {
-        ex.printStackTrace();
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to initialize OkConnectionFactory", e);
     }
-    return json;
-}
+  }
+
+  @Override
+  public HttpURLConnection create(URL url) throws IOException {
+    OkUrlFactory urlFactory = new OkUrlFactory(this.client);
+    return (HttpURLConnection) urlFactory.open(url);
+  }
+
+  @Override
+  public HttpURLConnection create(URL url, Proxy proxy) throws IOException {
+    OkHttpClient clientWithProxy = client.newBuilder().proxy(proxy).build();
+    OkUrlFactory urlFactory = new OkUrlFactory(clientWithProxy);
+    return (HttpURLConnection) urlFactory.open(url);
+  }
+
+  private String loadJson(String fileName) throws IOException {
+    try (InputStream is = getClass().getClassLoader().getResourceAsStream(fileName)) {
+      if (is == null) {
+        throw new IOException("Resource not found: " + fileName);
+      }
+
+      // Support older Android versions for reading the InputStream
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+      } else {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = is.read(buffer)) != -1) {
+          baos.write(buffer, 0, bytesRead);
+        }
+        return baos.toString(StandardCharsets.UTF_8.name());
+      }
+    }
+  }
 }
