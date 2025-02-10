@@ -133,7 +133,7 @@ abstract class CordovaHttpBase implements Runnable {
     request.followRedirects(this.followRedirects);
     request.connectTimeout(this.connectTimeout);
     request.readTimeout(this.readTimeout);
-    request.acceptCharset("UTF-8");
+    //request.acceptCharset("UTF-8");
     request.uncompress(true);
 
     if (this.tlsConfiguration.getHostnameVerifier() != null) {
