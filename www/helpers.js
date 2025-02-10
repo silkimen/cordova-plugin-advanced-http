@@ -225,7 +225,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   }
 
   function checkParamsObject(params) {
-    return checkKeyValuePairObject(params, ['String', 'Array'], messages.TYPE_MISMATCH_PARAMS);
+    return checkKeyValuePairObject(params, ['String', 'Array', 'Number', 'Boolean', 'Null', 'Object'], messages.TYPE_MISMATCH_PARAMS);
   }
 
   function checkDownloadFilePath(filePath) {

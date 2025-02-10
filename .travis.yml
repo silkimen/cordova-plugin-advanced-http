@@ -9,6 +9,7 @@ matrix:
   include:
     - name: "iOS Build & Test"
       language: objective-c
+      sudo: false
       os: osx
       osx_image: xcode12.5
 
@@ -28,21 +29,23 @@ matrix:
 
     - name: "Android Build & Test"
       language: android
+      sudo: required
 
-      before_cache:
-        - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-        - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
-
-      cache:
-        directories:
-          - $HOME/.gradle/caches/
-          - $HOME/.gradle/wrapper/
+      android:
+        components:
+          - tools
+          - platform-tools
+          - build-tools-30.0.1
+          - android-28
+          - extra-android-support
+          - extra-android-m2repository
+          - extra-google-m2repository
 
       before_install:
         - export LANG=en_US.UTF-8 &&
           curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - &&
           sudo apt-get install -y nodejs
-        - yes | sdkmanager "tools" "build-tools;30.0.3" "platforms;android-30" "extras;android;m2repository" "extras;google;m2repository"
+        - yes | sdkmanager --update
 
       install:
         - npm install
