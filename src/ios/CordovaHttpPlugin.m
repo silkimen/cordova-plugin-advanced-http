@@ -23,6 +23,7 @@
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
     NSURLCredential *x509Credential;
+    NSArray *pinnedDomains;
 }
 
 - (void)pluginInitialize {
@@ -42,11 +43,52 @@
     NSData *intermediateCertData = [self loadCertificateFromFile:intermediateCertPath];
     NSData *rootCertData = [self loadCertificateFromFile:rootCertPath];
 
+    pinnedDomains = [self loadPinnedDomains];
+
+
     if (intermediateCertData && rootCertData) {
         // Pin the intermediate and root certificates only
         NSSet *pinnedCertificates = [NSSet setWithObjects:intermediateCertData, rootCertData, nil];
         [securityPolicy setPinnedCertificates:pinnedCertificates];
     }
+}
+
+- (NSArray *)loadPinnedDomains {
+    // Get the path to the JSON file
+    NSString *jsonFilePath = [[NSBundle mainBundle] pathForResource:@"certificate_settings"
+                                                             ofType:@"json"
+                                                        inDirectory:@"assets"];
+
+    if (!jsonFilePath) {
+        NSLog(@"JSON file not found.");
+        return nil;
+    }
+
+    NSError *error;
+    NSData *jsonData = [NSData dataWithContentsOfFile:jsonFilePath];
+
+    if (!jsonData) {
+        NSLog(@"Error reading JSON file.");
+        return nil;
+    }
+
+    NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                             options:kNilOptions
+                                                               error:&error];
+
+    if (error || ![jsonDict isKindOfClass:[NSDictionary class]]) {
+        NSLog(@"Error parsing JSON: %@", error.localizedDescription);
+        return nil;
+    }
+
+    NSArray *pinned_domains = jsonDict[@"pinned_domains"];
+
+    if (![pinned_domains isKindOfClass:[NSArray class]]) {
+        NSLog(@"Error: 'pinned_domains' is not an array.");
+        return nil;
+    }
+
+    return pinned_domains;
 }
 
 // Helper method to load a PEM certificate file and convert it to NSData
@@ -89,6 +131,26 @@
     }
 }
 
+- (BOOL)matchesPinnedDomain:(NSString *)domain withPinnedDomains:(NSArray<NSString *> *)pinnedDomains {
+    for (NSString *pinnedDomain in pinnedDomains) {
+        // Escape dots and replace wildcard with regex pattern
+        NSString *regexPattern = [pinnedDomain stringByReplacingOccurrencesOfString:@"." withString:@"\\."];
+        regexPattern = [regexPattern stringByReplacingOccurrencesOfString:@"*\\." withString:@".+"];
+
+        // Create regex with case-insensitive matching
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:[NSString stringWithFormat:@"^%@$", regexPattern]
+                                                                               options:NSRegularExpressionCaseInsensitive
+                                                                                 error:nil];
+
+        // Check if domain matches regex
+        NSRange matchRange = [regex rangeOfFirstMatchInString:domain options:0 range:NSMakeRange(0, domain.length)];
+        if (matchRange.location != NSNotFound) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 - (void)setupAuthChallengeBlock:(AFHTTPSessionManager*)manager {
     [manager setSessionDidReceiveAuthenticationChallengeBlock:^NSURLSessionAuthChallengeDisposition(
         NSURLSession * _Nonnull session,
@@ -109,10 +171,24 @@
                 return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
             }
 
+            AFSecurityPolicy *previousPolicy = self->securityPolicy;
+
+            // check if the settings contain the current domain. We only do certificate pinning if the domain is
+            // actually pinned, otherwise, we just use the default mechanism to check the certificate chain
+            if (![self matchesPinnedDomain:serverDomain withPinnedDomains:self->pinnedDomains]) {
+                self->securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+                self->securityPolicy.allowInvalidCertificates = NO;  // Ensure invalid certificates are not allowed
+                self->securityPolicy.validatesDomainName = YES;
+            }
+
             // Perform certificate pinning for root and intermediate certificates only if CN matches
             if (![self->securityPolicy evaluateServerTrust:serverTrust forDomain:serverDomain]) {
+                self->securityPolicy = previousPolicy;
                 return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
             }
+
+            self->securityPolicy = previousPolicy;
+
 
             // If all validations pass, use the credential
             *credential = [NSURLCredential credentialForTrust:serverTrust];
