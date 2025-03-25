@@ -1,12 +1,11 @@
 package com.silkimen.http;
 
+import android.os.Build;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import okhttp3.OkUrlFactory;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,29 +16,35 @@ import java.nio.charset.StandardCharsets;
 
 public class OkConnectionFactory implements HttpRequest.ConnectionFactory {
 
+  private static CertificatePinner certificatePinner;
   private final OkHttpClient client;
 
   public OkConnectionFactory() {
-    // Load JSON and initialize the OkHttpClient with certificate pinning
-    try {
-      String jsonConfig = loadJson("assets/certificate_settings.json");
-      CertificatePinner.Builder pinnerBuilder = new CertificatePinner.Builder();
+    if (certificatePinner == null) {
+      try {
+        String jsonConfig = this.loadJson("assets/certificate_settings.json");
+        CertificatePinner.Builder pinnerBuilder = new CertificatePinner.Builder();
+        JSONObject jsonObject = new JSONObject(jsonConfig);
+        JSONArray pins = jsonObject.getJSONArray("certificates_to_pin");
 
-      JSONObject jsonObject = new JSONObject(jsonConfig);
-      JSONArray pins = jsonObject.getJSONArray("certificates_to_pin");
+        for (int i = 0; i < pins.length(); i++) {
+          JSONObject pin = pins.getJSONObject(i);
+          pinnerBuilder.add(pin.getString("domain"), pin.getString("hash"));
+        }
 
-      for (int i = 0; i < pins.length(); i++) {
-        JSONObject pin = pins.getJSONObject(i);
-        pinnerBuilder.add(pin.getString("domain"), pin.getString("hash"));
+        certificatePinner = pinnerBuilder.build();
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to initialize OkConnectionFactory", e);
       }
-
-      this.client = new OkHttpClient.Builder()
-        .certificatePinner(pinnerBuilder.build())
-        .build();
-
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to initialize OkConnectionFactory", e);
     }
+
+    if (certificatePinner == null) {
+      throw new RuntimeException("Failed to initialize OkConnectionFactory: no pinner available");
+    }
+
+    this.client = new OkHttpClient.Builder()
+      .certificatePinner(certificatePinner)
+      .build();
   }
 
   @Override
@@ -60,9 +65,8 @@ public class OkConnectionFactory implements HttpRequest.ConnectionFactory {
       if (is == null) {
         throw new IOException("Resource not found: " + fileName);
       }
-
       // Support older Android versions for reading the InputStream
-      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         return new String(is.readAllBytes(), StandardCharsets.UTF_8);
       } else {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -75,4 +79,5 @@ public class OkConnectionFactory implements HttpRequest.ConnectionFactory {
       }
     }
   }
+
 }
