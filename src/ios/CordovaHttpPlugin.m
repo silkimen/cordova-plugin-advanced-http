@@ -163,36 +163,39 @@
             SecTrustRef serverTrust = challenge.protectionSpace.serverTrust;
             NSString *serverDomain = challenge.protectionSpace.host;
 
-            // Retrieve the leaf certificate (index 0)
-            SecCertificateRef leafCertificate = SecTrustGetCertificateAtIndex(serverTrust, 0);
+            // check if the settings contain the current domain.
+            // We only do certificate pinning if the domain is actually pinned,
+            // otherwise we just use the default mechanism to check the certificate chain
+            if ([self matchesPinnedDomain:serverDomain withPinnedDomains:self->pinnedDomains]) {
+                // Retrieve the leaf certificate (index 0)
+                SecCertificateRef leafCertificate = SecTrustGetCertificateAtIndex(serverTrust, 0);
 
-            if (!leafCertificate) {
-                // If there is no leaf certificate, reject the connection
-                return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
+                if (!leafCertificate) {
+                    // If there is no leaf certificate, reject the connection
+                    return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
+                }
+
+                // Check serverTrust with PinningModeCertificateSecurityPolicy if domain matched
+                if (![self->securityPolicy evaluateServerTrust:serverTrust forDomain:serverDomain]) {
+                    return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
+                }
+                
+            } else {
+                AFSecurityPolicy *standardSecurityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+                standardSecurityPolicy.allowInvalidCertificates = NO;  // Ensure invalid certificates are not allowed
+                standardSecurityPolicy.validatesDomainName = YES;
+
+                // Check serverTrust with PinningModeNoneSecurityPolicy if domain didn't match (as before)
+                if (![standardSecurityPolicy evaluateServerTrust:serverTrust forDomain:serverDomain]) {
+                    return NSURLSessionAuthChallengeRejectProtectionSpace;
+                }
             }
-
-            AFSecurityPolicy *previousPolicy = self->securityPolicy;
-
-            // check if the settings contain the current domain. We only do certificate pinning if the domain is
-            // actually pinned, otherwise, we just use the default mechanism to check the certificate chain
-            if (![self matchesPinnedDomain:serverDomain withPinnedDomains:self->pinnedDomains]) {
-                self->securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-                self->securityPolicy.allowInvalidCertificates = NO;  // Ensure invalid certificates are not allowed
-                self->securityPolicy.validatesDomainName = YES;
-            }
-
-            // Perform certificate pinning for root and intermediate certificates only if CN matches
-            if (![self->securityPolicy evaluateServerTrust:serverTrust forDomain:serverDomain]) {
-                self->securityPolicy = previousPolicy;
-                return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
-            }
-
-            self->securityPolicy = previousPolicy;
-
 
             // If all validations pass, use the credential
             *credential = [NSURLCredential credentialForTrust:serverTrust];
-            return NSURLSessionAuthChallengeUseCredential;
+            if (credential) {
+                return NSURLSessionAuthChallengeUseCredential;
+            }
         }
 
         // Handle client certificate challenges
