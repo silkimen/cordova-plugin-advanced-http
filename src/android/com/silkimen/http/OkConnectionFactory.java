@@ -29,7 +29,13 @@ public class OkConnectionFactory implements HttpRequest.ConnectionFactory {
 
         for (int i = 0; i < pins.length(); i++) {
           JSONObject pin = pins.getJSONObject(i);
-          pinnerBuilder.add(pin.getString("domain"), pin.getString("hash"));
+
+          String domain = pin.getString("domain");
+          JSONArray hashes = pin.getJSONArray("hashes");
+          for (int j = 0; j < hashes.length(); j++) {
+            String hash = hashes.getString(j);
+            pinnerBuilder.add(domain, hash);
+          }
         }
 
         certificatePinner = pinnerBuilder.build();
