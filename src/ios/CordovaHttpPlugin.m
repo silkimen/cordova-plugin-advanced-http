@@ -63,8 +63,8 @@
 
         NSMutableSet<NSData *> *certsForDomain = [NSMutableSet set];
 
-        // Scan "intermediate" and "root" folder
-        for (NSString *subfolder in @[@"intermediate", @"root"]) {
+        // Scan "leaf", "intermediate" and "root" folder
+        for (NSString *subfolder in @[@"leaf", @"intermediate", @"root"]) {
             NSString *subfolderPath = [domainPath stringByAppendingPathComponent:subfolder];
             NSArray *pemFiles = [fileManager contentsOfDirectoryAtPath:subfolderPath error:nil];
 
@@ -149,7 +149,7 @@
                 SecCertificateRef leafCertificate = SecTrustGetCertificateAtIndex(serverTrust, 0);
 
                 if (!leafCertificate) {
-                    // If there is no leaf certificate, reject the connection
+                    // If there is no leaf certificate delivered by the request, reject the connection
                     return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
                 }
 

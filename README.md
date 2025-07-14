@@ -450,5 +450,66 @@ We've set up a separate document for our [contribution guidelines](CONTRIBUTING.
 
 
 ## Certificate Pinning
+With [BEKBAPP-3670](https://edorex.atlassian.net/browse/BEKBAPP-3670) a mixed mode of `NO PINNING` and `PINNING` got implemented.  
+This was necessary, as the plugin just could deal with `NO PINNING` or `PINNING` for every request / domain.  
+As both platforms vary in regards of their needs on `certificate pinning`, there needs to be different configuration per platform.
 
-Todo: add description
+
+### Android
+The file `assets/certificate_settings.json` is required.  
+The structure of it is as follows:
+```json
+{
+  "certificates_to_pin": [
+    {
+      "domain": "domain-a.ch",
+      "hashes": [
+        "sha256/...",
+        "sha256/..."
+      ]
+    },
+    {
+      "domain": "domain-b.ch",
+      "hashes": [
+        "sha256/...",
+        "sha256/..."
+      ]
+    }
+  ]
+}
+```
+This file will be read during plugin Initialization.
+When the HTTP request being made, matches one of the domains, one of the configured hashes must match one of the corresponding certificates in the certificate chain.  
+ℹ️ The certificate itself still must be trusted by the OS, 
+the pinning is just and additional check.
+
+⚠️ Take care of the order. Root CA's should come at last.  
+ℹ️ To get the `sha256-hash` execute following command:  
+`openssl x509 -in "certificate.pem" -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64` on a single exported certificate
+
+
+### iOS
+On iOS it's a bit more complex.
+Relevant is the assets folder: `certificate_pinning`.
+Within there the following structure is being analyzed during plugin initialization.
+- certificate_pinning
+  - domain-a.ch
+    - leaf
+      - \<file\>.pem
+    - intermediate
+      - \<file\>.pem
+    - root
+      - \<file\>.pem
+  - domain-a.ch
+    - leaf
+      - \<file\>.pem
+    - intermediate
+      - \<file\>.pem
+    - root
+      - \<file\>.pem
+  - ...
+
+When the HTTP request being made, matches a domain configured with the folder. It's certificates must match the ones located in the folder.
+
+ℹ️ The certificate itself still must be trusted by the OS, 
+the pinning is just and additional check.
