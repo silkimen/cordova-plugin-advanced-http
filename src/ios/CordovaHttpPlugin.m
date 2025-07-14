@@ -21,74 +21,69 @@
 @end
 
 @implementation CordovaHttpPlugin {
-    AFSecurityPolicy *securityPolicy;
     NSURLCredential *x509Credential;
-    NSArray *pinnedDomains;
+    NSMutableDictionary<NSString *, NSSet<NSData *> *> *pinnedCertificateMapping;
+    AFSSLPinningMode _pinningMode;
+    BOOL _allowInvalidCertificates;
+    BOOL _validatesDomainName;
 }
 
 - (void)pluginInitialize {
-    securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
-    securityPolicy.allowInvalidCertificates = NO;  // Ensure invalid certificates are not allowed
-    securityPolicy.validatesDomainName = YES;      // Validate the domain name
-
-    NSString *intermediateCertPath = [[NSBundle mainBundle] pathForResource:@"intermediate-certificate"
-                                                                     ofType:@"pem"
-                                                                inDirectory:@"assets"];
-
-    // Path to the root certificate in the "assets" folder within the app bundle
-    NSString *rootCertPath = [[NSBundle mainBundle] pathForResource:@"root-certificate"
-                                                             ofType:@"pem"
-                                                        inDirectory:@"assets"];
-
-    NSData *intermediateCertData = [self loadCertificateFromFile:intermediateCertPath];
-    NSData *rootCertData = [self loadCertificateFromFile:rootCertPath];
-
-    pinnedDomains = [self loadPinnedDomains];
-
-
-    if (intermediateCertData && rootCertData) {
-        // Pin the intermediate and root certificates only
-        NSSet *pinnedCertificates = [NSSet setWithObjects:intermediateCertData, rootCertData, nil];
-        [securityPolicy setPinnedCertificates:pinnedCertificates];
-    }
+    // NOTE:
+    // Pinned certificates are added later to the securityPolicy
+    // During PluginIntialization we only, load the configurations from the assets
+    // and process the certifcates which are
+    self->pinnedCertificateMapping = [NSMutableDictionary dictionary];
+    [self loadCertifactePinningMapping];
 }
 
-- (NSArray *)loadPinnedDomains {
-    // Get the path to the JSON file
-    NSString *jsonFilePath = [[NSBundle mainBundle] pathForResource:@"certificate_settings"
-                                                             ofType:@"json"
-                                                        inDirectory:@"assets"];
+/**
+ Scans the directory "certificate_pinning" within the assets folder
+ Iterates through every folder and remebers the foldername as "domain"
+ Then searches the "intermediate" and "root" of each folder,
+ in there searches for every *.PEM file
+ With each *.PEM file calls loadCertificateFromFile
+ Then saves the domains with each certifacte in the pinnedCertificateMapping member variable
+ */
+- (void)loadCertifactePinningMapping {
+    NSString *assetsPath = [[NSBundle mainBundle] pathForResource:@"certificate_pinning" ofType:nil inDirectory:@"assets"];
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSArray *domains = [fileManager contentsOfDirectoryAtPath:assetsPath error:nil];
+    
+    NSMutableDictionary<NSString *, NSMutableSet<NSData *> *> *domainCertMap = [NSMutableDictionary dictionary];
 
-    if (!jsonFilePath) {
-        NSLog(@"JSON file not found.");
-        return nil;
+    for (NSString *domainFolder in domains) {
+        NSString *domainPath = [assetsPath stringByAppendingPathComponent:domainFolder];
+        
+        BOOL isDir;
+        if (![fileManager fileExistsAtPath:domainPath isDirectory:&isDir] || !isDir) {
+            continue;
+        }
+
+        NSMutableSet<NSData *> *certsForDomain = [NSMutableSet set];
+
+        // Scan "intermediate" and "root" folder
+        for (NSString *subfolder in @[@"intermediate", @"root"]) {
+            NSString *subfolderPath = [domainPath stringByAppendingPathComponent:subfolder];
+            NSArray *pemFiles = [fileManager contentsOfDirectoryAtPath:subfolderPath error:nil];
+
+            for (NSString *pemFile in pemFiles) {
+                if ([[pemFile pathExtension].lowercaseString isEqualToString:@"pem"]) {
+                    NSString *fullPath = [subfolderPath stringByAppendingPathComponent:pemFile];
+                    NSData *certData = [self loadCertificateFromFile:fullPath];
+                    if (certData) {
+                        [certsForDomain addObject:certData];
+                    }
+                }
+            }
+        }
+
+        domainCertMap[domainFolder] = certsForDomain;
+        NSLog(@"%lu Certificates loaded for domain: %@", (unsigned long)certsForDomain.count, domainFolder);
     }
 
-    NSError *error;
-    NSData *jsonData = [NSData dataWithContentsOfFile:jsonFilePath];
-
-    if (!jsonData) {
-        NSLog(@"Error reading JSON file.");
-        return nil;
-    }
-
-    NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:jsonData
-                                                             options:kNilOptions
-                                                               error:&error];
-
-    if (error || ![jsonDict isKindOfClass:[NSDictionary class]]) {
-        NSLog(@"Error parsing JSON: %@", error.localizedDescription);
-        return nil;
-    }
-
-    NSArray *pinned_domains = jsonDict[@"pinned_domains"];
-
-    if (![pinned_domains isKindOfClass:[NSArray class]]) {
-        NSLog(@"Error: 'pinned_domains' is not an array.");
-        return nil;
-    }
-
-    return pinned_domains;
+    self->pinnedCertificateMapping = [domainCertMap copy];
 }
 
 // Helper method to load a PEM certificate file and convert it to NSData
@@ -131,26 +126,6 @@
     }
 }
 
-- (BOOL)matchesPinnedDomain:(NSString *)domain withPinnedDomains:(NSArray<NSString *> *)pinnedDomains {
-    for (NSString *pinnedDomain in pinnedDomains) {
-        // Escape dots and replace wildcard with regex pattern
-        NSString *regexPattern = [pinnedDomain stringByReplacingOccurrencesOfString:@"." withString:@"\\."];
-        regexPattern = [regexPattern stringByReplacingOccurrencesOfString:@"*\\." withString:@".+"];
-
-        // Create regex with case-insensitive matching
-        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:[NSString stringWithFormat:@"^%@$", regexPattern]
-                                                                               options:NSRegularExpressionCaseInsensitive
-                                                                                 error:nil];
-
-        // Check if domain matches regex
-        NSRange matchRange = [regex rangeOfFirstMatchInString:domain options:0 range:NSMakeRange(0, domain.length)];
-        if (matchRange.location != NSNotFound) {
-            return YES;
-        }
-    }
-    return NO;
-}
-
 - (void)setupAuthChallengeBlock:(AFHTTPSessionManager*)manager {
     [manager setSessionDidReceiveAuthenticationChallengeBlock:^NSURLSessionAuthChallengeDisposition(
         NSURLSession * _Nonnull session,
@@ -158,15 +133,18 @@
         NSURLCredential * _Nullable __autoreleasing * _Nullable credential
     ) {
         if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodServerTrust]) {
-
+            
             // Extract the server's trust
             SecTrustRef serverTrust = challenge.protectionSpace.serverTrust;
             NSString *serverDomain = challenge.protectionSpace.host;
+          
+            *credential = [NSURLCredential credentialForTrust:serverTrust];
 
             // check if the settings contain the current domain.
             // We only do certificate pinning if the domain is actually pinned,
             // otherwise we just use the default mechanism to check the certificate chain
-            if ([self matchesPinnedDomain:serverDomain withPinnedDomains:self->pinnedDomains]) {
+            NSSet<NSData *> *certsMatchingDomain = self->pinnedCertificateMapping[serverDomain];
+            if (certsMatchingDomain) {
                 // Retrieve the leaf certificate (index 0)
                 SecCertificateRef leafCertificate = SecTrustGetCertificateAtIndex(serverTrust, 0);
 
@@ -175,15 +153,20 @@
                     return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
                 }
 
+                AFSecurityPolicy *securityPolicyWithCertificatePinning = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+                securityPolicyWithCertificatePinning.allowInvalidCertificates = NO;  // Ensure invalid certificates are not allowed
+                securityPolicyWithCertificatePinning.validatesDomainName = YES;      // Validate the domain name
+                [securityPolicyWithCertificatePinning setPinnedCertificates:certsMatchingDomain];
+              
                 // Check serverTrust with PinningModeCertificateSecurityPolicy if domain matched
-                if (![self->securityPolicy evaluateServerTrust:serverTrust forDomain:serverDomain]) {
+                if (![securityPolicyWithCertificatePinning evaluateServerTrust:serverTrust forDomain:serverDomain]) {
                     return NSURLSessionAuthChallengeCancelAuthenticationChallenge;
                 }
                 
             } else {
-                AFSecurityPolicy *standardSecurityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-                standardSecurityPolicy.allowInvalidCertificates = NO;  // Ensure invalid certificates are not allowed
-                standardSecurityPolicy.validatesDomainName = YES;
+                AFSecurityPolicy *standardSecurityPolicy = [AFSecurityPolicy policyWithPinningMode:self->_pinningMode];
+                standardSecurityPolicy.allowInvalidCertificates = self->_allowInvalidCertificates;
+                standardSecurityPolicy.validatesDomainName = self->_validatesDomainName;
 
                 // Check serverTrust with PinningModeNoneSecurityPolicy if domain didn't match (as before)
                 if (![standardSecurityPolicy evaluateServerTrust:serverTrust forDomain:serverDomain]) {
@@ -191,8 +174,6 @@
                 }
             }
 
-            // If all validations pass, use the credential
-            *credential = [NSURLCredential credentialForTrust:serverTrust];
             if (credential) {
                 return NSURLSessionAuthChallengeUseCredential;
             }
@@ -505,17 +486,17 @@
     NSString *certMode = [command.arguments objectAtIndex:0];
 
     if ([certMode isEqualToString: @"default"] || [certMode isEqualToString: @"legacy"]) {
-        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-        securityPolicy.allowInvalidCertificates = NO;
-        securityPolicy.validatesDomainName = YES;
+        _pinningMode = AFSSLPinningModeNone;
+        _allowInvalidCertificates = NO;
+        _validatesDomainName = YES;
     } else if ([certMode isEqualToString: @"nocheck"]) {
-        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-        securityPolicy.allowInvalidCertificates = YES;
-        securityPolicy.validatesDomainName = NO;
+        _pinningMode = AFSSLPinningModeNone;
+        _allowInvalidCertificates = YES;
+        _validatesDomainName = NO;
     } else if ([certMode isEqualToString: @"pinned"]) {
-        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
-        securityPolicy.allowInvalidCertificates = NO;
-        securityPolicy.validatesDomainName = YES;
+      _pinningMode = AFSSLPinningModeCertificate;
+      _allowInvalidCertificates = NO;
+      _validatesDomainName = YES;
     }
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
