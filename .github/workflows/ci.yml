@@ -9,7 +9,10 @@ on:
         required: false
 
 env:
-  nodejs: "16.x"
+  node_version: "22.x"
+  java_distribution: "zulu"
+  java_version: "17"
+  gradle_version: "7.6.1"
   BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
   BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
@@ -18,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Install Node.js ${{ env.nodejs }}
+      - name: Install node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.nodejs }}
+          node-version: ${{ env.node_version }}
           cache: npm
           cache-dependency-path: package-lock.json
       - name: Install node modules
@@ -31,56 +34,82 @@ jobs:
 
   build-ios:
     runs-on: macOS-latest
+    outputs:
+      run-tests: ${{ steps.should-run-tests.outputs.run_tests }}
     steps:
       - uses: actions/checkout@v1
-      - name: Install Node.js ${{ env.nodejs }}
+      - name: Install node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.nodejs }}
+          node-version: ${{ env.node_version }}
           cache: npm
           cache-dependency-path: package-lock.json
+      - id: should-run-tests
+        # need to find a solution for signing iOS App so we can build for device target instead simulator
+        # for now we skip iOS tests on BrowserStack
+        run: echo "run_tests=false" >> "$GITHUB_OUTPUT"
       - name: Install node modules
         run: npm ci
       - name: Update test cert for httpbin.org
         run: npm run update:cert
-      # need to find a solution for signing iOS App so we can build for device target instead simulator
       - name: Build test app
         run: scripts/build-test-app.sh --ios --emulator
       - name: Upload artifact to BrowserStack
-        if: env.BROWSERSTACK_USERNAME != ''
+        if: steps.should-run-tests.outputs.run_tests == 'true'
         run: scripts/upload-browserstack.sh --ios
-      # need to have an App for device target
-      # - name: Run e2e tests
-      #   if: env.BROWSERSTACK_USERNAME != ''
-      #   run: scripts/test-app.sh --ios --device
+
+  test-ios:
+    needs: build-ios
+    if: needs.build-ios.outputs.run-tests == 'true'
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node_version }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install node modules
+        run: npm ci
+      - name: Run e2e tests (iOS)
+        run: scripts/test-app.sh --ios --device
 
   build-android:
     runs-on: ubuntu-latest
+    outputs:
+      run-tests: ${{ steps.should-run-tests.outputs.run_tests }}
     steps:
       - uses: actions/checkout@v1
-      - name: Install Node.js ${{ env.nodejs }}
+      - name: Install node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.nodejs }}
+          node-version: ${{ env.node_version }}
           cache: npm
           cache-dependency-path: package-lock.json
+      - id: should-run-tests
+        run: |
+          if [ -n "${BROWSERSTACK_USERNAME}" ]; then
+            echo "run_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_tests=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Install node modules
         run: npm ci
       - name: Install JDK
         uses: actions/setup-java@v2
         with:
-          distribution: "zulu"
-          java-version: "17"
+          distribution: ${{ env.java_distribution }}
+          java-version: ${{ env.java_version }}
           java-package: jdk
       - name: Ensure Android build-tools 33.0.2
         run: yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" "build-tools;33.0.2"
-      - name: Install Gradle 7.6.1
+      - name: Install Gradle
         run: |
           set -euo pipefail
-          GRADLE_VERSION=7.6.1
-          curl -sSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o gradle.zip
+          curl -sSL "https://services.gradle.org/distributions/gradle-${{ env.gradle_version }}-bin.zip" -o gradle.zip
           unzip -q gradle.zip -d "$HOME/gradle"
-          echo "$HOME/gradle/gradle-${GRADLE_VERSION}/bin" >> "$GITHUB_PATH"
+          echo "$HOME/gradle/gradle-${{ env.gradle_version }}/bin" >> "$GITHUB_PATH"
           rm gradle.zip
       - name: Update test cert for httpbin.org
         run: npm run update:cert
@@ -101,8 +130,22 @@ jobs:
       - name: Build test app
         run: scripts/build-test-app.sh --android --device
       - name: Upload artifact to BrowserStack
-        if: env.BROWSERSTACK_USERNAME != ''
+        if: steps.should-run-tests.outputs.run_tests == 'true'
         run: scripts/upload-browserstack.sh --android
-      - name: Run e2e tests
-        if: env.BROWSERSTACK_USERNAME != ''
+
+  test-android:
+    needs: build-android
+    if: needs.build-android.outputs.run-tests == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node_version }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install node modules
+        run: npm ci
+      - name: Run e2e tests (Android)
         run: scripts/test-app.sh --android --device
