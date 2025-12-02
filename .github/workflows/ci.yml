@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       ci_reason:
-        description: 'Optional note for manual runs'
+        description: "Optional note for manual runs"
         required: false
 
 env:
@@ -19,9 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install Node.js ${{ env.nodejs }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.nodejs }}
+          cache: npm
+          cache-dependency-path: package-lock.json
       - name: Install node modules
         run: npm ci
       - name: Run WWW interface tests
@@ -32,9 +34,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install Node.js ${{ env.nodejs }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.nodejs }}
+          cache: npm
+          cache-dependency-path: package-lock.json
       - name: Install node modules
         run: npm ci
       - name: Update test cert for httpbin.org
@@ -55,9 +59,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install Node.js ${{ env.nodejs }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.nodejs }}
+          cache: npm
+          cache-dependency-path: package-lock.json
       - name: Install node modules
         run: npm ci
       - name: Install JDK 1.8
