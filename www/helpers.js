@@ -1,3 +1,5 @@
+/* global FileSystem */
+
 module.exports = function init(global, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator, ponyfills) {
   var validSerializers = ['urlencoded', 'json', 'utf8', 'raw', 'multipart'];
   var validCertModes = ['default', 'nocheck', 'pinned', 'legacy'];
@@ -66,7 +68,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     for (var i = 0; i < globalKeys.length; i++) {
       key = globalKeys[i];
 
-      if (!localHeaders.hasOwnProperty(key)) {
+      if (!Object.prototype.hasOwnProperty.call(localHeaders, key)) {
         localHeaders[key] = globalHeaders[key];
       }
     }
@@ -361,7 +363,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   }
 
   function getMatchingHostHeaders(url, headersList) {
-    var matches = url.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+    var matches = url.match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
     var domain = matches && matches[1];
 
     return headersList[domain] || null;

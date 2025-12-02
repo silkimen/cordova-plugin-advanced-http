@@ -6,7 +6,7 @@ module.exports = function init(jsUtil) {
   }
 
   function parseUrl(url) {
-    var match = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/);
+    var match = url.match(/^(https?:)\/\/(([^:/?#]*)(?::([0-9]+))?)([/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/);
 
     return match && {
         protocol: match[1],
@@ -42,7 +42,7 @@ module.exports = function init(jsUtil) {
     var parts = [];
 
     for (var key in object) {
-      if (!object.hasOwnProperty(key)) {
+      if (!Object.prototype.hasOwnProperty.call(object, key)) {
         continue;
       }
 

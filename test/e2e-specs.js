@@ -1,3 +1,5 @@
+/* global cordova, resolveLocalFileSystemURL, should */
+
 const hooks = {
   onBeforeEachTest: function (resolve, reject) {
     cordova.plugin.http.clearCookies();
@@ -92,12 +94,12 @@ const helpers = {
     // abort is not working reliably; will be documented in known issues
     return false;
 
-    if (window.cordova && window.cordova.platformId === 'android') {
-      var version = device.version; // NOTE will throw error if cordova is present without cordova-plugin-device
-      var major = parseInt(/^(\d+)(\.|$)/.exec(version)[1], 10);
-      return isFinite(major) && major >= 6;
-    }
-    return true;
+    // if (window.cordova && window.cordova.platformId === 'android') {
+    //   var version = device.version; // NOTE will throw error if cordova is present without cordova-plugin-device
+    //   var major = parseInt(/^(\d+)(\.|$)/.exec(version)[1], 10);
+    //   return isFinite(major) && major >= 6;
+    // }
+    // return true;
   },
   getAbortDelay: function () { return 0; },
   getDemoArrayBuffer: function(size) {
@@ -229,7 +231,7 @@ const tests = [
   },
   {
     description: 'should send JSON object correctly (POST)',
-    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}" ...',
     before: helpers.setJsonSerializer,
     func: function (resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -239,7 +241,7 @@ const tests = [
   },
   {
     description: 'should send JSON object correctly (PUT)',
-    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}" ...',
     before: helpers.setJsonSerializer,
     func: function (resolve, reject) { cordova.plugin.http.put('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -249,7 +251,7 @@ const tests = [
   },
   {
     description: 'should send JSON object correctly (PATCH)',
-    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"json\\":\\"test\\": \\"testString\\"}" ...',
     before: helpers.setJsonSerializer,
     func: function (resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -259,7 +261,7 @@ const tests = [
   },
   {
     description: 'should send JSON array correctly (POST) #26',
-    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]\" ...',
+    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]" ...',
     before: helpers.setJsonSerializer,
     func: function (resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', [1, 2, 3], {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -269,7 +271,7 @@ const tests = [
   },
   {
     description: 'should send JSON array correctly (PUT) #26',
-    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]\" ...',
+    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]" ...',
     before: helpers.setJsonSerializer,
     func: function (resolve, reject) { cordova.plugin.http.put('http://httpbin.org/anything', [1, 2, 3], {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -279,7 +281,7 @@ const tests = [
   },
   {
     description: 'should send JSON array correctly (PATCH) #26',
-    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]\" ...',
+    expected: 'resolved: {"status": 200, "data": "[ 1, 2, 3 ]" ...',
     before: helpers.setJsonSerializer,
     func: function (resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', [1, 2, 3], {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -290,7 +292,7 @@ const tests = [
   },
   {
     description: 'should send url encoded data correctly (POST) #41',
-    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}" ...',
     before: helpers.setUrlEncodedSerializer,
     func: function (resolve, reject) { cordova.plugin.http.post('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -300,7 +302,7 @@ const tests = [
   },
   {
     description: 'should send url encoded data correctly (PUT)',
-    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}" ...',
     before: helpers.setUrlEncodedSerializer,
     func: function (resolve, reject) { cordova.plugin.http.put('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -310,7 +312,7 @@ const tests = [
   },
   {
     description: 'should send url encoded data correctly (PATCH)',
-    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"form\\":\\"test\\": \\"testString\\"}" ...',
     before: helpers.setUrlEncodedSerializer,
     func: function (resolve, reject) { cordova.plugin.http.patch('http://httpbin.org/anything', { test: 'testString' }, {}, resolve, reject); },
     validationFunc: function (driver, result) {
@@ -330,7 +332,10 @@ const tests = [
   {
     description: 'should not follow 302 redirect when following redirects is disabled',
     expected: 'rejected: {"status": 302, ...',
-    before: function (resolve, reject) { cordova.plugin.http.setFollowRedirect(false); resolve(); },
+    before: function (resolve) {
+      cordova.plugin.http.setFollowRedirect(false);
+      resolve();
+    },
     func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=http://httpbingo.org/anything', {}, {}, resolve, reject); },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('rejected');
@@ -427,7 +432,7 @@ const tests = [
   },
   {
     description: 'should encode HTTP array params correctly (GET) #45',
-    expected: 'resolved: {"status": 200, "data": "{\\"url\\":\\"http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3\\"}\" ...',
+    expected: 'resolved: {"status": 200, "data": "{\\"url\\":\\"http://httpbin.org/get?myArray[]=val1&myArray[]=val2&myArray[]=val3\\"}" ...',
     func: function (resolve, reject) {
       cordova.plugin.http.get('http://httpbin.org/get', { myArray: ['val1', 'val2', 'val3'], myString: 'testString' }, {}, resolve, reject);
     },
@@ -455,8 +460,9 @@ const tests = [
   {
     description: 'should throw an error while setting non-string value as global header #54',
     expected: 'throwed: "advanced-http: header values must be strings"',
-    func: function (resolve, reject) {
+    func: function (resolve) {
       cordova.plugin.http.setHeader('myTestHeader', 2);
+      resolve();
     },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('throwed');
@@ -495,7 +501,7 @@ const tests = [
   },
   {
     description: 'should not send programmatically set cookies after running "clearCookies" (GET) #59',
-    expected: 'resolved: {"status": 200, "data": "{\"headers\": {\"Cookie\": \"\"...',
+    expected: 'resolved: {"status": 200, "data": "{"headers": {"Cookie": ""...',
     func: function (resolve, reject) {
       cordova.plugin.http.setCookie('http://httpbin.org/get', 'myCookie=myValue');
       cordova.plugin.http.setCookie('http://httpbin.org/get', 'mySecondCookie=mySecondValue');
@@ -1011,7 +1017,7 @@ const tests = [
   },
   {
     description: 'should not send any cookies after running "clearCookies" (GET) #248',
-    expected: 'resolved: {"status": 200, "data": "{\"cookies\":{}} ...',
+    expected: 'resolved: {"status": 200, "data": "{"cookies":{}} ...',
     before: helpers.disableFollowingRedirect,
     func: function (resolve, reject) {
       cordova.plugin.http.get('https://httpbin.org/cookies/set?myCookieKey=myCookieValue', {}, {}, function () {

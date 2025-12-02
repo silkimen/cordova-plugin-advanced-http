@@ -164,13 +164,15 @@ module.exports = function init(ToughCookie, _) {
   WebStorageCookieStore.prototype._readStore = function () {
     var json = this._storage.getItem(this._storeKey);
 
-    if (json !== null) {
-      try {
-        return JSON.parse(json);
-      } catch (e) { }
+    if (json === null) {
+      return {};
     }
 
-    return {};
+    try {
+      return JSON.parse(json);
+    } catch (e) {
+      return {};
+    }
   };
 
   WebStorageCookieStore.prototype._writeStore = function (store) {

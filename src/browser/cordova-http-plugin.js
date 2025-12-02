@@ -193,7 +193,7 @@ function sendRequest(method, withData, opts, success, failure) {
   }
 
   switch (serializer) {
-    case 'json':
+    case 'json': {
       setDefaultContentType(headers, 'application/json; charset=utf8');
       processedData = serializeJsonData(data);
 
@@ -202,18 +202,21 @@ function sendRequest(method, withData, opts, success, failure) {
       }
 
       break;
+    }
 
-    case 'utf8':
+    case 'utf8': {
       setDefaultContentType(headers, 'text/plain; charset=utf8');
       processedData = data.text;
       break;
+    }
 
-    case 'urlencoded':
+    case 'urlencoded': {
       setDefaultContentType(headers, 'application/x-www-form-urlencoded');
       processedData = serializeParams(data);
       break;
+    }
 
-    case 'multipart':
+    case 'multipart': {
       const contentType = getHeaderValue(headers, 'Content-Type');
 
       // intentionally don't set a default content type
@@ -224,11 +227,13 @@ function sendRequest(method, withData, opts, success, failure) {
 
       processedData = processMultipartData(data);
       break;
+    }
 
-    case 'raw':
+    case 'raw': {
       setDefaultContentType(headers, 'application/octet-stream');
       processedData = data;
       break;
+    }
   }
 
   // requesting text instead of JSON because it's parsed in the response handler
@@ -283,7 +288,7 @@ function sendRequest(method, withData, opts, success, failure) {
   xhr.send(processedData);
 }
 
-function abort(opts, success, failure) {
+function abort(opts, success) {
   var reqId = opts[0];
   var result = false;
 
@@ -318,19 +323,19 @@ var browserInterface = {
   abort: function (success, failure, opts) {
     return abort(opts, success, failure);
   },
-  uploadFile: function (success, failure, opts) {
+  uploadFile: function (success, failure) {
     return failure('advanced-http: function "uploadFile" not supported on browser platform');
   },
-  uploadFiles: function (success, failure, opts) {
+  uploadFiles: function (success, failure) {
     return failure('advanced-http: function "uploadFiles" not supported on browser platform');
   },
-  downloadFile: function (success, failure, opts) {
+  downloadFile: function (success, failure) {
     return failure('advanced-http: function "downloadFile" not supported on browser platform');
   },
-  setServerTrustMode: function (success, failure, opts) {
+  setServerTrustMode: function (success, failure) {
     return failure('advanced-http: function "setServerTrustMode" not supported on browser platform');
   },
-  setClientAuthMode: function (success, failure, opts) {
+  setClientAuthMode: function (success, failure) {
     return failure('advanced-http: function "setClientAuthMode" not supported on browser platform');
   }
 };

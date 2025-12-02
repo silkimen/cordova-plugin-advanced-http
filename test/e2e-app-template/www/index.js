@@ -1,3 +1,5 @@
+/* global hooks, tests */
+
 const app = {
   testIndex: -1,
 

@@ -86,7 +86,7 @@ function getCaps(environment, os, runtime) {
   caps.name = `cordova-plugin-advanced-http (${os})`;
 
   return caps;
-};
+}
 
 function capitalize(text) {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();

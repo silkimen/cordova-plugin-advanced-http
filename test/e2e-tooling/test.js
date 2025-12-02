@@ -98,7 +98,7 @@ async function validateTestIndex(driver, testIndex) {
 
 async function validateTestTitle(driver, testTitle) {
   const description = await driver.elementById('descriptionLbl').text();
-  const title = description.match(/\d+:\ (.*)/)[1];
+  const title = description.match(/\d+: (.*)/)[1];
 
   title.should.be.equal(testTitle, 'Test description is not matching!');
 }
@@ -106,6 +106,7 @@ async function validateTestTitle(driver, testTitle) {
 async function waitToBeFinished(driver, timeout) {
   const timeoutTimestamp = Date.now() + timeout;
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (await driver.elementById('statusInput').getValue() === 'finished') {
       return true;

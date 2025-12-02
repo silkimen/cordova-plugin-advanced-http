@@ -17,6 +17,21 @@ env:
   BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node_version }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install node modules
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+
   test-www-interface:
     runs-on: ubuntu-latest
     steps:
