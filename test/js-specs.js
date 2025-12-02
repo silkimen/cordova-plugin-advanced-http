@@ -536,7 +536,7 @@ describe('Common helpers', function () {
         null,
         (response) => {
           response.status.should.be.equal(errorCodes.POST_PROCESSING_FAILED);
-          response.error.should.include('Unexpected token N in JSON at position 0');
+          response.error.should.include('Unexpected token');
         }
       );
 

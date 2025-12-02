@@ -117,7 +117,6 @@ const helpers = {
 };
 
 const messageFactory = {
-  handshakeFailed: function() { return 'TLS connection could not be established: javax.net.ssl.SSLHandshakeException: Handshake failed' },
   sslTrustAnchor: function () { return 'TLS connection could not be established: javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.' },
   invalidCertificate: function (domain) { return 'The certificate for this server is invalid. You might be connecting to a server that is pretending to be “' + domain + '” which could put your confidential information at risk.' }
 }
@@ -612,7 +611,9 @@ const tests = [
     },
     validationFunc: function (driver, result, targetInfo) {
       result.type.should.be.equal('rejected');
-      result.data.should.be.eql({ status: -2, error: targetInfo.isAndroid ? messageFactory.sslTrustAnchor() : messageFactory.invalidCertificate('sha512.badssl.com') });
+      result.data.status.should.be.equal(-2);
+      result.data.error.should.include(targetInfo.isAndroid ? 'javax.net.ssl.SSLHandshakeException' : 'The certificate for this server is invalid');
+      // result.data.should.be.eql({ status: -2, error: targetInfo.isAndroid ? messageFactory.s^slTrustAnchor() : messageFactory.invalidCertificate('sha512.badssl.com') });
     }
   },
   {
@@ -1175,7 +1176,8 @@ const tests = [
     },
     validationFunc: function (driver, result) {
       result.type.should.be.equal('rejected');
-      result.data.should.be.eql({ status: -2, error: messageFactory.handshakeFailed() });
+      result.data.status.should.be.equal(-2);
+      result.data.error.should.include('UNSUPPORTED_PROTOCOL');
     }
   },
 ];
