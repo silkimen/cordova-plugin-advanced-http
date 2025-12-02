@@ -1,6 +1,12 @@
 name: Cordova HTTP Plugin CI
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      ci_reason:
+        description: 'Optional note for manual runs'
+        required: false
 
 env:
   nodejs: "16.x"
