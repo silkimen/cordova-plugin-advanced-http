@@ -17,13 +17,20 @@ if [ $PLATFORM = "android" ]; then
       -F "file=@$TEMP/platforms/android/app/build/outputs/apk/debug/app-debug.apk" \
       -F "data={\"custom_id\": \"HttpTestAppAndroid\"}"
 else
-  rm -rf $TEMP/HttpDemo.ipa
-  pushd $TEMP/platforms/ios/build/emulator
-  rm -rf ./Payload
-  mkdir -p ./Payload
-  cp -r ./HttpDemo.app ./Payload/HttpDemo.app
-  zip -r $TEMP/HttpDemo.ipa ./Payload
-  popd
+  rm -rf "$TEMP/HttpDemo.ipa"
+  IOS_BUILD_DIR="$TEMP/platforms/ios/build/Debug-iphonesimulator"
+  APP_PATH="$IOS_BUILD_DIR/HttpDemo.app"
+  if [ ! -d "$APP_PATH" ]; then
+    echo "Unable to locate $APP_PATH" >&2
+    exit 1
+  fi
+
+  PAYLOAD_DIR="$TEMP/Payload"
+  rm -rf "$PAYLOAD_DIR"
+  mkdir -p "$PAYLOAD_DIR"
+  cp -R "$APP_PATH" "$PAYLOAD_DIR/HttpDemo.app"
+  (cd "$TEMP" && zip -qr HttpDemo.ipa Payload)
+  rm -rf "$PAYLOAD_DIR"
 
   curl -u $BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY \
       -X POST \
