@@ -73,10 +73,5 @@ If we suggest changes or the [CI build fails](#cibuild), then:
 That's it! Thank you for your contribution!
 
 ### <a name="cibuild"></a> Pull Request Feedback
-You can always check the results of the latest CI builds on
-[Travis CI](https://travis-ci.org/silkimen/cordova-plugin-advanced-http/).
+You can always check the results of the latest CI builds on [Github Actions](https://github.com/silkimen/cordova-plugin-advanced-http/actions).
 You can use this information to inspect failing tests in your PR.
-
-## Attribution
-This document is adapted from
-[AngularJS' Contribution Guidelines](https://github.com/angular/angular.js/blob/master/CONTRIBUTING.md)
