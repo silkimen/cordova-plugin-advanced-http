@@ -180,7 +180,14 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
         break;
       case 'upload':
         var fileOptions = helpers.checkUploadFileOptions(options.filePath, options.name);
-        exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.connectTimeout, options.readTimeout, options.followRedirect, options.responseType, reqId]);
+        var hasProgressCallback = options.onProgress != null;
+        exec(function(resp) {
+          if (resp != null && resp.isProgress) {
+            options.onProgress(resp);
+          } else {
+            onSuccess(resp);
+          }
+        }, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.connectTimeout, options.readTimeout, options.followRedirect, options.responseType, reqId, hasProgressCallback]);
         break;
       case 'download':
         var filePath = helpers.checkDownloadFilePath(options.filePath);
@@ -223,8 +230,8 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     return publicInterface.sendRequest(url, { method: 'options', params: params, headers: headers }, success, failure);
   }
 
-  function uploadFile(url, params, headers, filePath, name, success, failure) {
-    return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name }, success, failure);
+  function uploadFile(url, params, headers, filePath, name, success, failure, progress) {
+    return publicInterface.sendRequest(url, { method: 'upload', params: params, headers: headers, filePath: filePath, name: name, onProgress: progress }, success, failure);
   }
 
   function downloadFile(url, params, headers, filePath, success, failure) {
