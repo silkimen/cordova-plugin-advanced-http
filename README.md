@@ -270,7 +270,10 @@ Here's a quick example:
 const options = {
   method: 'post',
   data: { id: 12, message: 'test' },
-  headers: { Authorization: 'OAuth2: token' }
+  headers: { Authorization: 'OAuth2: token' },
+  onProgress: function(progressData) {
+    console.log((progressData.transferred / progressData.total * 100) + ' percent complete')
+  }
 };
 
 cordova.plugin.http.sendRequest('https://google.com/', options, function(response) {
