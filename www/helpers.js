@@ -503,7 +503,7 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     return {
       data: jsUtil.getTypeOf(options.data) === 'Undefined' ? null : options.data,
       filePath: options.filePath,
-      followRedirect: checkFollowRedirectValue(options.followRedirect || globals.followRedirect),
+      followRedirect: checkFollowRedirectValue(('followRedirect' in options) ? options.followRedirect : globals.followRedirect),
       headers: checkHeadersObject(options.headers || {}),
       method: checkHttpMethod(options.method || validHttpMethods[0]),
       name: options.name,
