@@ -75,7 +75,7 @@ class CordovaHttpResponse {
     } else if (this.isFileOperation) {
       json.put("file", this.fileEntry);
     } else if (this.isRawResponse) {
-      json.put("data", Base64.encodeToString(this.rawData, Base64.DEFAULT));
+      json.put("data", Base64.encodeToString(this.rawData, Base64.NO_WRAP));
     } else {
       json.put("data", this.body);
     }
