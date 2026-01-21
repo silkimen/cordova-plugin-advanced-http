@@ -6,6 +6,7 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     setHeader: setHeader,
     getDataSerializer: getDataSerializer,
     setDataSerializer: setDataSerializer,
+    setCookieStorageImpl: setCookieStorageImpl,
     setCookie: setCookie,
     clearCookies: clearCookies,
     removeCookies: removeCookies,
@@ -79,6 +80,18 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
 
   function setDataSerializer(serializer) {
     globalConfigs.serializer = helpers.checkSerializer(serializer);
+  }
+
+  /**
+   * Provides a custom cookie storage, to override the default localStorage
+   * @param {Object} storage 
+   * @param {(name: string, value: string) => void} storage.setItem 
+   * @param {(name: string) => string} storage.getItem 
+   * @param {(name: string) => void} storage.removeItem 
+   */
+  function setCookieStorageImpl(storage)
+  {
+    cookieHandler.setStorageImpl(storage);
   }
 
   function setCookie(url, cookie, options) {
