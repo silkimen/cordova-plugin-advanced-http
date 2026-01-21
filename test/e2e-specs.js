@@ -343,6 +343,15 @@ const tests = [
     }
   },
   {
+    description: 'should follow 302 redirect with protocol change #383',
+    expected: 'resolved: {"status": 200, url: "https://httpbin.org/anything", ...',
+    func: function (resolve, reject) { cordova.plugin.http.get('http://httpbingo.org/redirect-to?url=https://httpbin.org/anything', {}, {}, resolve, reject); },
+    validationFunc: function (driver, result) {
+      result.type.should.be.equal('resolved');
+      result.data.url.should.be.equal('https://httpbin.org/anything');
+    }
+  },
+  {
     description: 'should download a file from given URL to given path in local filesystem',
     expected: 'resolved: {"content": "<?xml version=\'1.0\' encoding=\'us-ascii\'?>\\n\\n<!--  A SAMPLE set of slides  -->" ...',
     func: function (resolve, reject) {
