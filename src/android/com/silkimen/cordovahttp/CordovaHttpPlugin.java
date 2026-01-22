@@ -163,12 +163,17 @@ public class CordovaHttpPlugin extends CordovaPlugin implements Observer {
     int readTimeout = args.getInt(5) * 1000;
     boolean followRedirect = args.getBoolean(6);
     String responseType = args.getString(7);
-    Integer reqId = args.getInt(8);
+    JSONObject transmitOptions = args.getJSONObject(8);
+    Integer reqId = args.getInt(9);
+
+    // new file transmission options
+    String transmitFileType = transmitOptions.getString("transmitFileAs");
+    boolean submitRaw = transmitFileType.equalsIgnoreCase("BINARY");
 
     CordovaObservableCallbackContext observableCallbackContext = new CordovaObservableCallbackContext(callbackContext, reqId);
 
     CordovaHttpUpload upload = new CordovaHttpUpload(url, headers, filePaths, uploadNames, connectTimeout, readTimeout, followRedirect,
-        responseType, this.tlsConfiguration, this.cordova.getActivity().getApplicationContext(), observableCallbackContext);
+        responseType, this.tlsConfiguration, submitRaw, this.cordova.getActivity().getApplicationContext(), observableCallbackContext);
 
     startRequest(reqId, observableCallbackContext, upload);
 

@@ -1186,6 +1186,34 @@ const tests = [
       result.data.error.should.include('UNSUPPORTED_PROTOCOL');
     }
   },
+  {
+    description: 'should upload a file in binary mode from given path in local filesystem to given URL #495',
+    expected: 'resolved: {"status": 200, "data": "files": {"test-file.txt": "I am a dummy file. I am used ...',
+    func: function (resolve, reject) {
+      var fileName = 'test-file.txt';
+      var fileContent = 'I am a dummy file. I am used for testing purposes!';
+      var sourcePath = cordova.file.cacheDirectory + fileName;
+      var targetUrl = 'http://httpbin.org/post';
+
+      var options = { method: 'upload', transmitFileAs: 'BINARY', filePath: sourcePath, name: fileName };
+
+      helpers.writeToFile(function () {
+        cordova.plugin.http.sendRequest(targetUrl, options, resolve, reject);
+      }, fileName, fileContent);
+    },
+    validationFunc: function (driver, result) {
+      var fileName = 'test-file.txt';
+      var fileContent = 'I am a dummy file. I am used for testing purposes!';
+
+      result.type.should.be.equal('resolved');
+      result.data.data.should.be.a('string');
+
+      JSON
+        .parse(result.data.data)
+        .data
+        .should.be.equal(fileContent);
+    }
+  },
 ];
 
 if (typeof module !== 'undefined' && module.exports) {
