@@ -33,11 +33,15 @@
 }
 
 - (void)addRequest:(NSNumber*)reqId forTask:(NSURLSessionDataTask*)task {
-    [reqDict setObject:task forKey:reqId];
+    @synchronized (reqDict) {
+        [reqDict setObject:task forKey:reqId];
+    }
 }
 
 - (void)removeRequest:(NSNumber*)reqId {
-    [reqDict removeObjectForKey:reqId];
+    @synchronized (reqDict) {
+        [reqDict removeObjectForKey:reqId];
+    }
 }
 
 - (void)setRequestSerializer:(NSString*)serializerName forManager:(SM_AFHTTPSessionManager*)manager {
@@ -53,6 +57,14 @@
 }
 
 - (void)setupAuthChallengeBlock:(SM_AFHTTPSessionManager*)manager {
+    SM_AFSecurityPolicy *policySnapshot;
+    NSURLCredential *credentialSnapshot;
+
+    @synchronized (self) {
+        policySnapshot = securityPolicy;
+        credentialSnapshot = x509Credential;
+    }
+
     [manager setSessionDidReceiveAuthenticationChallengeBlock:^NSURLSessionAuthChallengeDisposition(
         NSURLSession * _Nonnull session,
         NSURLAuthenticationChallenge * _Nonnull challenge,
@@ -61,7 +73,7 @@
         if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodServerTrust]) {
             *credential = [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust];
 
-            if (![self->securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
+            if (![policySnapshot evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) {
                 return NSURLSessionAuthChallengeRejectProtectionSpace;
             }
 
@@ -70,8 +82,8 @@
             }
         }
 
-        if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodClientCertificate] && self->x509Credential) {
-            *credential = self->x509Credential;
+        if ([challenge.protectionSpace.authenticationMethod isEqualToString: NSURLAuthenticationMethodClientCertificate] && credentialSnapshot) {
+            *credential = credentialSnapshot;
             return NSURLSessionAuthChallengeUseCredential;
         }
 
@@ -352,18 +364,24 @@
 - (void)setServerTrustMode:(CDVInvokedUrlCommand*)command {
     NSString *certMode = [command.arguments objectAtIndex:0];
 
+    SM_AFSecurityPolicy *newPolicy;
+
     if ([certMode isEqualToString: @"default"] || [certMode isEqualToString: @"legacy"]) {
-        securityPolicy = [SM_AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-        securityPolicy.allowInvalidCertificates = NO;
-        securityPolicy.validatesDomainName = YES;
+        newPolicy = [SM_AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+        newPolicy.allowInvalidCertificates = NO;
+        newPolicy.validatesDomainName = YES;
     } else if ([certMode isEqualToString: @"nocheck"]) {
-        securityPolicy = [SM_AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-        securityPolicy.allowInvalidCertificates = YES;
-        securityPolicy.validatesDomainName = NO;
+        newPolicy = [SM_AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+        newPolicy.allowInvalidCertificates = YES;
+        newPolicy.validatesDomainName = NO;
     } else if ([certMode isEqualToString: @"pinned"]) {
-        securityPolicy = [SM_AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
-        securityPolicy.allowInvalidCertificates = NO;
-        securityPolicy.validatesDomainName = YES;
+        newPolicy = [SM_AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+        newPolicy.allowInvalidCertificates = NO;
+        newPolicy.validatesDomainName = YES;
+    }
+
+    @synchronized (self) {
+        securityPolicy = newPolicy;
     }
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -375,7 +393,9 @@
     NSString *mode = [command.arguments objectAtIndex:0];
 
     if ([mode isEqualToString:@"none"]) {
-      x509Credential = nil;
+      @synchronized (self) {
+          x509Credential = nil;
+      }
       pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     }
 
@@ -415,7 +435,9 @@
                 }
             }
 
-            self->x509Credential = [NSURLCredential credentialWithIdentity:identity certificates: trustCertificates persistence:NSURLCredentialPersistenceForSession];
+            @synchronized (self) {
+                self->x509Credential = [NSURLCredential credentialWithIdentity:identity certificates: trustCertificates persistence:NSURLCredentialPersistenceForSession];
+            }
             CFRelease(items);
 
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -631,7 +653,10 @@
 
     CDVPluginResult *pluginResult;
     bool removed = false;
-    NSURLSessionDataTask *task = [reqDict objectForKey:reqId];
+    NSURLSessionDataTask *task;
+    @synchronized (reqDict) {
+        task = [reqDict objectForKey:reqId];
+    }
     if(task){
         @try{
             [task cancel];
