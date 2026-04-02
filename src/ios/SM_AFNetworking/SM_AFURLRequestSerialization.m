@@ -1211,6 +1211,31 @@ typedef enum {
     return serializer;
 }
 
++ (id)convertFloatsToDecimalNumbers:(id)obj {
+    if ([obj isKindOfClass:[NSDictionary class]]) {
+        NSMutableDictionary *result = [NSMutableDictionary dictionaryWithCapacity:[obj count]];
+        [obj enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+            result[key] = [self convertFloatsToDecimalNumbers:value];
+        }];
+        return result;
+    } else if ([obj isKindOfClass:[NSArray class]]) {
+        NSMutableArray *result = [NSMutableArray arrayWithCapacity:[obj count]];
+        for (id value in obj) {
+            [result addObject:[self convertFloatsToDecimalNumbers:value]];
+        }
+        return result;
+    } else if ([obj isKindOfClass:[NSNumber class]] && ![obj isKindOfClass:[NSDecimalNumber class]]) {
+        // Check if the NSNumber wraps a floating-point type (float or double)
+        const char *objCType = [obj objCType];
+        if (objCType && (objCType[0] == 'f' || objCType[0] == 'd')) {
+            // Use the string representation to preserve the original decimal value
+            // and avoid IEEE 754 binary floating-point artifacts
+            return [NSDecimalNumber decimalNumberWithString:[obj stringValue]];
+        }
+    }
+    return obj;
+}
+
 #pragma mark - SM_AFURLRequestSerialization
 
 - (NSURLRequest *)requestBySerializingRequest:(NSURLRequest *)request
@@ -1236,7 +1261,8 @@ typedef enum {
             [mutableRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
         }
 
-        [mutableRequest setHTTPBody:[NSJSONSerialization dataWithJSONObject:parameters options:self.writingOptions error:error]];
+        id sanitizedParameters = [SM_AFJSONRequestSerializer convertFloatsToDecimalNumbers:parameters];
+        [mutableRequest setHTTPBody:[NSJSONSerialization dataWithJSONObject:sanitizedParameters options:self.writingOptions error:error]];
     }
 
     return mutableRequest;
