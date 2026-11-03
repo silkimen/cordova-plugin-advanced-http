@@ -7,6 +7,11 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   var validHttpMethods = ['get', 'put', 'post', 'patch', 'head', 'delete', 'options', 'upload', 'download'];
   var validResponseTypes = ['text', 'json', 'arraybuffer', 'blob'];
 
+  var REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308];
+  var MAX_REDIRECTS = 20;
+  var CREDENTIAL_HEADERS = ['authorization', 'proxy-authorization'];
+  var BODY_HEADERS = ['content-type', 'content-encoding', 'content-language', 'content-location', 'content-length'];
+
   var nextRequestId = (function(){
     var currReqId = 0;
     return function nextRequestId() {
@@ -34,6 +39,9 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
     injectFileEntryHandler: injectFileEntryHandler,
     injectRawResponseHandler: injectRawResponseHandler,
     nextRequestId: nextRequestId,
+    getRequestHeaders: getRequestHeaders,
+    getRedirectRequest: getRedirectRequest,
+    getAbortedResponse: getAbortedResponse,
   };
 
   // expose all functions for testing purposes
@@ -363,21 +371,129 @@ module.exports = function init(global, jsUtil, cookieHandler, messages, base64, 
   }
 
   function getMatchingHostHeaders(url, headersList) {
-    var matches = url.match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
-    var domain = matches && matches[1];
+    var matches = url.match(/^(https?):\/\/([^/?#]+)(?:[/?#]|$)/i);
+    var domain = matches && matches[2];
 
-    return headersList[domain] || null;
+    if (!domain) {
+      return null;
+    }
+
+    return headersList[domain] || headersList[getDefaultPortAlias(matches[1], domain)] || null;
+  }
+
+  // "api.example" and "api.example:443" name the same https origin; redirect targets are
+  // normalized without the default port, so look up the other spelling too.
+  function getDefaultPortAlias(scheme, domain) {
+    var defaultPort = scheme.toLowerCase() === 'https' ? '443' : '80';
+    var portMatch = domain.match(/^(.*):(\d+)$/);
+
+    if (!portMatch) {
+      return domain + ':' + defaultPort;
+    }
+
+    return portMatch[2] === defaultPort ? portMatch[1] : null;
   }
 
   function getMergedHeaders(url, requestHeaders, predefinedHeaders) {
     var globalHeaders = predefinedHeaders['*'] || {};
     var hostHeaders = getMatchingHostHeaders(url, predefinedHeaders) || {};
-    var mergedHeaders = mergeHeaders(globalHeaders, hostHeaders);
 
-    mergedHeaders = mergeHeaders(mergedHeaders, requestHeaders);
+    // merge into fresh objects, the stored host and request headers must stay untouched
+    var mergedHeaders = mergeHeaders(globalHeaders, mergeHeaders(hostHeaders, {}));
+
+    mergedHeaders = mergeHeaders(mergedHeaders, mergeHeaders(requestHeaders, {}));
     mergedHeaders = mergeHeaders(mergedHeaders, getCookieHeader(url));
 
     return mergedHeaders;
+  }
+
+  // Headers for one hop of a request. Once a redirect chain has left the original
+  // origin, no credential header is sent anymore, whether it came from the request,
+  // the global headers or headers configured for the new host. Cookies still are:
+  // the cookie jar scopes them to the URL of each hop.
+  function getRequestHeaders(request, requestHeaders, predefinedHeaders) {
+    var headers = getMergedHeaders(request.url, requestHeaders, predefinedHeaders);
+
+    if (request.crossedOrigin) {
+      headers = omitHeaders(headers, CREDENTIAL_HEADERS);
+    }
+
+    return request.bodyDropped ? omitHeaders(headers, BODY_HEADERS) : headers;
+  }
+
+  function omitHeaders(headers, names) {
+    var result = {};
+    var keys = Object.keys(headers);
+
+    for (var i = 0; i < keys.length; ++i) {
+      if (names.indexOf(keys[i].toLowerCase()) === -1) {
+        result[keys[i]] = headers[keys[i]];
+      }
+    }
+
+    return result;
+  }
+
+  // Next hop of a redirect chain, or null when the response is not a redirect the
+  // plugin follows: no Location, a non-HTTP target, or an HTTPS to HTTP downgrade.
+  function getRedirectRequest(request, response) {
+    if (REDIRECT_STATUS_CODES.indexOf(response.status) === -1) {
+      return null;
+    }
+
+    var location = response.headers && response.headers.location;
+    var currentUrl = parseAbsoluteUrl(request.url);
+    var nextUrl = location && currentUrl && parseAbsoluteUrl(location, currentUrl.href);
+
+    if (!nextUrl || !/^https?:$/.test(nextUrl.protocol)) {
+      return null;
+    }
+
+    if (currentUrl.protocol === 'https:' && nextUrl.protocol !== 'https:') {
+      return null;
+    }
+
+    if (request.redirectCount >= MAX_REDIRECTS) {
+      return { error: { status: errorCodes.GENERIC, error: messages.TOO_MANY_REDIRECTS + ' ' + MAX_REDIRECTS, url: request.url } };
+    }
+
+    var method = getRedirectMethod(request.method, response.status);
+
+    return {
+      url: nextUrl.href,
+      method: method,
+      bodyDropped: request.bodyDropped || method !== request.method,
+      crossedOrigin: request.crossedOrigin || currentUrl.origin !== nextUrl.origin,
+      redirectCount: request.redirectCount + 1
+    };
+  }
+
+  // Same method rewriting as browsers (Fetch standard, "HTTP-redirect fetch").
+  function getRedirectMethod(method, status) {
+    var isPost = method === 'post' || method === 'upload';
+    var keepsMethod = method === 'get' || method === 'head' || method === 'download';
+
+    if (status === 303 && !keepsMethod) {
+      return 'get';
+    }
+
+    if ((status === 301 || status === 302) && isPost) {
+      return 'get';
+    }
+
+    return method;
+  }
+
+  function parseAbsoluteUrl(url, base) {
+    try {
+      return new URL(url, base);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function getAbortedResponse(url) {
+    return { status: errorCodes.ABORTED, error: messages.REQUEST_ABORTED, url: url };
   }
 
   function getAllowedDataTypes(dataSerializer) {

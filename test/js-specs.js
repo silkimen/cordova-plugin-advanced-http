@@ -188,6 +188,323 @@ describe('Advanced HTTP public interface', function () {
   });
 });
 
+describe('Redirect handling', function () {
+  const messages = require('../www/messages');
+  const errorCodes = require('../www/error-codes');
+
+  const noop = () => { /* intentionally doing nothing */ };
+
+  const createStorage = () => {
+    const items = {};
+
+    return {
+      getItem: key => (Object.prototype.hasOwnProperty.call(items, key) ? items[key] : null),
+      setItem: (key, value) => { items[key] = String(value); },
+      removeItem: key => { delete items[key]; }
+    };
+  };
+
+  // routes maps a URL to the response the fake server gives; every native call is recorded
+  const loadHttp = (routes, settings) => {
+    settings = settings || {};
+    const jsUtil = require('../www/js-util');
+    const ToughCookie = require('../www/umd-tough-cookie');
+    const lodash = require('../www/lodash');
+    const WebStorageCookieStore = require('../www/local-storage-store')(ToughCookie, lodash);
+    const cookieHandler = require('../www/cookie-handler')(createStorage(), ToughCookie, WebStorageCookieStore);
+    const helpers = require('../www/helpers')(null, jsUtil, cookieHandler, messages, null, errorCodes, null, null);
+    const urlUtil = require('../www/url-util')(jsUtil);
+
+    Object.assign(helpers, settings.helpers || {});
+
+    // a fresh config: other specs change the shared global-configs module
+    const globalConfigs = { headers: {}, serializer: 'urlencoded', followRedirect: true, timeout: 60.0, connectTimeout: 60.0, readTimeout: 60.0 };
+    const calls = [];
+
+    const exec = (onSuccess, onFail, namespace, method, params) => {
+      const isBodyMethod = ['post', 'put', 'patch'].indexOf(method) !== -1;
+      const call = {
+        method,
+        url: params[0],
+        data: isBodyMethod ? params[1] : undefined,
+        headers: isBodyMethod ? params[3] : params[1],
+        followRedirect: method === 'downloadFile' ? params[5] : params[isBodyMethod ? 6 : method === 'uploadFiles' ? 6 : 4]
+      };
+      const route = routes[call.url] || { status: 404 };
+      const response = { status: route.status, url: call.url, headers: route.headers || {} };
+
+      calls.push(call);
+
+      const respond = () => (response.status >= 200 && response.status < 300 ? onSuccess(response) : onFail(response));
+
+      if (route.onCall) {
+        route.onCall();
+      }
+
+      // native answers asynchronously; routes opt in where the timing matters
+      return route.async ? setImmediate(respond) : respond();
+    };
+
+    const http = require('../www/public-interface')(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes, null, settings.nativeFollowsRedirects);
+
+    return { http, calls };
+  };
+
+  const redirect = (status, location, headers) => ({ status, headers: Object.assign({ location }, headers || {}) });
+
+  it('never asks native to follow redirects', () => {
+    const { http, calls } = loadHttp({ 'https://a.example/start': { status: 200 } });
+
+    http.get('https://a.example/start', {}, {}, noop, noop);
+    calls[0].followRedirect.should.equal(false);
+  });
+
+  it('does not send credentials or cookies to another origin', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/start': redirect(302, 'https://b.example/land'),
+      'https://b.example/land': { status: 200 }
+    });
+
+    http.useBasicAuth('user', 'secret');
+    http.setCookie('https://a.example/', 'session=A_SECRET');
+    http.get('https://a.example/start', {}, { 'Proxy-Authorization': 'p' }, noop, noop);
+
+    calls[0].headers.should.include.keys('Authorization', 'Cookie', 'Proxy-Authorization');
+    calls[1].url.should.equal('https://b.example/land');
+    calls[1].headers.should.not.have.any.keys('Authorization', 'Cookie', 'Proxy-Authorization');
+  });
+
+  it('keeps credentials dropped after the chain returns to the original origin', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/start': redirect(302, 'https://b.example/hop'),
+      'https://b.example/hop': redirect(302, 'https://a.example/end'),
+      'https://a.example/end': { status: 200 }
+    });
+
+    http.get('https://a.example/start', {}, { Authorization: 'Bearer token' }, noop, noop);
+    calls[2].url.should.equal('https://a.example/end');
+    calls[2].headers.should.not.have.key('Authorization');
+  });
+
+  it('does not send credentials configured for the target host on a cross-origin hop', () => {
+    const { http, calls } = loadHttp({
+      'http://a.example/start': redirect(302, 'http://b.example/land'),
+      'http://b.example/land': { status: 200 }
+    });
+
+    http.setHeader('b.example', 'Authorization', 'Bearer for-b');
+    http.setHeader('b.example', 'X-Client', 'app');
+    http.get('http://a.example/start', {}, {}, noop, noop);
+    calls[1].headers.should.not.have.key('Authorization');
+    calls[1].headers['X-Client'].should.equal('app');
+  });
+
+  it('matches host headers set with an explicit default port after a redirect', () => {
+    const { http, calls } = loadHttp({
+      'https://api.example:443/start': redirect(302, '/next'),
+      'https://api.example/next': { status: 200 }
+    });
+
+    http.setHeader('api.example:443', 'Authorization', 'Bearer token');
+    http.get('https://api.example:443/start', {}, {}, noop, noop);
+    calls[1].url.should.equal('https://api.example/next');
+    calls[1].headers.Authorization.should.equal('Bearer token');
+  });
+
+  it('keeps credentials and sends cookies set on a same origin redirect', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/login': redirect(302, '/home', { 'set-cookie': 'sid=NEW; Path=/' }),
+      'https://a.example/home': { status: 200 }
+    });
+
+    http.get('https://a.example/login', {}, { Authorization: 'Bearer token' }, noop, noop);
+    calls[1].headers.Authorization.should.equal('Bearer token');
+    calls[1].headers.Cookie.should.equal('sid=NEW');
+  });
+
+  it('replaces a cookie rotated by a redirect instead of sending both values', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/login': redirect(302, '/home', { 'set-cookie': 'sid=NEW; Path=/' }),
+      'https://a.example/home': { status: 200 }
+    });
+
+    http.setCookie('https://a.example/', 'sid=OLD; Path=/');
+    http.get('https://a.example/login', {}, {}, noop, noop);
+    calls[1].headers.Cookie.should.equal('sid=NEW');
+  });
+
+  it('stores cookies from a redirect under the host that set them', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/start': redirect(302, 'https://b.example/land', { 'set-cookie': 'fromA=1; Path=/' }),
+      'https://b.example/land': redirect(302, 'https://a.example/end', { 'set-cookie': 'fromB=1; Path=/' }),
+      'https://a.example/end': { status: 200 }
+    });
+
+    http.get('https://a.example/start', {}, {}, noop, noop);
+    calls[1].headers.should.not.have.key('Cookie');
+    calls[2].headers.Cookie.should.equal('fromA=1');
+    http.getCookieString('https://b.example/').should.equal('fromB=1');
+  });
+
+  it('rejects cookies a redirect sets for a domain it does not own', () => {
+    const { http, calls } = loadHttp({
+      'https://evil.example/start': redirect(302, 'https://bank.example/home', { 'set-cookie': 'sid=chosen; Domain=bank.example; Path=/' }),
+      'https://bank.example/home': { status: 200 }
+    });
+
+    http.get('https://evil.example/start', {}, {}, noop, noop);
+    calls[1].headers.should.not.have.key('Cookie');
+  });
+
+  it('honours cookie paths and deletions set on redirects', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/private/start': redirect(302, '/public', { 'set-cookie': 'sid=PRIVATE; Path=/private' }),
+      'https://a.example/public': redirect(302, '/next', { 'set-cookie': 'old=1; Path=/; Max-Age=0' }),
+      'https://a.example/next': { status: 200 }
+    });
+
+    http.setCookie('https://a.example/', 'old=1; Path=/');
+    http.get('https://a.example/private/start', {}, {}, noop, noop);
+    calls[1].headers.Cookie.should.equal('old=1');
+    calls[2].headers.should.not.have.key('Cookie');
+  });
+
+  it('does not follow a redirect from https to http', () => {
+    let failure = null;
+    const { http, calls } = loadHttp({
+      'https://a.example/start': redirect(302, 'http://a.example/plain')
+    });
+
+    http.get('https://a.example/start', {}, {}, noop, response => { failure = response; });
+    calls.length.should.equal(1);
+    failure.status.should.equal(302);
+  });
+
+  it('does not follow redirects when following is disabled', () => {
+    let failure = null;
+    const { http, calls } = loadHttp({
+      'https://a.example/start': redirect(302, '/land'),
+      'https://a.example/land': { status: 200 }
+    });
+
+    http.setFollowRedirect(false);
+    http.get('https://a.example/start', {}, {}, noop, response => { failure = response; });
+    calls.length.should.equal(1);
+    failure.status.should.equal(302);
+  });
+
+  it('turns a 303 response to a POST into a GET without body headers', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/form': redirect(303, '/result'),
+      'https://a.example/result': { status: 200 }
+    });
+
+    http.post('https://a.example/form', { x: 1 }, { 'Content-Type': 'application/json' }, noop, noop);
+    calls[1].method.should.equal('get');
+    calls[1].headers.should.not.have.key('Content-Type');
+  });
+
+  it('repeats method and body on 307 and keeps GET after an earlier rewrite', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/start': redirect(307, '/middle'),
+      'https://a.example/middle': redirect(302, '/after'),
+      'https://a.example/after': redirect(307, '/end'),
+      'https://a.example/end': { status: 200 }
+    });
+
+    http.setDataSerializer('json');
+    http.post('https://a.example/start', { x: 1 }, {}, noop, noop);
+    calls.map(call => call.method).should.eql(['post', 'post', 'get', 'get']);
+    calls[1].data.should.eql({ x: 1 });
+    should.equal(undefined, calls[3].data);
+  });
+
+  it('keeps HEAD requests as HEAD across redirects', () => {
+    const { http, calls } = loadHttp({
+      'https://a.example/start': redirect(302, '/end'),
+      'https://a.example/end': { status: 200 }
+    });
+
+    http.head('https://a.example/start', {}, {}, noop, noop);
+    calls[1].method.should.equal('head');
+  });
+
+  it('stops after too many redirects', () => {
+    let failure = null;
+    const { http, calls } = loadHttp({ 'https://a.example/loop': redirect(302, '/loop') });
+
+    http.get('https://a.example/loop', {}, {}, noop, response => { failure = response; });
+    calls.length.should.equal(21);
+    failure.status.should.equal(errorCodes.GENERIC);
+  });
+
+  it('stops following when the request is aborted between redirects', (done) => {
+    const { http, calls } = loadHttp({
+      'https://a.example/start': Object.assign(redirect(302, '/land'), { async: true }),
+      'https://a.example/land': { status: 200 }
+    });
+
+    const reqId = http.get('https://a.example/start', {}, {}, noop, response => {
+      calls.filter(call => call.method === 'get').length.should.equal(1);
+      response.status.should.equal(errorCodes.ABORTED);
+      done();
+    });
+
+    http.abort(reqId, noop, noop);
+  });
+
+  it('stops a 307 replay when aborted while the body is being serialized', (done) => {
+    let reqId = null;
+    const deferredProcessData = (data, serializer, cb) => setImmediate(() => cb(data));
+    const routes = {
+      'https://a.example/start': Object.assign(redirect(307, '/again'), { onCall: () => setImmediate(() => http.abort(reqId, noop, noop)) }),
+      'https://a.example/again': { status: 200 }
+    };
+    const { http, calls } = loadHttp(routes, { helpers: { processData: deferredProcessData } });
+
+    reqId = http.post('https://a.example/start', {}, {}, () => done(new Error('replay was sent')), response => {
+      calls.filter(call => call.method === 'post').length.should.equal(1);
+      response.status.should.equal(errorCodes.ABORTED);
+      done();
+    });
+  });
+
+  it('passes the file entry and the response to a download success callback', () => {
+    let args = null;
+    const fakeFileEntryHandler = cb => response => cb('fileEntry', response);
+    const { http } = loadHttp({
+      'https://a.example/file': redirect(302, '/file.bin'),
+      'https://a.example/file.bin': { status: 200 }
+    }, { helpers: { injectFileEntryHandler: fakeFileEntryHandler } });
+
+    http.downloadFile('https://a.example/file', {}, {}, '/tmp/file.bin', function () { args = Array.from(arguments); }, noop);
+    args[0].should.equal('fileEntry');
+    args[1].url.should.equal('https://a.example/file.bin');
+  });
+
+  it('leaves redirects to the platform where native follows them (browser)', () => {
+    let failure = null;
+    const { http, calls } = loadHttp({
+      'https://a.example/start': redirect(302, '/land'),
+      'https://a.example/land': { status: 200 }
+    }, { nativeFollowsRedirects: true });
+
+    http.get('https://a.example/start', {}, {}, noop, response => { failure = response; });
+    calls.length.should.equal(1);
+    calls[0].followRedirect.should.equal(true);
+    failure.status.should.equal(302);
+  });
+
+  it('does not copy global headers into the stored host headers', () => {
+    const { http } = loadHttp({ 'https://b.example/land': { status: 200 } });
+
+    http.setHeader('*', 'Authorization', 'Bearer global');
+    http.setHeader('b.example', 'X-Host', '1');
+    http.get('https://b.example/land', {}, {}, noop, noop);
+    http.getHeaders('b.example').should.eql({ 'X-Host': '1' });
+  });
+});
+
 describe('URL util', function () {
   const jsUtil = require('../www/js-util');
   const util = require('../www/url-util')(jsUtil);

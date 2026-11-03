@@ -1,4 +1,6 @@
-module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes, ponyfills) {
+module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes, ponyfills, nativeFollowsRedirects) {
+  var pendingRequests = {};
+
   var publicInterface = {
     getBasicAuthHeader: getBasicAuthHeader,
     useBasicAuth: useBasicAuth,
@@ -163,36 +165,82 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
     options = helpers.handleMissingOptions(options, globalConfigs);
     url = urlUtil.appendQueryParamsString(url, urlUtil.serializeQueryParams(options.params, true));
 
-    var headers = helpers.getMergedHeaders(url, options.headers, globalConfigs.headers);
-
-    var onFail = helpers.injectCookieHandler(url, failure);
-    var onSuccess = helpers.injectCookieHandler(url, helpers.injectRawResponseHandler(options.responseType, success, failure));
-
     var reqId = helpers.nextRequestId();
+    var request = { url: url, method: options.method, bodyDropped: false, crossedOrigin: false, redirectCount: 0 };
 
-    switch (options.method) {
+    pendingRequests[reqId] = { aborted: false };
+    dispatchRequest(reqId, request, options, success, failure);
+
+    return reqId;
+  }
+
+  // On Android and iOS native never follows redirects: every hop comes back here, so
+  // cookies set on a redirect response are stored for the URL that set them, and each
+  // hop gets only the headers and cookies that belong to it (helpers.getRequestHeaders).
+  // The browser platform cannot see intermediate responses and lets XHR follow them.
+  function dispatchRequest(reqId, request, options, success, failure) {
+    var url = request.url;
+    var headers = helpers.getRequestHeaders(request, options.headers, globalConfigs.headers);
+    var followRedirect = nativeFollowsRedirects ? options.followRedirect : false;
+
+    var finishWith = function (callback) {
+      return function () {
+        delete pendingRequests[reqId];
+        callback.apply(null, arguments);
+      };
+    };
+
+    var isAborted = function () {
+      return pendingRequests[reqId] && pendingRequests[reqId].aborted;
+    };
+
+    var onFail = helpers.injectCookieHandler(url, function (response) {
+      var follows = options.followRedirect && !nativeFollowsRedirects;
+      var nextRequest = follows ? helpers.getRedirectRequest(request, response) : null;
+
+      if (!nextRequest) {
+        return finishWith(failure)(response);
+      }
+
+      if (nextRequest.error) {
+        return finishWith(failure)(nextRequest.error);
+      }
+
+      if (isAborted()) {
+        return finishWith(failure)(helpers.getAbortedResponse(url));
+      }
+
+      dispatchRequest(reqId, nextRequest, options, success, failure);
+    });
+
+    var onSuccess = helpers.injectCookieHandler(url, helpers.injectRawResponseHandler(options.responseType, finishWith(success), finishWith(failure)));
+
+    switch (request.method) {
       case 'post':
       case 'put':
       case 'patch':
         helpers.processData(options.data, options.serializer, function (data) {
-          exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, data, options.serializer, headers, options.connectTimeout, options.readTimeout, options.followRedirect, options.responseType, reqId]);
+          // serializing can be asynchronous, the request may have been aborted meanwhile
+          if (isAborted()) {
+            return finishWith(failure)(helpers.getAbortedResponse(url));
+          }
+
+          exec(onSuccess, onFail, 'CordovaHttpPlugin', request.method, [url, data, options.serializer, headers, options.connectTimeout, options.readTimeout, followRedirect, options.responseType, reqId]);
         });
         break;
       case 'upload':
         var fileOptions = helpers.checkUploadFileOptions(options.filePath, options.name);
-        exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.connectTimeout, options.readTimeout, options.followRedirect, options.responseType, reqId]);
+        exec(onSuccess, onFail, 'CordovaHttpPlugin', 'uploadFiles', [url, headers, fileOptions.filePaths, fileOptions.names, options.connectTimeout, options.readTimeout, followRedirect, options.responseType, reqId]);
         break;
       case 'download':
         var filePath = helpers.checkDownloadFilePath(options.filePath);
-        var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(success));
-        exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, headers, filePath, options.connectTimeout, options.readTimeout, options.followRedirect, reqId]);
+        var onDownloadSuccess = helpers.injectCookieHandler(url, helpers.injectFileEntryHandler(finishWith(success)));
+        exec(onDownloadSuccess, onFail, 'CordovaHttpPlugin', 'downloadFile', [url, headers, filePath, options.connectTimeout, options.readTimeout, followRedirect, reqId]);
         break;
       default:
-        exec(onSuccess, onFail, 'CordovaHttpPlugin', options.method, [url, headers, options.connectTimeout, options.readTimeout, options.followRedirect, options.responseType, reqId]);
+        exec(onSuccess, onFail, 'CordovaHttpPlugin', request.method, [url, headers, options.connectTimeout, options.readTimeout, followRedirect, options.responseType, reqId]);
         break;
     }
-
-    return reqId;
   }
 
   function post(url, data, headers, success, failure) {
@@ -232,6 +280,10 @@ module.exports = function init(exec, cookieHandler, urlUtil, helpers, globalConf
   }
 
   function abort(requestId , success, failure) {
+    if (pendingRequests[requestId]) {
+      pendingRequests[requestId].aborted = true;
+    }
+
     return exec(success, failure, 'CordovaHttpPlugin', 'abort', [requestId]);
   }
 
