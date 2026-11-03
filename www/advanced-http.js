@@ -18,7 +18,8 @@ var dependencyValidator = require(pluginId + '.dependency-validator')(window, wi
 var ponyfills = require(pluginId + '.ponyfills')(window);
 var helpers = require(pluginId + '.helpers')(window, jsUtil, cookieHandler, messages, base64, errorCodes, dependencyValidator, ponyfills);
 var urlUtil = require(pluginId + '.url-util')(jsUtil);
-var publicInterface = require(pluginId + '.public-interface')(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes, ponyfills);
+var nativeFollowsRedirects = require('cordova').platformId === 'browser';
+var publicInterface = require(pluginId + '.public-interface')(exec, cookieHandler, urlUtil, helpers, globalConfigs, errorCodes, ponyfills, nativeFollowsRedirects);
 
 dependencyValidator.logWarnings();
 
