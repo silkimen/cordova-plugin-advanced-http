@@ -160,18 +160,30 @@ static NSArray * AFPublicKeyTrustChainForServerTrust(SecTrustRef serverTrust) {
 }
 
 + (NSSet *)certificatesInBundle:(NSBundle *)bundle {
-    NSString* assetDir = @"www";
-    if([self isRunningOnCapacitor]) {
-        // we are running on capacitor and its assets dir is 'public'
-        assetDir = @"public";
-    }
-    
-    NSArray *paths = [bundle pathsForResourcesOfType:@"cer" inDirectory: [NSString stringWithFormat:@"%@/certificates", assetDir]];
-    NSMutableSet *certificates = [NSMutableSet setWithCapacity:[paths count]];
+    // Capacitor copies web assets to <App>.app/public/; legacy Cordova uses <App>.app/www/.
+    // Search both (plus common fallbacks) so pinning works regardless of CAPPlugin detection.
+    NSArray *searchDirectories = @[
+        @"public/certificates",
+        @"www/certificates",
+        @"Resources/certificates",
+        @"certificates"
+    ];
+    NSMutableSet *certificates = [NSMutableSet set];
 
-    for (NSString *path in paths) {
-        NSData *certificateData = [NSData dataWithContentsOfFile:path];
-        [certificates addObject:certificateData];
+    for (NSString *directory in searchDirectories) {
+        NSArray *paths = [bundle pathsForResourcesOfType:@"cer" inDirectory:directory];
+        for (NSString *path in paths) {
+            NSData *certificateData = [NSData dataWithContentsOfFile:path];
+            if (!certificateData) {
+                continue;
+            }
+            // SecCertificateCreateWithData requires DER; skip PEM/invalid files.
+            SecCertificateRef certificate = SecCertificateCreateWithData(NULL, (__bridge CFDataRef)certificateData);
+            if (certificate) {
+                [certificates addObject:certificateData];
+                CFRelease(certificate);
+            }
+        }
     }
 
     return [NSSet setWithSet:certificates];
@@ -277,7 +289,13 @@ static NSArray * AFPublicKeyTrustChainForServerTrust(SecTrustRef serverTrust) {
         case AFSSLPinningModeCertificate: {
             NSMutableArray *pinnedCertificates = [NSMutableArray array];
             for (NSData *certificateData in self.pinnedCertificates) {
-                [pinnedCertificates addObject:(__bridge_transfer id)SecCertificateCreateWithData(NULL, (__bridge CFDataRef)certificateData)];
+                SecCertificateRef certificate = SecCertificateCreateWithData(NULL, (__bridge CFDataRef)certificateData);
+                if (certificate) {
+                    [pinnedCertificates addObject:(__bridge_transfer id)certificate];
+                }
+            }
+            if ([pinnedCertificates count] == 0) {
+                return NO;
             }
             SecTrustSetAnchorCertificates(serverTrust, (__bridge CFArrayRef)pinnedCertificates);
 
